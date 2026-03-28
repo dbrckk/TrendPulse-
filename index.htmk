@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TrendPulse - Swipe & Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #f3f4f6; touch-action: pan-y; overflow: hidden; }
+        .card { transition: transform 0.3s ease, opacity 0.3s ease; }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen">
+
+    <div id="app" class="relative w-full max-w-md h-[85vh] px-4">
+        </div>
+
+    <script>
+        const supabase = supabase.createClient('https://hyrofyfhmabhlqbucjdp.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs');
+
+        async function loadProducts() {
+            const { data: products } = await supabase.from('products').select('*');
+            const container = document.getElementById('app');
+            
+            products.forEach((product, index) => {
+                const card = document.createElement('div');
+                card.className = "absolute inset-0 bg-white rounded-[30px] shadow-2xl overflow-hidden card border border-gray-100";
+                card.style.zIndex = products.length - index;
+                card.innerHTML = `
+                    <img src="${product.image_url}" class="w-full h-2/3 object-cover">
+                    <div class="p-6">
+                        <span class="text-blue-500 font-bold text-xs uppercase">${product.tagline}</span>
+                        <h2 class="text-2xl font-black text-gray-800">${product.name}</h2>
+                        <p class="text-gray-500 text-sm mt-1">${product.description}</p>
+                        <div class="flex justify-between items-center mt-6">
+                            <span class="text-2xl font-bold">${product.price}€</span>
+                            <a href="${product.affiliate_link}" target="_blank" class="bg-black text-white px-6 py-3 rounded-full font-bold">SHOP</a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+                setupSwipe(card);
+            });
+        }
+
+        function setupSwipe(el) {
+            let startX;
+            el.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+            el.addEventListener('touchmove', e => {
+                let moveX = e.touches[0].clientX - startX;
+                if (moveX > 0) el.style.transform = `translateX(${moveX}px) rotate(${moveX/20}deg)`;
+            });
+            el.addEventListener('touchend', e => {
+                let moveX = e.changedTouches[0].clientX - startX;
+                if (Math.abs(moveX) > 120) {
+                    el.style.transform = `translateX(${moveX > 0 ? 1000 : -1000}px)`;
+                    el.style.opacity = 0;
+                } else {
+                    el.style.transform = 'translateX(0px) rotate(0deg)';
+                }
+            });
+        }
+
+        loadProducts();
+    </script>
+</body>
+  </html>
+  
