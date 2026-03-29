@@ -27,3 +27,4 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
         run: node sync-deals.js
+    
