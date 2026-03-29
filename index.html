@@ -3,59 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TrendPulse | Elite Curated Tech</title>
+    <title>TrendPulse | Best Deals Only</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { background: #000; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; touch-action: none; }
-        .card-stack { position: relative; width: 100%; height: 72vh; perspective: 1200px; }
-        .card { position: absolute; inset: 0; background: #0a0a0a; border-radius: 42px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; will-change: transform, opacity; transform-origin: bottom center; transition: transform 0.5s ease; box-shadow: 0 30px 60px -12px rgba(0,0,0,0.7); }
-        .card-overlay { background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%); position: absolute; inset: 0; pointer-events: none; }
-        #onboarding { background: #000; display: flex; flex-col; items-center; justify-center; height: 100vh; width: 100vw; position: absolute; z-index: 1000; transition: opacity 0.5s ease; padding: 20px; }
-        .category-btn { background: #111; border: 2px solid #222; border-radius: 20px; padding: 15px 25px; text-align: center; transition: all 0.2s; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; width: 100%; }
-        .category-btn.active { background: #3b82f6; border-color: #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.5); }
-        .btn-luxe { transition: all 0.2s; box-shadow: 0 10px 20px rgba(59,130,246,0.4); }
-        .btn-luxe:active { transform: scale(0.9); }
+        .card-stack { position: relative; width: 100%; height: 70vh; perspective: 1200px; }
+        .card { position: absolute; inset: 0; background: #0a0a0a; border-radius: 38px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; will-change: transform; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+        .card-overlay { background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 100%); position: absolute; inset: 0; pointer-events: none; }
+        .promo-pill { background: #ff3b30; color: white; padding: 6px 12px; border-radius: 12px; font-weight: 900; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4); }
     </style>
 </head>
-<body class="flex flex-col h-screen py-8 px-5">
+<body class="flex flex-col h-screen py-6 px-5">
 
-    <div id="onboarding">
-        <header class="text-center mb-10">
-            <h1 class="text-3xl font-[900] tracking-tighter italic leading-none mb-1">TRENDPULSE</h1>
-            <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em]">Premium Tech Curation</p>
-        </header>
-        <p class="text-center text-zinc-400 text-sm mb-12 max-w-xs font-medium">Pour t'offrir la meilleure sélection de produits viraux et en promo, choisis une catégorie.</p>
-        <div class="grid grid-cols-2 gap-4 w-full max-w-sm mb-12">
-            <button onclick="selectCat('Desk Setup')" class="category-btn Desk Setup">🖥️ Work & Studio</button>
-            <button onclick="selectCat('Gaming')" class="category-btn Gaming">🎮 Gaming Zone</button>
-            <button onclick="selectCat('Smart Home')" class="category-btn Smart Home">💡 Smart Home</button>
-            <button onclick="selectCat('Portable Tech')" class="category-btn Portable Tech">🎒 Portable Tech</button>
+    <header class="w-full flex justify-between items-center mb-4">
+        <div class="flex flex-col">
+            <h1 class="text-2xl font-[900] tracking-tighter italic">TRENDPULSE</h1>
+            <div class="flex items-center gap-2 mt-1">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Live Amazon Deals</span>
+            </div>
         </div>
-        <button id="continue-btn" onclick="startApp()" class="w-full max-w-xs bg-white text-black py-4 rounded-full font-black text-sm uppercase opacity-50 cursor-not-allowed" disabled>Continuer</button>
-    </div>
+        <div id="deal-count" class="bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full text-[10px] font-bold text-zinc-400">0 DEALS</div>
+    </header>
 
-    <div id="app-content" class="hidden flex flex-col justify-between h-full">
-        <header class="w-full flex justify-between items-center px-3 pt-2">
-            <div class="flex flex-col">
-                <h1 class="text-2xl font-[900] tracking-tighter italic leading-none">TRENDPULSE</h1>
-                <span id="counter" class="text-[9px] text-zinc-500 font-bold tracking-[0.2em] mt-1">Sourcing viral tech...</span>
-            </div>
-            <button onclick="changeCategoryMenu()" class="text-xs bg-zinc-900 px-4 py-1 rounded-full text-zinc-400 font-bold">Catégories ✨</button>
-        </header>
+    <div id="app" class="card-stack max-w-sm mx-auto">
+        </div>
 
-        <div id="app" class="card-stack max-w-sm">
-            </div>
-
-        <footer class="w-full max-w-xs mx-auto flex justify-around items-center mb-6">
-            <button onclick="forceSwipe('left')" class="btn-luxe w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-red-500 shadow-xl">✕</button>
-            <a id="shop-btn" href="#" target="_blank" class="btn-luxe w-32 bg-white text-black py-4 rounded-full font-black text-sm uppercase text-center shadow-[0_0_30px_rgba(255,255,255,0.4)]">Shop Now</a>
-            <button onclick="forceSwipe('right')" class="btn-luxe w-16 h-16 rounded-full bg-blue-600 border-2 border-blue-500 flex items-center justify-center text-white shadow-[0_0_20px_rgba(59,130,246,0.5)]">
-                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            </button>
-        </footer>
-    </div>
+    <footer class="w-full max-w-xs mx-auto flex justify-around items-center mt-6 mb-4">
+        <button onclick="forceSwipe('left')" class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500">✕</button>
+        <button onclick="forceSwipe('right')" class="w-20 h-20 rounded-full bg-white flex items-center justify-center text-black shadow-2xl">
+            <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </button>
+        <div class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-yellow-500 opacity-30">🔥</div>
+    </footer>
 
     <script>
         const SB_URL = 'https://hyrofyfhmabhlqbucjdp.supabase.co';
@@ -64,47 +46,25 @@
 
         let products = [];
         let currentIndex = 0;
-        let selectedCategory = null;
 
-        // --- Onboarding Logic ---
-        function selectCat(cat) {
-            selectedCategory = cat;
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.category-btn.' + cat.replace(' ', '\\ ')).classList.add('active');
-            
-            const btn = document.getElementById('continue-btn');
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            btn.classList.add('btn-luxe');
-            btn.removeAttribute('disabled');
+        // Charger les articles dislikés depuis la mémoire du tel
+        function getDislikedIds() {
+            return JSON.parse(localStorage.getItem('tp_nopes') || '[]');
         }
 
-        function startApp() {
-            document.getElementById('onboarding').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('onboarding').classList.add('hidden');
-                document.getElementById('app-content').classList.remove('hidden');
-                load();
-            }, 500);
-        }
-
-        function changeCategoryMenu() {
-            currentIndex = 0;
-            document.getElementById('onboarding').style.opacity = '1';
-            document.getElementById('onboarding').classList.remove('hidden');
-            document.getElementById('app-content').classList.add('hidden');
-        }
-
-        // --- Moteur de Curation ---
         async function load() {
-            // Requête Supabase avec tri ALGORITHMIQUE : Deals d'abord, puis Viral, puis Nouveaux
-            let query = sb.from('products').select('*')
-                .eq('category', selectedCategory)
-                .order('discount_percent', { ascending: false }) // Meilleures promos
-                .order('likes', { ascending: false })            // Plus viraux
-                .order('id', { ascending: false });                // Plus récents
+            const dislikedIds = getDislikedIds();
+            
+            // On récupère tout ce qui a plus de 10% de réduction
+            const { data } = await sb.from('products')
+                .select('*')
+                .gt('discount_percent', 10)
+                .order('discount_percent', { ascending: false });
 
-            const { data } = await query;
-            products = data;
+            // On filtre pour enlever ceux déjà "nopes" par cet utilisateur
+            products = data.filter(p => !dislikedIds.includes(p.id));
+            
+            document.getElementById('deal-count').innerText = `${products.length} DEALS`;
             renderStack();
         }
 
@@ -112,99 +72,70 @@
             const container = document.getElementById('app');
             container.innerHTML = '';
             
-            const visibleCards = products.slice(currentIndex, currentIndex + 2);
-            
-            if(visibleCards.length === 0) {
-                container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-center p-10"><p class="text-zinc-500 font-bold uppercase tracking-widest">Plus d'articles dans ${selectedCategory}.<br>Reviens plus tard.</p></div>`;
-                document.getElementById('shop-btn').classList.add('opacity-30', 'cursor-not-allowed');
-                document.getElementById('shop-btn').setAttribute('href', '#');
-                return;
-            }
-
-            visibleCards.forEach((p, i) => {
+            products.slice(currentIndex, currentIndex + 2).forEach((p, i) => {
                 const card = document.createElement('div');
                 card.className = "card";
                 card.style.zIndex = 10 - i;
-                card.style.transform = `scale(${1 - i * 0.08}) translateY(${i * 30}px) translateZ(0)`;
-                card.style.opacity = 1 - (i * 0.3);
-
-                const discount = p.discount_percent ? Math.round(p.discount_percent) : 0;
-                const img = p.image_url || `https://ws-eu.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&MarketPlace=FR&Operation=GetImage&ASIN=${p.asin}&Service=Amazon&TemplateId=LargeImage`;
+                card.style.transform = `scale(${1 - i * 0.08}) translateY(${i * 25}px)`;
+                
+                const img = `https://ws-eu.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&MarketPlace=FR&Operation=GetImage&ASIN=${p.asin}&Service=Amazon&TemplateId=LargeImage`;
 
                 card.innerHTML = `
-                    <img src="${img}" class="w-full h-full object-cover">
+                    <img src="${img}" class="w-full h-full object-cover p-12 bg-white">
                     <div class="card-overlay"></div>
-                    <div class="absolute bottom-0 p-8 w-full space-y-3">
-                        <div class="flex justify-between items-center">
-                            ${discount > 0 ? `<div class="bg-red-500 text-white px-3 py-1 rounded-lg font-black text-xs">-${discount}% SAVINGS</div>` : `<div class="bg-blue-600 text-white px-3 py-1 rounded-lg font-black text-xs uppercase">${selectedCategory}</div>`}
-                            <span class="text-[10px] text-zinc-400 font-black tracking-widest uppercase">${p.likes || 0} ♥</span>
+                    <div class="absolute bottom-0 p-8 w-full">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="promo-pill">-${Math.round(p.discount_percent)}% OFF</span>
                         </div>
-                        <div>
-                            <h2 class="text-3xl font-black leading-[0.9] tracking-tighter uppercase italic line-clamp-2">${p.name}</h2>
-                            <p class="text-zinc-400 text-xs mt-3 line-clamp-2 font-medium opacity-80">${p.description}</p>
-                        </div>
-                        <div class="flex flex-col pt-2">
-                            ${p.original_price ? `<span class="text-xs text-zinc-500 line-through mb-1">${p.original_price}€</span>` : ''}
-                            <span class="text-4xl font-black tracking-tighter">${p.price}€</span>
+                        <h2 class="text-2xl font-extrabold leading-tight mb-4 line-clamp-2 uppercase italic">${p.name}</h2>
+                        <div class="flex justify-between items-end">
+                            <div class="flex flex-col">
+                                <span class="text-xs text-zinc-500 line-through">${p.original_price || p.price + 20}€</span>
+                                <span class="text-4xl font-black">${p.price}€</span>
+                            </div>
+                            <a href="${p.affiliate_link}" target="_blank" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm uppercase">Shop Deal</a>
                         </div>
                     </div>
                 `;
                 container.appendChild(card);
-                if(i === 0) {
-                    initDrag(card);
-                    // Mise à jour du bouton Shop
-                    const shopBtn = document.getElementById('shop-btn');
-                    shopBtn.classList.remove('opacity-30', 'cursor-not-allowed');
-                    shopBtn.setAttribute('href', p.affiliate_link);
-                }
+                if(i === 0) initDrag(card);
             });
-            document.getElementById('counter').innerText = `${products.length - currentIndex} deals ready`;
         }
 
-        async function updateVote(id, field) {
-            const p = products[currentIndex];
-            const newValue = (p[field] || 0) + 1;
-            await sb.from('products').update({ [field]: newValue }).eq('id', id);
+        function recordNope(id) {
+            let nopes = getDislikedIds();
+            nopes.push(id);
+            localStorage.setItem('tp_nopes', JSON.stringify(nopes));
         }
 
-        // --- Swipe Optimized ---
         function initDrag(el) {
-            let startX, startY, moveX, isDragging = false;
-            
-            el.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                isDragging = true; el.style.transition = 'none';
-            });
-
-            el.addEventListener('touchmove', (e) => {
+            let startX, moveX = 0, isDragging = false;
+            el.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isDragging = true; el.style.transition = 'none'; });
+            el.addEventListener('touchmove', (e) => { 
                 if(!isDragging) return;
-                moveX = e.touches[0].clientX - startX; let moveY = e.touches[0].clientY - startY;
-                let rotation = moveX / 15;
-                el.style.transform = `translate3d(${moveX}px, ${moveY/3}px, 0) rotate(${rotation}deg) scale(1.03)`;
+                moveX = e.touches[0].clientX - startX;
+                el.style.transform = `translate3d(${moveX}px, 0, 0) rotate(${moveX/20}deg)`;
             });
-
-            el.addEventListener('touchend', (e) => {
-                isDragging = false; el.style.transition = 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
-                if (Math.abs(moveX) > 130) {
-                    const direction = moveX > 0 ? 1 : -1;
-                    updateVote(products[currentIndex].id, moveX > 0 ? 'likes' : 'nopes');
-                    el.style.transform = `translate3d(${direction * 1000}px, 0, 0) rotate(${direction * 45}deg)`;
-                    el.style.opacity = '0';
+            el.addEventListener('touchend', () => {
+                isDragging = false; el.style.transition = 'all 0.5s ease';
+                if (Math.abs(moveX) > 120) {
+                    if (moveX < 0) recordNope(products[currentIndex].id);
+                    el.style.transform = `translate3d(${moveX > 0 ? 1000 : -1000}px, 0, 0)`;
                     setTimeout(() => { currentIndex++; renderStack(); }, 200);
-                } else { el.style.transform = 'translate3d(0,0,0) scale(1)'; }
+                } else { el.style.transform = 'translate3d(0,0,0)'; }
                 moveX = 0;
             });
         }
 
         window.forceSwipe = (dir) => {
-            const card = document.querySelector('.card'); if(!card) return;
-            updateVote(products[currentIndex].id, dir === 'right' ? 'likes' : 'nopes');
-            card.style.transition = 'all 0.7s cubic-bezier(0.23, 1, 0.32, 1)';
-            card.style.transform = `translate3d(${dir === 'right' ? 1000 : -1000}px, 0, 0) rotate(${dir === 'right' ? 45 : -45}deg)`;
-            card.style.opacity = '0';
+            const card = document.querySelector('.card');
+            if(!card) return;
+            if(dir === 'left') recordNope(products[currentIndex].id);
+            card.style.transform = `translate3d(${dir === 'right' ? 1000 : -1000}px, 0, 0) rotate(${dir === 'right' ? 20 : -20}deg)`;
             setTimeout(() => { currentIndex++; renderStack(); }, 300);
         };
+
+        load();
     </script>
 </body>
-    </html>
-    
+</html>
