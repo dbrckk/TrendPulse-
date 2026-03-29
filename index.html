@@ -2,190 +2,424 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>TrendPulse | Best Amazon Deals</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>TrendPulse | Trending Amazon Deals in the US</title>
+  <meta name="description" content="Discover trending Amazon deals, popular discounts, and fast-moving product offers in the US. Swipe through top deals and shop instantly." />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="theme-color" content="#050505" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <link rel="canonical" href="https://trend-pulse.shop/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="TrendPulse | Trending Amazon Deals in the US" />
+  <meta property="og:description" content="Swipe through trending Amazon deals, fast-moving discounts, and popular product offers." />
+  <meta property="og:url" content="https://trend-pulse.shop/" />
+  <meta property="og:site_name" content="TrendPulse" />
+  <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TrendPulse | Trending Amazon Deals in the US" />
+  <meta name="twitter:description" content="Swipe through trending Amazon deals, fast-moving discounts, and popular product offers." />
+  <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"TrendPulse",
+    "url":"https://trend-pulse.shop/",
+    "description":"Trending Amazon deals and popular discounted products for shoppers in the United States.",
+    "potentialAction":{
+      "@type":"SearchAction",
+      "target":"https://trend-pulse.shop/?q={search_term_string}",
+      "query-input":"required name=search_term_string"
+    }
+  }
+  </script>
 
-    * {
-      -webkit-tap-highlight-color: transparent;
-      box-sizing: border-box;
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    :root {
+      --bg: #050505;
+      --card: #0f1014;
+      --muted: #a1a1aa;
+      --line: rgba(255,255,255,.08);
+      --pill: #171923;
+      --blue: #2563eb;
+      --white: #ffffff;
+      --red: #ef4444;
+      --green: #22c55e;
     }
 
-    html, body {
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
       margin: 0;
-      padding: 0;
-      background: #000;
-      color: white;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(37,99,235,.12), transparent 26%),
+        linear-gradient(180deg, #050505 0%, #07080b 100%);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
       overflow: hidden;
       touch-action: none;
     }
 
-    .card-stack {
-      position: relative;
-      width: 100%;
-      height: 70vh;
-      perspective: 1200px;
+    img {
+      display: block;
+      max-width: 100%;
     }
 
-    .card {
-      position: absolute;
-      inset: 0;
-      background: #0a0a0a;
-      border-radius: 38px;
-      border: 1px solid rgba(255,255,255,0.08);
-      overflow: hidden;
-      will-change: transform;
-      transition: transform 0.45s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    .page-shell {
+      min-height: 100vh;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        18px
+        max(18px, env(safe-area-inset-bottom))
+        18px;
     }
 
-    .card-overlay {
-      background: linear-gradient(
-        0deg,
-        rgba(0,0,0,1) 0%,
-        rgba(0,0,0,0.65) 42%,
-        rgba(0,0,0,0.15) 70%,
-        rgba(0,0,0,0) 100%
-      );
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    .promo-pill {
-      background: #ff3b30;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-weight: 900;
-      font-size: 0.8rem;
-      box-shadow: 0 4px 15px rgba(255, 59, 48, 0.35);
+    .glass {
+      background: rgba(255,255,255,.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--line);
     }
 
     .badge {
-      background: #18181b;
-      border: 1px solid #27272a;
-      color: #a1a1aa;
-      padding: 6px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
       border-radius: 999px;
-      font-size: 10px;
+      background: var(--pill);
+      border: 1px solid var(--line);
+      color: #d4d4d8;
+      font-size: 11px;
       font-weight: 800;
-      letter-spacing: .15em;
+      letter-spacing: .14em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
-    .state-box {
+    .hero-title {
+      font-size: clamp(32px, 6vw, 52px);
+      line-height: .94;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -.05em;
+    }
+
+    .stack {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 68vh;
+      margin: 0 auto;
+      perspective: 1400px;
+    }
+
+    .deal-card {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: 34px;
+      background: linear-gradient(180deg, #11131a 0%, #090a0f 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,.42),
+        inset 0 1px 0 rgba(255,255,255,.04);
+      will-change: transform, opacity;
+      transition: transform .42s cubic-bezier(.22,1,.36,1), opacity .28s ease;
+    }
+
+    .deal-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
       height: 100%;
+      object-fit: cover;
+      background: #fff;
+    }
+
+    .deal-bg.fallback {
+      object-fit: contain;
+      padding: 28px;
+      background:
+        radial-gradient(circle at center, rgba(37,99,235,.16), transparent 35%),
+        linear-gradient(180deg, #161922 0%, #0d0f15 100%);
+    }
+
+    .deal-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.08) 0%, rgba(0,0,0,.20) 36%, rgba(0,0,0,.88) 100%);
+      pointer-events: none;
+    }
+
+    .top-row {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .pill-hot {
+      background: linear-gradient(135deg, #ff4d4d, #ff7a18);
+      color: white;
+      border: none;
+      box-shadow: 0 8px 20px rgba(255,95,31,.28);
+    }
+
+    .content {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 22px;
+      z-index: 2;
+    }
+
+    .product-title {
+      font-size: clamp(28px, 7vw, 42px);
+      line-height: .95;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -.05em;
+      margin: 0 0 10px;
+      text-transform: uppercase;
+      text-wrap: balance;
+    }
+
+    .product-desc {
+      color: #d4d4d8;
+      font-size: 15px;
+      line-height: 1.5;
+      margin: 0 0 18px;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+    }
+
+    .bottom-row {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .price-box {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .old-price {
+      color: #71717a;
+      font-size: 14px;
+      text-decoration: line-through;
+      margin-bottom: 2px;
+      font-weight: 600;
+    }
+
+    .new-price {
+      font-size: clamp(30px, 8vw, 48px);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.04em;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 136px;
+      padding: 16px 20px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      box-shadow: 0 16px 28px rgba(37,99,235,.28);
+    }
+
+    .cta-btn:active {
+      transform: translateY(1px);
+    }
+
+    .controls {
+      width: 100%;
+      max-width: 360px;
+      margin: 22px auto 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .action-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #171922 0%, #0f1118 100%);
+      color: #8b8b98;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 14px 26px rgba(0,0,0,.28);
+    }
+
+    .action-btn-main {
+      width: 90px;
+      height: 90px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(180deg, #ffffff 0%, #ededed 100%);
+      color: #000;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 20px 45px rgba(255,255,255,.16);
+    }
+
+    .status-box {
+      width: 100%;
+      max-width: 420px;
+      height: 68vh;
+      margin: 0 auto;
+      border-radius: 34px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #11131a 0%, #090a0f 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 24px;
-      color: #a1a1aa;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 38px;
-      background: #0a0a0a;
+      padding: 28px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.42);
     }
 
-    .line-clamp-2 {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+    .status-title {
+      font-size: 24px;
+      font-weight: 900;
+      margin: 0 0 8px;
+      letter-spacing: -.03em;
+    }
+
+    .status-text {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
       overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
     }
 
-    .line-clamp-3 {
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
+    @media (max-width: 420px) {
+      .page-shell {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
 
-    .action-btn {
-      width: 64px;
-      height: 64px;
-      border-radius: 999px;
-      background: #18181b;
-      border: 1px solid #27272a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+      .stack,
+      .status-box {
+        height: 66vh;
+      }
 
-    .action-btn-main {
-      width: 80px;
-      height: 80px;
-      border-radius: 999px;
-      background: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: black;
-      box-shadow: 0 20px 40px rgba(255,255,255,0.15);
+      .content {
+        left: 18px;
+        right: 18px;
+        bottom: 18px;
+      }
+
+      .cta-btn {
+        min-width: 122px;
+        padding: 14px 16px;
+      }
     }
   </style>
 </head>
-<body class="flex flex-col h-screen py-6 px-5">
+<body>
+  <div class="page-shell">
+    <header class="w-full max-w-[980px] mx-auto mb-5">
+      <div class="flex items-start justify-between gap-3 mb-3">
+        <div>
+          <p class="hero-title m-0">TRENDPULSE</p>
+          <div class="mt-2 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+            <span class="text-[12px] uppercase tracking-[0.18em] text-zinc-400 font-extrabold">Live Amazon Deals</span>
+          </div>
+        </div>
 
-  <header class="w-full flex justify-between items-center mb-4">
-    <div class="flex flex-col">
-      <h1 class="text-2xl font-[900] tracking-tighter italic">TRENDPULSE</h1>
-      <div class="flex items-center gap-2 mt-1">
-        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-        <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Live Amazon Deals</span>
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="refresh-btn" onclick="reloadDeals()" class="badge" aria-label="Refresh deals">Refresh</button>
+          <div id="deal-count" class="badge">0 Deals</div>
+        </div>
       </div>
-    </div>
 
-    <div class="flex items-center gap-2">
-      <button
-        id="refresh-btn"
-        class="badge"
-        onclick="reloadDeals()"
-      >
-        Refresh
+      <p class="m-0 text-sm text-zinc-400 max-w-[680px]">
+        Discover trending Amazon bargains, popular discounts, and fast-moving product deals for shoppers in the United States.
+      </p>
+    </header>
+
+    <main class="w-full">
+      <h1 class="visually-hidden">TrendPulse trending Amazon deals</h1>
+      <section aria-label="Trending Amazon deals">
+        <div id="app" class="stack"></div>
+      </section>
+    </main>
+
+    <footer class="controls" aria-label="Deal actions">
+      <button id="btn-nope" onclick="forceSwipe('left')" class="action-btn" aria-label="Skip this deal">✕</button>
+
+      <button id="btn-like" onclick="forceSwipe('right')" class="action-btn-main" aria-label="Open this deal">
+        <svg class="w-11 h-11" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
       </button>
-      <div id="deal-count" class="badge">0 DEALS</div>
-    </div>
-  </header>
 
-  <main id="app" class="card-stack max-w-sm mx-auto w-full"></main>
-
-  <footer class="w-full max-w-xs mx-auto flex justify-around items-center mt-6 mb-4">
-    <button
-      id="btn-nope"
-      onclick="forceSwipe('left')"
-      class="action-btn text-zinc-500 text-2xl"
-      aria-label="Skip"
-    >
-      ✕
-    </button>
-
-    <button
-      id="btn-like"
-      onclick="forceSwipe('right')"
-      class="action-btn-main"
-      aria-label="Open deal"
-    >
-      <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-      </svg>
-    </button>
-
-    <button
-      onclick="clearNopesAndReload()"
-      class="action-btn text-yellow-500 text-2xl"
-      aria-label="Reset"
-      title="Reset skipped deals"
-    >
-      ↺
-    </button>
-  </footer>
+      <button onclick="clearNopesAndReload()" class="action-btn" aria-label="Reset skipped deals">↺</button>
+    </footer>
+  </div>
 
   <script>
     const SB_URL = 'https://hyrofyfhmabhlqbucjdp.supabase.co';
@@ -211,10 +445,10 @@
     }
 
     function recordSkip(id) {
-      const nopes = getSkippedIds();
-      if (!nopes.includes(id)) {
-        nopes.push(id);
-        setSkippedIds(nopes);
+      const skipped = getSkippedIds();
+      if (!skipped.includes(id)) {
+        skipped.push(id);
+        setSkippedIds(skipped);
       }
     }
 
@@ -235,20 +469,16 @@
       if (Number.isNaN(num)) return '';
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'USD'
+        currency: 'USD',
+        maximumFractionDigits: num % 1 === 0 ? 0 : 2
       }).format(num);
-    }
-
-    function getAmazonImageUrl(asin) {
-      if (!asin) return '';
-      return `https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&MarketPlace=US&Operation=GetImage&ASIN=${encodeURIComponent(asin)}&Service=Amazon&TemplateId=LargeImage`;
     }
 
     function getDisplayImage(product) {
       if (product.image_url && String(product.image_url).trim() !== '') {
         return product.image_url;
       }
-      return getAmazonImageUrl(product.asin);
+      return '';
     }
 
     function getDisplayAffiliateLink(product) {
@@ -283,20 +513,7 @@
 
     function updateDealCount() {
       const remaining = Math.max(products.length - currentIndex, 0);
-      document.getElementById('deal-count').innerText = `${remaining} DEALS`;
-    }
-
-    function renderState(title, subtitle, colorClass = 'text-white') {
-      const app = document.getElementById('app');
-      app.innerHTML = `
-        <div class="state-box">
-          <div>
-            <div class="${colorClass} text-xl font-extrabold mb-2">${sanitizeText(title)}</div>
-            <div class="text-sm text-zinc-500">${sanitizeText(subtitle)}</div>
-          </div>
-        </div>
-      `;
-      updateDealCount();
+      document.getElementById('deal-count').innerText = `${remaining} Deals`;
     }
 
     function setButtonsDisabled(disabled) {
@@ -305,12 +522,51 @@
       document.getElementById('refresh-btn').disabled = disabled;
     }
 
+    function renderState(title, text, isError = false) {
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="status-box">
+          <div>
+            <h2 class="status-title ${isError ? 'text-red-400' : 'text-white'}">${sanitizeText(title)}</h2>
+            <p class="status-text">${sanitizeText(text)}</p>
+          </div>
+        </div>
+      `;
+      updateDealCount();
+    }
+
+    function createFallbackSVG(name, category) {
+      const safeName = sanitizeText(name || 'Trending Deal');
+      const safeCategory = sanitizeText(category || 'Amazon Deal');
+
+      return `data:image/svg+xml;utf8,
+      <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600">
+        <defs>
+          <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stop-color="%23121825"/>
+            <stop offset="100%" stop-color="%23090b11"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="1600" fill="url(%23g)"/>
+        <circle cx="600" cy="440" r="220" fill="%232563eb" opacity="0.12"/>
+        <text x="600" y="320" text-anchor="middle" fill="white" font-size="70" font-family="Arial, sans-serif" font-weight="800">TrendPulse</text>
+        <text x="600" y="410" text-anchor="middle" fill="%23a1a1aa" font-size="34" font-family="Arial, sans-serif">${safeCategory}</text>
+        <text x="600" y="760" text-anchor="middle" fill="white" font-size="68" font-family="Arial, sans-serif" font-weight="900">No product image</text>
+        <text x="600" y="860" text-anchor="middle" fill="%23cbd5e1" font-size="34" font-family="Arial, sans-serif">Tap to view the deal on Amazon</text>
+        <foreignObject x="120" y="980" width="960" height="360">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="color:white;font-size:52px;line-height:1.1;font-family:Arial,sans-serif;font-weight:900;text-align:center;">
+            ${safeName}
+          </div>
+        </foreignObject>
+      </svg>`;
+    }
+
     async function load() {
       if (isLoading) return;
 
       isLoading = true;
       setButtonsDisabled(true);
-      renderState('Loading...', 'Fetching the best Amazon deals right now.');
+      renderState('Loading deals...', 'Fetching the latest trending Amazon offers.');
 
       try {
         const skippedIds = getSkippedIds();
@@ -344,15 +600,12 @@
 
         if (error) {
           console.error('Supabase error:', error);
-          renderState('Error', error.message || 'Unable to load deals.', 'text-red-400');
+          renderState('Unable to load deals', error.message || 'Please try again in a moment.', true);
           return;
         }
 
         products = (data || []).filter(item => {
-          if (!item) return false;
-          if (!item.id) return false;
-          if (!item.name) return false;
-          if (!item.asin) return false;
+          if (!item || !item.id || !item.name || !item.asin) return false;
           if (skippedIds.includes(item.id)) return false;
           return true;
         });
@@ -361,14 +614,14 @@
         updateDealCount();
 
         if (!products.length) {
-          renderState('No deals available', 'Check back later or reset your skipped deals.');
+          renderState('No deals available right now', 'Please check back later or reset your skipped deals.');
           return;
         }
 
         renderStack();
       } catch (err) {
         console.error(err);
-        renderState('Error', err.message || 'Unexpected error.', 'text-red-400');
+        renderState('Unexpected error', err.message || 'Something went wrong.', true);
       } finally {
         isLoading = false;
         setButtonsDisabled(false);
@@ -383,17 +636,18 @@
       updateDealCount();
 
       if (!remaining.length) {
-        renderState('No more deals', 'You’ve seen them all. Refresh or reset skipped deals.');
+        renderState('You are all caught up', 'Refresh to load new deals or reset skipped items.');
         return;
       }
 
       remaining.forEach((p, i) => {
-        const card = document.createElement('div');
-        card.className = 'card';
+        const card = document.createElement('article');
+        card.className = 'deal-card';
         card.style.zIndex = 10 - i;
-        card.style.transform = `scale(${1 - i * 0.06}) translateY(${i * 18}px)`;
+        card.style.transform = `scale(${1 - i * 0.05}) translateY(${i * 16}px)`;
 
-        const imageUrl = getDisplayImage(p);
+        const imageUrl = getDisplayImage(p) || createFallbackSVG(p.name, p.category);
+        const useFallbackClass = !getDisplayImage(p);
         const shopUrl = getDisplayAffiliateLink(p);
         const safeName = sanitizeText(p.name);
         const safeDescription = sanitizeText(p.description || '');
@@ -405,40 +659,43 @@
         const hasPrice = p.price !== null && p.price !== undefined && p.price !== '';
 
         const originalPriceHtml = hasOriginalPrice
-          ? `<span class="text-xs text-zinc-500 line-through">${formatPrice(p.original_price)}</span>`
+          ? `<span class="old-price">${formatPrice(p.original_price)}</span>`
           : '';
 
         const priceHtml = hasPrice
-          ? `<span class="text-4xl font-black">${formatPrice(p.price)}</span>`
-          : `<span class="text-lg font-bold text-zinc-300">Check price</span>`;
+          ? `<span class="new-price">${formatPrice(p.price)}</span>`
+          : `<span class="new-price" style="font-size:34px;">Check price</span>`;
 
         card.innerHTML = `
           <img
             src="${imageUrl}"
             alt="${safeName}"
-            class="w-full h-full object-cover p-8 bg-white"
-            onerror="this.onerror=null; this.src='https://placehold.co/800x1000/111111/FFFFFF?text=No+Image';"
+            class="deal-bg ${useFallbackClass ? 'fallback' : ''}"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            onerror="this.onerror=null; this.src='${createFallbackSVG(p.name, p.category)}'; this.classList.add('fallback');"
           >
-          <div class="card-overlay"></div>
 
-          <div class="absolute top-5 left-5 right-5 flex justify-between items-center gap-2">
-            <div class="flex items-center gap-2">
-              ${discount > 0 ? `<span class="promo-pill">-${discount}% OFF</span>` : `<span class="badge">HOT DEAL</span>`}
+          <div class="deal-overlay"></div>
+
+          <div class="top-row">
+            <div class="top-left">
+              ${discount > 0
+                ? `<span class="badge pill-hot">-${discount}% Off</span>`
+                : `<span class="badge">Hot Deal</span>`
+              }
               <span class="badge">${safeCategory}</span>
             </div>
-            <span class="badge">SCORE ${score}</span>
+            <span class="badge">Score ${score}</span>
           </div>
 
-          <div class="absolute bottom-0 p-6 w-full">
-            <h2 class="text-2xl font-extrabold leading-tight mb-2 line-clamp-2 uppercase italic">${safeName}</h2>
+          <div class="content">
+            <h2 class="product-title">${safeName}</h2>
+            <p class="product-desc">${safeDescription || 'Trending Amazon product deal. Tap to check the latest price and availability.'}</p>
 
-            ${safeDescription
-              ? `<p class="text-sm text-zinc-300 mb-4 line-clamp-3">${safeDescription}</p>`
-              : ''
-            }
-
-            <div class="flex justify-between items-end gap-4">
-              <div class="flex flex-col min-w-0">
+            <div class="bottom-row">
+              <div class="price-box">
                 ${originalPriceHtml}
                 ${priceHtml}
               </div>
@@ -446,8 +703,9 @@
               <a
                 href="${shopUrl}"
                 target="_blank"
-                rel="noopener noreferrer"
-                class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-black text-sm uppercase shrink-0"
+                rel="nofollow sponsored noopener noreferrer"
+                class="cta-btn"
+                aria-label="Shop ${safeName} on Amazon"
               >
                 Shop Now
               </a>
@@ -480,14 +738,13 @@
         if (!isDragging || isAnimating || isLoading) return;
         moveX = e.touches[0].clientX - startX;
         const rotation = moveX / 18;
-        el.style.transform = `translate3d(${moveX}px, 0, 0) rotate(${rotation}deg)`;
+        el.style.transform = `translate3d(${moveX}px,0,0) rotate(${rotation}deg)`;
       };
 
       const onTouchEnd = () => {
         if (!isDragging || isAnimating || isLoading) return;
-
         isDragging = false;
-        el.style.transition = 'transform 0.35s ease';
+        el.style.transition = 'transform .35s ease';
 
         if (Math.abs(moveX) > 120) {
           const direction = moveX > 0 ? 'right' : 'left';
@@ -506,7 +763,7 @@
       if (isAnimating || isLoading) return;
 
       const currentProduct = products[currentIndex];
-      const card = document.querySelector('.card');
+      const card = document.querySelector('.deal-card');
       if (!card || !currentProduct) return;
 
       isAnimating = true;
@@ -522,9 +779,9 @@
         }
       }
 
-      card.style.transition = 'transform 0.35s ease, opacity 0.25s ease';
+      card.style.transition = 'transform .35s ease, opacity .25s ease';
       card.style.opacity = '0.9';
-      card.style.transform = `translate3d(${direction === 'right' ? 1000 : -1000}px, 0, 0) rotate(${direction === 'right' ? 18 : -18}deg)`;
+      card.style.transform = `translate3d(${direction === 'right' ? 1000 : -1000}px,0,0) rotate(${direction === 'right' ? 18 : -18}deg)`;
 
       setTimeout(() => {
         currentIndex++;
@@ -544,4 +801,4 @@
     load();
   </script>
 </body>
-  </html>
+</html>
