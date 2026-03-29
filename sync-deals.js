@@ -5,7 +5,7 @@ import * as cheerio from "cheerio";
 const parser = new Parser({
   timeout: 15000,
   headers: {
-    "User-Agent": "TrendPulseBot/2.0"
+    "User-Agent": "TrendPulseBot/2.1"
   }
 });
 
@@ -14,7 +14,7 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AFFILIATE_TAG = process.env.AFFILIATE_TAG || "Drackk-20";
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("Variables manquantes: SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY");
+  throw new Error("Missing required env vars: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
 }
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -91,12 +91,6 @@ function extractPriceFromText(text) {
   return null;
 }
 
-function estimateOriginalPrice(price, discountPercent) {
-  if (!price || !discountPercent || discountPercent <= 0 || discountPercent >= 100) return null;
-  const original = price / (1 - discountPercent / 100);
-  return Math.round(original * 100) / 100;
-}
-
 function extractDiscountPercent(text) {
   const value = cleanText(text);
   if (!value) return null;
@@ -118,13 +112,18 @@ function extractDiscountPercent(text) {
   return null;
 }
 
+function estimateOriginalPrice(price, discountPercent) {
+  if (!price || !discountPercent || discountPercent <= 0 || discountPercent >= 100) return null;
+  const original = price / (1 - discountPercent / 100);
+  return Math.round(original * 100) / 100;
+}
+
 function scoreProduct({ price, discount_percent, name }) {
   const discountScore = Number(discount_percent || 0) * 2;
-  const cheapBoost = price && price < 50 ? 10 : 0;
-  const keywordBoost =
-    /amazon|deal|sale|hot|best|save|discount/i.test(name || "") ? 5 : 0;
+  const lowPriceBoost = price && price < 50 ? 10 : 0;
+  const dealKeywordBoost = /amazon|deal|sale|save|discount|hot|under/i.test(name || "") ? 5 : 0;
 
-  return Math.round((discountScore + cheapBoost + keywordBoost) * 100) / 100;
+  return Math.round((discountScore + lowPriceBoost + dealKeywordBoost) * 100) / 100;
 }
 
 function normalizeAmazonUrl(url) {
@@ -143,18 +142,18 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/2.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/2.1"
       }
     });
 
     if (!res.ok) {
-      console.log(`HTTP ${res.status} pour ${url}`);
+      console.log(`HTTP ${res.status} for ${url}`);
       return null;
     }
 
     return await res.text();
   } catch (error) {
-    console.log(`Erreur fetch ${url}: ${error.message}`);
+    console.log(`Fetch error for ${url}: ${error.message}`);
     return null;
   }
 }
@@ -165,7 +164,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/2.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/2.1"
       }
     });
 
@@ -210,11 +209,12 @@ function extractAmazonLinksFromHtml(html) {
 function extractCategory(title, description) {
   const text = `${title} ${description}`.toLowerCase();
 
-  if (/coffee|kitchen|cookware|dish|pan|knife|food/.test(text)) return "Kitchen";
-  if (/toothbrush|beauty|skincare|soap|cleaner/.test(text)) return "Beauty";
-  if (/fitbit|tracker|headphone|speaker|tablet|laptop|tech|electronic/.test(text)) return "Tech";
-  if (/toy|kid|baby|alphabet|lego/.test(text)) return "Kids";
-  if (/fitness|sport|exercise|health/.test(text)) return "Fitness";
+  if (/coffee|kitchen|cookware|dish|pan|knife|food|appliance/.test(text)) return "Kitchen";
+  if (/toothbrush|beauty|skincare|soap|cleaner|makeup|hair/.test(text)) return "Beauty";
+  if (/fitbit|tracker|headphone|speaker|tablet|laptop|tech|electronic|monitor|keyboard|mouse/.test(text)) return "Tech";
+  if (/toy|kid|baby|alphabet|lego|game/.test(text)) return "Kids";
+  if (/fitness|sport|exercise|health|workout/.test(text)) return "Fitness";
+  if (/home|furniture|decor|storage|bedding/.test(text)) return "Home";
 
   return "All";
 }
@@ -223,10 +223,27 @@ function isStrongEnoughProduct(product) {
   if (!product.asin || !isValidAsin(product.asin)) return false;
   if (!product.name || product.name.length < 5) return false;
   if (!product.affiliate_link) return false;
-
   if (product.price !== null && Number(product.price) < 3) return false;
 
   return true;
+}
+
+function buildDescription(title, sourceDescription, price, discountPercent) {
+  const cleanDesc = cleanText(sourceDescription);
+
+  if (cleanDesc && cleanDesc.length > 20) {
+    return cleanDesc.slice(0, 240);
+  }
+
+  if (price && discountPercent) {
+    return `Amazon deal spotted for ${title}. Current price: $${price}. Save ${discountPercent}% while it lasts.`;
+  }
+
+  if (price) {
+    return `Amazon deal spotted for ${title}. Current price: $${price}.`;
+  }
+
+  return `Trending Amazon deal found automatically. Tap to check the latest price and availability.`;
 }
 
 async function extractDealFromArticle(item) {
@@ -236,14 +253,14 @@ async function extractDealFromArticle(item) {
 
   if (!sourceUrl) return null;
 
-  console.log(`Analyse: ${sourceTitle}`);
+  console.log(`Analyzing: ${sourceTitle}`);
 
   const html = await fetchText(sourceUrl);
   if (!html) return null;
 
   const foundLinks = extractAmazonLinksFromHtml(html);
   if (!foundLinks.length) {
-    console.log("Aucun lien Amazon trouvé");
+    console.log("No Amazon link found");
     return null;
   }
 
@@ -258,12 +275,13 @@ async function extractDealFromArticle(item) {
     const price = extractPriceFromText(mergedText);
     const discountPercent = extractDiscountPercent(mergedText);
     const originalPrice = discountPercent ? estimateOriginalPrice(price, discountPercent) : null;
+    const description = buildDescription(sourceTitle, sourceDescription, price, discountPercent);
 
     const product = {
       asin,
       name: sourceTitle.slice(0, 180) || `Amazon Deal ${asin}`,
-      tagline: "Hot Amazon deal",
-      description: sourceDescription || "Amazing Amazon deal found automatically.",
+      tagline: "Top Amazon deal",
+      description,
       price: price ?? null,
       original_price: originalPrice ?? null,
       discount_percent: discountPercent ?? null,
@@ -291,7 +309,7 @@ async function extractDealFromArticle(item) {
     return product;
   }
 
-  console.log("Aucun ASIN valide trouvé");
+  console.log("No valid ASIN found");
   return null;
 }
 
@@ -300,14 +318,14 @@ async function fetchFeedItems(feedUrl) {
     const feed = await parser.parseURL(feedUrl);
     return (feed.items || []).slice(0, 12);
   } catch (error) {
-    console.log(`Erreur flux ${feedUrl}: ${error.message}`);
+    console.log(`Feed error for ${feedUrl}: ${error.message}`);
     return [];
   }
 }
 
 async function upsertProducts(products) {
   if (!products.length) {
-    console.log("Aucun produit à insérer");
+    console.log("No products to upsert");
     return;
   }
 
@@ -321,7 +339,7 @@ async function upsertProducts(products) {
     throw error;
   }
 
-  console.log(`${products.length} produits upsert`);
+  console.log(`${products.length} products upserted`);
 }
 
 async function deactivateMissingProducts(latestAsins) {
@@ -329,21 +347,24 @@ async function deactivateMissingProducts(latestAsins) {
 
   const { error } = await sb
     .from("products")
-    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .update({
+      is_active: false,
+      updated_at: new Date().toISOString()
+    })
     .not("asin", "in", `(${latestAsins.map(a => `"${a}"`).join(",")})`);
 
   if (error) {
-    console.log("Impossible de désactiver les anciens produits:", error.message);
+    console.log("Could not deactivate old products:", error.message);
   }
 }
 
 async function main() {
-  console.log("Début sync V2");
+  console.log("Starting sync V2.1");
 
   const allItems = [];
   for (const feedUrl of FEEDS) {
     const items = await fetchFeedItems(feedUrl);
-    console.log(`${items.length} items lus depuis ${feedUrl}`);
+    console.log(`${items.length} items loaded from ${feedUrl}`);
     allItems.push(...items);
     await sleep(1200);
   }
@@ -358,7 +379,7 @@ async function main() {
     uniqueArticles.push(item);
   }
 
-  console.log(`${uniqueArticles.length} articles uniques`);
+  console.log(`${uniqueArticles.length} unique articles found`);
 
   const results = [];
   const seenAsins = new Set();
@@ -374,19 +395,21 @@ async function main() {
 
       await sleep(1200);
     } catch (error) {
-      console.log(`Erreur article: ${error.message}`);
+      console.log(`Article error: ${error.message}`);
     }
   }
 
-  console.log(`${results.length} produits valides trouvés`);
+  console.log(`${results.length} valid products found`);
 
   await upsertProducts(results);
-  await deactivateMissingProducts(results.map(p => p.asin));
 
-  console.log("Fin sync V2");
+  // Uncomment this later if you want products missing from the latest run to be marked inactive.
+  // await deactivateMissingProducts(results.map(p => p.asin));
+
+  console.log("Sync complete");
 }
 
 main().catch(error => {
-  console.error("Erreur fatale:", error);
+  console.error("Fatal error:", error);
   process.exit(1);
 });
