@@ -3,38 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TrendPulse | Smart Shopping</title>
+    <title>TrendPulse | Premium Curation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { background: #000; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; touch-action: none; }
-        .card-stack { position: relative; width: 100%; height: 65vh; perspective: 1000px; }
-        .card { position: absolute; inset: 0; background: #111; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; will-change: transform; transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
-        .card-info { background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%); position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 24px 24px; }
-        .promo-badge { background: #ef4444; color: white; padding: 4px 12px; border-radius: 10px; font-weight: 900; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+        
+        /* Animations fluides */
+        .card-stack { position: relative; width: 100%; height: 68vh; perspective: 1200px; }
+        .card { 
+            position: absolute; inset: 0; background: #0a0a0a; border-radius: 42px;
+            border: 1px solid rgba(255,255,255,0.08); overflow: hidden;
+            will-change: transform, opacity; transform-origin: center center;
+            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.7);
+        }
+
+        .card-overlay {
+            background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%);
+            position: absolute; inset: 0; pointer-events: none;
+        }
+
+        /* Barre de progression */
+        #progress-bar { position: absolute; top: 0; left: 0; height: 3px; background: #3b82f6; transition: width 0.3s ease; z-index: 100; }
+
+        .btn-interact { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn-interact:active { transform: scale(0.8); background: #3b82f6; color: white; }
+
+        .promo-tag { background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; letter-spacing: -0.02em; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-between h-screen py-10 px-6">
+<body class="flex flex-col items-center justify-between h-screen py-8 px-5">
 
-    <header class="w-full flex justify-between items-center px-2">
-        <div>
-            <h1 class="text-xl font-extrabold tracking-tighter italic leading-none">TRENDPULSE</h1>
-            <p id="counter" class="text-[9px] text-zinc-500 font-bold tracking-[0.2em] uppercase mt-1">Searching Deals...</p>
+    <div id="progress-bar" style="width: 0%"></div>
+
+    <header class="w-full flex justify-between items-center px-3 pt-2">
+        <div class="flex flex-col">
+            <h1 class="text-2xl font-[900] tracking-tighter italic leading-none">TRENDPULSE</h1>
+            <span id="counter" class="text-[9px] text-zinc-500 font-bold tracking-[0.2em] uppercase mt-1">Sourcing viral tech...</span>
         </div>
-        <div class="flex gap-2">
-            <div id="save-tag" class="hidden promo-badge animate-bounce">TOP PROMO</div>
-        </div>
+        <div class="bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full text-[10px] font-bold">LIVE</div>
     </header>
 
-    <div id="app" class="card-stack max-w-sm"></div>
+    <div id="app" class="card-stack max-w-sm">
+        <div class="card flex flex-col items-center justify-center space-y-4">
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-zinc-500 text-xs font-bold tracking-widest uppercase">Loading Deck</p>
+        </div>
+    </div>
 
-    <footer class="w-full max-w-xs flex justify-around items-center mb-4">
-        <button onclick="forceSwipe('left')" class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">✕</button>
-        <button onclick="forceSwipe('right')" class="w-20 h-20 rounded-full bg-white flex items-center justify-center text-black shadow-xl">
+    <footer class="w-full max-w-xs flex justify-around items-center mb-6">
+        <button onclick="forceSwipe('left')" class="btn-interact w-14 h-14 rounded-full bg-zinc-900/50 border border-zinc-800 flex items-center justify-center text-zinc-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        
+        <button onclick="forceSwipe('right')" class="btn-interact w-20 h-20 rounded-full bg-white flex items-center justify-center text-black shadow-[0_0_40px_rgba(59,130,246,0.3)]">
             <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         </button>
-        <button onclick="filterTop()" class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-yellow-500">
+
+        <button onclick="toggleTop()" class="btn-interact w-14 h-14 rounded-full bg-zinc-900/50 border border-zinc-800 flex items-center justify-center text-yellow-500">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
         </button>
     </footer>
@@ -46,10 +73,11 @@
 
         let products = [];
         let currentIndex = 0;
+        let isShowingTop = false;
 
-        async function load(filter = '') {
+        async function load() {
             let query = sb.from('products').select('*');
-            if(filter === 'top') query = query.gt('likes', 5).order('likes', {ascending: false});
+            if(isShowingTop) query = query.order('likes', {ascending: false}).limit(10);
             else query = query.order('id', {ascending: false});
             
             const { data } = await query;
@@ -61,80 +89,112 @@
             const container = document.getElementById('app');
             container.innerHTML = '';
             
-            products.slice(currentIndex, currentIndex + 2).forEach((p, i) => {
+            const visibleCards = products.slice(currentIndex, currentIndex + 3);
+            
+            if(visibleCards.length === 0) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-center p-10"><p class="text-zinc-500 font-bold uppercase tracking-widest">Fin de la sélection.<br>Reviens dans 30min.</p></div>`;
+                return;
+            }
+
+            visibleCards.forEach((p, i) => {
                 const card = document.createElement('div');
                 card.className = "card";
                 card.style.zIndex = 10 - i;
-                card.style.transform = `scale(${1 - i * 0.08}) translateY(${i * 30}px)`;
-                
-                // Calcul de l'économie
-                let discountHtml = '';
-                if (p.original_price > p.price) {
-                    const pct = Math.round(((p.original_price - p.price) / p.original_price) * 100);
-                    discountHtml = `<div class="promo-badge">-${pct}% OFF</div>`;
-                }
+                card.style.transform = `scale(${1 - i * 0.07}) translateY(${i * 25}px) translateZ(0)`;
+                card.style.opacity = 1 - (i * 0.3);
 
+                const discount = p.original_price ? Math.round(((p.original_price - p.price) / p.original_price) * 100) : 0;
                 const img = p.image_url || `https://ws-eu.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&MarketPlace=FR&Operation=GetImage&ASIN=${p.asin}&Service=Amazon&TemplateId=LargeImage`;
 
                 card.innerHTML = `
                     <img src="${img}" class="w-full h-full object-cover">
-                    <div class="card-info">
-                        <div class="flex justify-between items-center mb-4">
-                            ${discountHtml}
-                            <span class="text-zinc-400 text-[10px] font-bold uppercase tracking-widest">${p.tagline || 'Trending'}</span>
-                        </div>
-                        <h2 class="text-2xl font-black uppercase leading-tight tracking-tighter mb-6">${p.name}</h2>
+                    <div class="card-overlay"></div>
+                    <div class="absolute bottom-0 p-8 w-full space-y-4">
                         <div class="flex justify-between items-center">
+                            ${discount > 0 ? `<span class="promo-tag">-${discount}% SAVINGS</span>` : `<span></span>`}
+                            <span class="text-[10px] text-zinc-400 font-black tracking-widest uppercase">${p.tagline || 'Viral Find'}</span>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-black leading-[0.9] tracking-tighter uppercase italic">${p.name}</h2>
+                            <p class="text-zinc-400 text-xs mt-3 line-clamp-2 font-medium">${p.description}</p>
+                        </div>
+                        <div class="flex justify-between items-end pt-2">
                             <div class="flex flex-col">
-                                ${p.original_price ? `<span class="text-xs text-zinc-500 line-through">${p.original_price}€</span>` : ''}
-                                <span class="text-3xl font-black">${p.price}€</span>
+                                ${p.original_price ? `<span class="text-xs text-zinc-500 line-through mb-1">${p.original_price}€</span>` : ''}
+                                <span class="text-4xl font-black tracking-tighter">${p.price}€</span>
                             </div>
-                            <a href="${p.affiliate_link}" target="_blank" class="bg-white text-black px-6 py-3 rounded-2xl font-extrabold text-sm uppercase">Shop Now</a>
+                            <a href="${p.affiliate_link}" target="_blank" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-tighter shadow-[0_10px_20px_rgba(59,130,246,0.4)]">Get Link</a>
                         </div>
                     </div>
                 `;
                 container.appendChild(card);
                 if(i === 0) initDrag(card);
             });
-            document.getElementById('counter').innerText = `${products.length - currentIndex} deals found`;
+
+            // Update Progress
+            const progress = (currentIndex / products.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('counter').innerText = `${products.length - currentIndex} deals ready`;
         }
 
-        async function recordVote(id, type) {
-            // Incrémente likes ou nopes dans Supabase
+        async function updateVote(id, field) {
             const p = products[currentIndex];
-            const newValue = (p[type] || 0) + 1;
-            await sb.from('products').update({ [type]: newValue }).eq('id', id);
+            await sb.from('products').update({ [field]: (p[field] || 0) + 1 }).eq('id', id);
         }
 
         function initDrag(el) {
-            let startX, moveX = 0, isDragging = false;
-            el.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isDragging = true; el.style.transition = 'none'; });
-            el.addEventListener('touchmove', (e) => { if(!isDragging) return; moveX = e.touches[0].clientX - startX; el.style.transform = `translate3d(${moveX}px, 0, 0) rotate(${moveX/20}deg)`; });
-            el.addEventListener('touchend', () => {
+            let startX, startY, moveX, isDragging = false;
+            
+            el.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isDragging = true;
+                el.style.transition = 'none';
+            });
+
+            el.addEventListener('touchmove', (e) => {
+                if(!isDragging) return;
+                moveX = e.touches[0].clientX - startX;
+                let moveY = e.touches[0].clientY - startY;
+                let rotation = moveX / 15;
+                el.style.transform = `translate3d(${moveX}px, ${moveY/3}px, 0) rotate(${rotation}deg) scale(1.05)`;
+            });
+
+            el.addEventListener('touchend', (e) => {
                 isDragging = false;
-                el.style.transition = 'all 0.5s ease';
-                if (Math.abs(moveX) > 120) {
-                    const type = moveX > 0 ? 'likes' : 'nopes';
-                    recordVote(products[currentIndex].id, type);
-                    el.style.transform = `translate3d(${moveX > 0 ? 1000 : -1000}px, 0, 0)`;
+                el.style.transition = 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
+                
+                if (Math.abs(moveX) > 140) {
+                    const direction = moveX > 0 ? 1 : -1;
+                    updateVote(products[currentIndex].id, moveX > 0 ? 'likes' : 'nopes');
+                    el.style.transform = `translate3d(${direction * 1000}px, 0, 0) rotate(${direction * 45}deg)`;
+                    el.style.opacity = '0';
                     setTimeout(() => { currentIndex++; renderStack(); }, 200);
-                } else { el.style.transform = `translate3d(0,0,0)`; }
+                } else {
+                    el.style.transform = 'translate3d(0,0,0) scale(1)';
+                }
                 moveX = 0;
             });
         }
 
         window.forceSwipe = (dir) => {
-            const type = dir === 'right' ? 'likes' : 'nopes';
-            recordVote(products[currentIndex].id, type);
-            // ... animation de swipe identique au code précédent ...
+            const card = document.querySelector('.card');
+            if(!card) return;
+            updateVote(products[currentIndex].id, dir === 'right' ? 'likes' : 'nopes');
+            card.style.transition = 'all 0.7s cubic-bezier(0.23, 1, 0.32, 1)';
+            card.style.transform = `translate3d(${dir === 'right' ? 1000 : -1000}px, 0, 0) rotate(${dir === 'right' ? 45 : -45}deg)`;
+            card.style.opacity = '0';
+            setTimeout(() => { currentIndex++; renderStack(); }, 300);
         };
 
-        function filterTop() {
+        function toggleTop() {
+            isShowingTop = !isShowingTop;
             currentIndex = 0;
-            load('top');
+            load();
         }
 
         load();
     </script>
 </body>
-</html>
+    </html>
+    
