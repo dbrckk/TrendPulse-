@@ -5,7 +5,7 @@ import * as cheerio from "cheerio";
 const parser = new Parser({
   timeout: 15000,
   headers: {
-    "User-Agent": "TrendPulseBot/1.0"
+    "User-Agent": "TrendPulseBot/2.0"
   }
 });
 
@@ -19,8 +19,6 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-// Mets ici tes sources.
-// Garde seulement celles qui te donnent de bons résultats.
 const FEEDS = [
   "https://hip2save.com/feed/",
   "https://moneysavingmom.com/category/amazon-deals/feed",
@@ -33,8 +31,10 @@ function sleep(ms) {
 
 function cleanText(input) {
   return String(input || "")
-    .replace(/\s+/g, " ")
+    .replace(/<[^>]*>/g, " ")
     .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -52,8 +52,8 @@ function buildAmazonImage(asin) {
 
 function extractAsinFromAmazonUrl(url) {
   if (!url) return null;
-  const decoded = decodeURIComponent(url);
 
+  const decoded = decodeURIComponent(url);
   const patterns = [
     /\/dp\/([A-Z0-9]{10})(?:[/?]|$)/i,
     /\/gp\/product\/([A-Z0-9]{10})(?:[/?]|$)/i,
@@ -70,14 +70,68 @@ function extractAsinFromAmazonUrl(url) {
   return null;
 }
 
+function extractPriceFromText(text) {
+  const value = cleanText(text);
+  if (!value) return null;
+
+  const patterns = [
+    /\$([0-9]+(?:\.[0-9]{1,2})?)/,
+    /only\s+\$([0-9]+(?:\.[0-9]{1,2})?)/i,
+    /price[:\s]+\$?([0-9]+(?:\.[0-9]{1,2})?)/i
+  ];
+
+  for (const pattern of patterns) {
+    const match = value.match(pattern);
+    if (match?.[1]) {
+      const num = Number(match[1]);
+      if (!Number.isNaN(num)) return num;
+    }
+  }
+
+  return null;
+}
+
+function estimateOriginalPrice(price, discountPercent) {
+  if (!price || !discountPercent || discountPercent <= 0 || discountPercent >= 100) return null;
+  const original = price / (1 - discountPercent / 100);
+  return Math.round(original * 100) / 100;
+}
+
+function extractDiscountPercent(text) {
+  const value = cleanText(text);
+  if (!value) return null;
+
+  const patterns = [
+    /([0-9]{1,2})%\s*off/i,
+    /save\s+([0-9]{1,2})%/i,
+    /([0-9]{1,2})\s*percent\s*off/i
+  ];
+
+  for (const pattern of patterns) {
+    const match = value.match(pattern);
+    if (match?.[1]) {
+      const num = Number(match[1]);
+      if (!Number.isNaN(num) && num > 0 && num < 100) return num;
+    }
+  }
+
+  return null;
+}
+
+function scoreProduct({ price, discount_percent, name }) {
+  const discountScore = Number(discount_percent || 0) * 2;
+  const cheapBoost = price && price < 50 ? 10 : 0;
+  const keywordBoost =
+    /amazon|deal|sale|hot|best|save|discount/i.test(name || "") ? 5 : 0;
+
+  return Math.round((discountScore + cheapBoost + keywordBoost) * 100) / 100;
+}
+
 function normalizeAmazonUrl(url) {
   if (!url) return null;
 
   try {
     const u = new URL(url);
-    if (!/amazon\.com$/i.test(u.hostname) && !/^www\.amazon\.com$/i.test(u.hostname) && !/amzn\.to$/i.test(u.hostname)) {
-      return url;
-    }
     return u.toString();
   } catch {
     return url;
@@ -89,7 +143,7 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/1.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/2.0"
       }
     });
 
@@ -111,7 +165,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/1.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/2.0"
       }
     });
 
@@ -153,6 +207,28 @@ function extractAmazonLinksFromHtml(html) {
   return [...results];
 }
 
+function extractCategory(title, description) {
+  const text = `${title} ${description}`.toLowerCase();
+
+  if (/coffee|kitchen|cookware|dish|pan|knife|food/.test(text)) return "Kitchen";
+  if (/toothbrush|beauty|skincare|soap|cleaner/.test(text)) return "Beauty";
+  if (/fitbit|tracker|headphone|speaker|tablet|laptop|tech|electronic/.test(text)) return "Tech";
+  if (/toy|kid|baby|alphabet|lego/.test(text)) return "Kids";
+  if (/fitness|sport|exercise|health/.test(text)) return "Fitness";
+
+  return "All";
+}
+
+function isStrongEnoughProduct(product) {
+  if (!product.asin || !isValidAsin(product.asin)) return false;
+  if (!product.name || product.name.length < 5) return false;
+  if (!product.affiliate_link) return false;
+
+  if (product.price !== null && Number(product.price) < 3) return false;
+
+  return true;
+}
+
 async function extractDealFromArticle(item) {
   const sourceUrl = item.link;
   const sourceTitle = cleanText(item.title);
@@ -178,28 +254,39 @@ async function extractDealFromArticle(item) {
 
     if (!isValidAsin(asin)) continue;
 
-    const affiliateLink = buildAffiliateLink(asin);
-    const imageUrl = buildAmazonImage(asin);
+    const mergedText = `${sourceTitle} ${sourceDescription}`;
+    const price = extractPriceFromText(mergedText);
+    const discountPercent = extractDiscountPercent(mergedText);
+    const originalPrice = discountPercent ? estimateOriginalPrice(price, discountPercent) : null;
 
     const product = {
       asin,
-      name: sourceTitle || `Amazon Deal ${asin}`,
+      name: sourceTitle.slice(0, 180) || `Amazon Deal ${asin}`,
       tagline: "Hot Amazon deal",
       description: sourceDescription || "Amazing Amazon deal found automatically.",
-      price: null,
-      original_price: null,
-      discount_percent: null,
-      image_url: imageUrl,
-      affiliate_link: affiliateLink,
-      category: "All",
+      price: price ?? null,
+      original_price: originalPrice ?? null,
+      discount_percent: discountPercent ?? null,
+      image_url: buildAmazonImage(asin),
+      affiliate_link: buildAffiliateLink(asin),
+      category: extractCategory(sourceTitle, sourceDescription),
       likes: 0,
       nopes: 0,
       source_url: sourceUrl,
       source_name: new URL(sourceUrl).hostname,
       amazon_url: finalUrl,
       is_active: true,
+      score: scoreProduct({
+        price,
+        discount_percent: discountPercent,
+        name: sourceTitle
+      }),
       updated_at: new Date().toISOString()
     };
+
+    if (!isStrongEnoughProduct(product)) {
+      return null;
+    }
 
     return product;
   }
@@ -211,7 +298,7 @@ async function extractDealFromArticle(item) {
 async function fetchFeedItems(feedUrl) {
   try {
     const feed = await parser.parseURL(feedUrl);
-    return (feed.items || []).slice(0, 10);
+    return (feed.items || []).slice(0, 12);
   } catch (error) {
     console.log(`Erreur flux ${feedUrl}: ${error.message}`);
     return [];
@@ -237,15 +324,28 @@ async function upsertProducts(products) {
   console.log(`${products.length} produits upsert`);
 }
 
+async function deactivateMissingProducts(latestAsins) {
+  if (!latestAsins.length) return;
+
+  const { error } = await sb
+    .from("products")
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .not("asin", "in", `(${latestAsins.map(a => `"${a}"`).join(",")})`);
+
+  if (error) {
+    console.log("Impossible de désactiver les anciens produits:", error.message);
+  }
+}
+
 async function main() {
-  console.log("Début sync");
+  console.log("Début sync V2");
 
   const allItems = [];
   for (const feedUrl of FEEDS) {
     const items = await fetchFeedItems(feedUrl);
     console.log(`${items.length} items lus depuis ${feedUrl}`);
     allItems.push(...items);
-    await sleep(1000);
+    await sleep(1200);
   }
 
   const uniqueArticles = [];
@@ -272,7 +372,7 @@ async function main() {
       seenAsins.add(product.asin);
       results.push(product);
 
-      await sleep(1500);
+      await sleep(1200);
     } catch (error) {
       console.log(`Erreur article: ${error.message}`);
     }
@@ -281,8 +381,9 @@ async function main() {
   console.log(`${results.length} produits valides trouvés`);
 
   await upsertProducts(results);
+  await deactivateMissingProducts(results.map(p => p.asin));
 
-  console.log("Fin sync");
+  console.log("Fin sync V2");
 }
 
 main().catch(error => {
