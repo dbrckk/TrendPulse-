@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",
+    "@vercel/analytics": "^2.0.1",
     "cheerio": "^1.0.0",
     "rss-parser": "^3.13.0"
   }
