@@ -5,7 +5,7 @@ import * as cheerio from "cheerio";
 const parser = new Parser({
   timeout: 15000,
   headers: {
-    "User-Agent": "TrendPulseBot/2.1"
+    "User-Agent": "TrendPulseBot/3.0"
   }
 });
 
@@ -121,17 +121,14 @@ function estimateOriginalPrice(price, discountPercent) {
 function scoreProduct({ price, discount_percent, name }) {
   const discountScore = Number(discount_percent || 0) * 2;
   const lowPriceBoost = price && price < 50 ? 10 : 0;
-  const dealKeywordBoost = /amazon|deal|sale|save|discount|hot|under/i.test(name || "") ? 5 : 0;
-
+  const dealKeywordBoost = /amazon|deal|sale|save|discount|hot|under|clearance/i.test(name || "") ? 5 : 0;
   return Math.round((discountScore + lowPriceBoost + dealKeywordBoost) * 100) / 100;
 }
 
-function normalizeAmazonUrl(url) {
+function normalizeUrl(url, baseUrl) {
   if (!url) return null;
-
   try {
-    const u = new URL(url);
-    return u.toString();
+    return new URL(url, baseUrl).toString();
   } catch {
     return url;
   }
@@ -142,7 +139,7 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/2.1"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/3.0"
       }
     });
 
@@ -164,7 +161,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/2.1"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/3.0"
       }
     });
 
@@ -172,6 +169,17 @@ async function resolveFinalUrl(url) {
   } catch {
     return url;
   }
+}
+
+function extractMetaImage($, sourceUrl) {
+  const ogImage =
+    $('meta[property="og:image"]').attr("content") ||
+    $('meta[property="og:image:url"]').attr("content") ||
+    $('meta[name="twitter:image"]').attr("content") ||
+    $('meta[name="twitter:image:src"]').attr("content") ||
+    null;
+
+  return ogImage ? normalizeUrl(ogImage, sourceUrl) : null;
 }
 
 function extractAmazonLinksFromHtml(html) {
@@ -224,7 +232,6 @@ function isStrongEnoughProduct(product) {
   if (!product.name || product.name.length < 5) return false;
   if (!product.affiliate_link) return false;
   if (product.price !== null && Number(product.price) < 3) return false;
-
   return true;
 }
 
@@ -258,6 +265,9 @@ async function extractDealFromArticle(item) {
   const html = await fetchText(sourceUrl);
   if (!html) return null;
 
+  const $ = cheerio.load(html);
+  const metaImage = extractMetaImage($, sourceUrl);
+
   const foundLinks = extractAmazonLinksFromHtml(html);
   if (!foundLinks.length) {
     console.log("No Amazon link found");
@@ -265,7 +275,7 @@ async function extractDealFromArticle(item) {
   }
 
   for (const rawLink of foundLinks) {
-    const normalized = normalizeAmazonUrl(rawLink);
+    const normalized = normalizeUrl(rawLink, sourceUrl);
     const finalUrl = await resolveFinalUrl(normalized);
     const asin = extractAsinFromAmazonUrl(finalUrl) || extractAsinFromAmazonUrl(normalized);
 
@@ -285,7 +295,7 @@ async function extractDealFromArticle(item) {
       price: price ?? null,
       original_price: originalPrice ?? null,
       discount_percent: discountPercent ?? null,
-      image_url: buildAmazonImage(asin),
+      image_url: metaImage || buildAmazonImage(asin),
       affiliate_link: buildAffiliateLink(asin),
       category: extractCategory(sourceTitle, sourceDescription),
       likes: 0,
@@ -342,24 +352,8 @@ async function upsertProducts(products) {
   console.log(`${products.length} products upserted`);
 }
 
-async function deactivateMissingProducts(latestAsins) {
-  if (!latestAsins.length) return;
-
-  const { error } = await sb
-    .from("products")
-    .update({
-      is_active: false,
-      updated_at: new Date().toISOString()
-    })
-    .not("asin", "in", `(${latestAsins.map(a => `"${a}"`).join(",")})`);
-
-  if (error) {
-    console.log("Could not deactivate old products:", error.message);
-  }
-}
-
 async function main() {
-  console.log("Starting sync V2.1");
+  console.log("Starting sync V3");
 
   const allItems = [];
   for (const feedUrl of FEEDS) {
@@ -400,12 +394,7 @@ async function main() {
   }
 
   console.log(`${results.length} valid products found`);
-
   await upsertProducts(results);
-
-  // Uncomment this later if you want products missing from the latest run to be marked inactive.
-  // await deactivateMissingProducts(results.map(p => p.asin));
-
   console.log("Sync complete");
 }
 
