@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>TrendPulse | Best Deals Only</title>
+  <title>TrendPulse | Best Amazon Deals</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -68,21 +68,6 @@
       box-shadow: 0 4px 15px rgba(255, 59, 48, 0.35);
     }
 
-    .empty-state,
-    .loading-state,
-    .error-state {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 24px;
-      color: #a1a1aa;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 38px;
-      background: #0a0a0a;
-    }
-
     .badge {
       background: #18181b;
       border: 1px solid #27272a;
@@ -95,6 +80,19 @@
       text-transform: uppercase;
     }
 
+    .state-box {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      color: #a1a1aa;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 38px;
+      background: #0a0a0a;
+    }
+
     .line-clamp-2 {
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -102,8 +100,34 @@
       overflow: hidden;
     }
 
-    .hidden {
-      display: none !important;
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .action-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 999px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-btn-main {
+      width: 80px;
+      height: 80px;
+      border-radius: 999px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: black;
+      box-shadow: 0 20px 40px rgba(255,255,255,0.15);
     }
   </style>
 </head>
@@ -118,7 +142,16 @@
       </div>
     </div>
 
-    <div id="deal-count" class="badge">0 Deals</div>
+    <div class="flex items-center gap-2">
+      <button
+        id="refresh-btn"
+        class="badge"
+        onclick="reloadDeals()"
+      >
+        Refresh
+      </button>
+      <div id="deal-count" class="badge">0 DEALS</div>
+    </div>
   </header>
 
   <main id="app" class="card-stack max-w-sm mx-auto w-full"></main>
@@ -127,8 +160,8 @@
     <button
       id="btn-nope"
       onclick="forceSwipe('left')"
-      class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 text-2xl"
-      aria-label="Passer"
+      class="action-btn text-zinc-500 text-2xl"
+      aria-label="Skip"
     >
       ✕
     </button>
@@ -136,29 +169,36 @@
     <button
       id="btn-like"
       onclick="forceSwipe('right')"
-      class="w-20 h-20 rounded-full bg-white flex items-center justify-center text-black shadow-2xl"
-      aria-label="Voir le deal"
+      class="action-btn-main"
+      aria-label="Open deal"
     >
       <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
       </svg>
     </button>
 
-    <div class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-yellow-500 opacity-40 text-2xl">
-      🔥
-    </div>
+    <button
+      onclick="clearNopesAndReload()"
+      class="action-btn text-yellow-500 text-2xl"
+      aria-label="Reset"
+      title="Reset skipped deals"
+    >
+      ↺
+    </button>
   </footer>
 
   <script>
     const SB_URL = 'https://hyrofyfhmabhlqbucjdp.supabase.co';
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs';
+
     const sb = supabase.createClient(SB_URL, SB_KEY);
 
     let products = [];
     let currentIndex = 0;
     let isAnimating = false;
+    let isLoading = false;
 
-    function getDislikedIds() {
+    function getSkippedIds() {
       try {
         return JSON.parse(localStorage.getItem('tp_nopes') || '[]');
       } catch {
@@ -166,23 +206,37 @@
       }
     }
 
-    function setDislikedIds(ids) {
+    function setSkippedIds(ids) {
       localStorage.setItem('tp_nopes', JSON.stringify(ids));
     }
 
-    function recordNope(id) {
-      const nopes = getDislikedIds();
+    function recordSkip(id) {
+      const nopes = getSkippedIds();
       if (!nopes.includes(id)) {
         nopes.push(id);
-        setDislikedIds(nopes);
+        setSkippedIds(nopes);
       }
+    }
+
+    function clearNopesAndReload() {
+      localStorage.removeItem('tp_nopes');
+      load();
+    }
+
+    function sanitizeText(text) {
+      return String(text || '')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     }
 
     function formatPrice(value) {
       if (value === null || value === undefined || value === '') return '';
       const num = Number(value);
       if (Number.isNaN(num)) return '';
-      return num % 1 === 0 ? `${num}€` : `${num.toFixed(2)}€`;
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(num);
     }
 
     function getAmazonImageUrl(asin) {
@@ -207,8 +261,24 @@
       return '#';
     }
 
-    function sanitizeText(text) {
-      return String(text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    function getDisplayDiscount(product) {
+      const dp = Number(product.discount_percent || 0);
+      if (Number.isFinite(dp) && dp > 0) return Math.round(dp);
+
+      const price = Number(product.price);
+      const original = Number(product.original_price);
+
+      if (Number.isFinite(price) && Number.isFinite(original) && original > price && original > 0) {
+        return Math.round(((original - price) / original) * 100);
+      }
+
+      return 0;
+    }
+
+    function getDisplayScore(product) {
+      const score = Number(product.score || 0);
+      if (!Number.isFinite(score)) return 0;
+      return Math.round(score);
     }
 
     function updateDealCount() {
@@ -216,56 +286,41 @@
       document.getElementById('deal-count').innerText = `${remaining} DEALS`;
     }
 
-    function renderLoading() {
+    function renderState(title, subtitle, colorClass = 'text-white') {
       const app = document.getElementById('app');
       app.innerHTML = `
-        <div class="loading-state">
+        <div class="state-box">
           <div>
-            <div class="text-white text-xl font-extrabold mb-2">Chargement...</div>
-            <div class="text-sm text-zinc-500">On récupère les meilleurs deals.</div>
+            <div class="${colorClass} text-xl font-extrabold mb-2">${sanitizeText(title)}</div>
+            <div class="text-sm text-zinc-500">${sanitizeText(subtitle)}</div>
           </div>
         </div>
       `;
       updateDealCount();
     }
 
-    function renderError(message) {
-      const app = document.getElementById('app');
-      app.innerHTML = `
-        <div class="error-state">
-          <div>
-            <div class="text-red-400 text-xl font-extrabold mb-2">Erreur</div>
-            <div class="text-sm text-zinc-400">${sanitizeText(message)}</div>
-          </div>
-        </div>
-      `;
-      updateDealCount();
-    }
-
-    function renderEmpty() {
-      const app = document.getElementById('app');
-      app.innerHTML = `
-        <div class="empty-state">
-          <div>
-            <div class="text-white text-xl font-extrabold mb-2">Aucun deal disponible</div>
-            <div class="text-sm text-zinc-500">Reviens plus tard pour voir de nouvelles promos.</div>
-          </div>
-        </div>
-      `;
-      updateDealCount();
+    function setButtonsDisabled(disabled) {
+      document.getElementById('btn-nope').disabled = disabled;
+      document.getElementById('btn-like').disabled = disabled;
+      document.getElementById('refresh-btn').disabled = disabled;
     }
 
     async function load() {
-      renderLoading();
+      if (isLoading) return;
+
+      isLoading = true;
+      setButtonsDisabled(true);
+      renderState('Loading...', 'Fetching the best Amazon deals right now.');
 
       try {
-        const dislikedIds = getDislikedIds();
+        const skippedIds = getSkippedIds();
 
         const { data, error } = await sb
           .from('products')
           .select(`
             id,
             name,
+            tagline,
             description,
             price,
             image_url,
@@ -276,41 +331,47 @@
             nopes,
             category,
             discount_percent,
-            created_at
+            score,
+            created_at,
+            updated_at,
+            is_active
           `)
+          .eq('is_active', true)
           .not('asin', 'is', null)
-          .gt('discount_percent', 10)
+          .order('score', { ascending: false })
           .order('discount_percent', { ascending: false })
-          .limit(50);
+          .limit(60);
 
         if (error) {
-          console.error('Erreur Supabase:', error);
-          renderError(error.message || 'Impossible de charger les deals.');
+          console.error('Supabase error:', error);
+          renderState('Error', error.message || 'Unable to load deals.', 'text-red-400');
           return;
         }
 
-        const cleaned = (data || []).filter(item => {
+        products = (data || []).filter(item => {
           if (!item) return false;
           if (!item.id) return false;
           if (!item.name) return false;
           if (!item.asin) return false;
-          if (dislikedIds.includes(item.id)) return false;
+          if (skippedIds.includes(item.id)) return false;
           return true;
         });
 
-        products = cleaned;
         currentIndex = 0;
         updateDealCount();
 
-        if (products.length === 0) {
-          renderEmpty();
+        if (!products.length) {
+          renderState('No deals available', 'Check back later or reset your skipped deals.');
           return;
         }
 
         renderStack();
       } catch (err) {
         console.error(err);
-        renderError(err.message || 'Erreur inattendue.');
+        renderState('Error', err.message || 'Unexpected error.', 'text-red-400');
+      } finally {
+        isLoading = false;
+        setButtonsDisabled(false);
       }
     }
 
@@ -321,8 +382,8 @@
       const remaining = products.slice(currentIndex, currentIndex + 2);
       updateDealCount();
 
-      if (remaining.length === 0) {
-        renderEmpty();
+      if (!remaining.length) {
+        renderState('No more deals', 'You’ve seen them all. Refresh or reset skipped deals.');
         return;
       }
 
@@ -336,13 +397,20 @@
         const shopUrl = getDisplayAffiliateLink(p);
         const safeName = sanitizeText(p.name);
         const safeDescription = sanitizeText(p.description || '');
+        const safeCategory = sanitizeText(p.category || 'All');
+        const discount = getDisplayDiscount(p);
+        const score = getDisplayScore(p);
+
         const hasOriginalPrice = p.original_price !== null && p.original_price !== undefined && p.original_price !== '';
+        const hasPrice = p.price !== null && p.price !== undefined && p.price !== '';
+
         const originalPriceHtml = hasOriginalPrice
           ? `<span class="text-xs text-zinc-500 line-through">${formatPrice(p.original_price)}</span>`
           : '';
 
-        const discount = Number(p.discount_percent || 0);
-        const showDiscount = Number.isFinite(discount) && discount > 0 ? Math.round(discount) : 0;
+        const priceHtml = hasPrice
+          ? `<span class="text-4xl font-black">${formatPrice(p.price)}</span>`
+          : `<span class="text-lg font-bold text-zinc-300">Check price</span>`;
 
         card.innerHTML = `
           <img
@@ -353,23 +421,26 @@
           >
           <div class="card-overlay"></div>
 
-          <div class="absolute top-5 left-5 right-5 flex justify-between items-center">
-            <span class="promo-pill">-${showDiscount}% OFF</span>
-            ${p.category ? `<span class="badge">${sanitizeText(p.category)}</span>` : ''}
+          <div class="absolute top-5 left-5 right-5 flex justify-between items-center gap-2">
+            <div class="flex items-center gap-2">
+              ${discount > 0 ? `<span class="promo-pill">-${discount}% OFF</span>` : `<span class="badge">HOT DEAL</span>`}
+              <span class="badge">${safeCategory}</span>
+            </div>
+            <span class="badge">SCORE ${score}</span>
           </div>
 
           <div class="absolute bottom-0 p-6 w-full">
             <h2 class="text-2xl font-extrabold leading-tight mb-2 line-clamp-2 uppercase italic">${safeName}</h2>
 
             ${safeDescription
-              ? `<p class="text-sm text-zinc-300 mb-4 line-clamp-2">${safeDescription}</p>`
+              ? `<p class="text-sm text-zinc-300 mb-4 line-clamp-3">${safeDescription}</p>`
               : ''
             }
 
             <div class="flex justify-between items-end gap-4">
               <div class="flex flex-col min-w-0">
                 ${originalPriceHtml}
-                <span class="text-4xl font-black">${formatPrice(p.price)}</span>
+                ${priceHtml}
               </div>
 
               <a
@@ -378,7 +449,7 @@
                 rel="noopener noreferrer"
                 class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-black text-sm uppercase shrink-0"
               >
-                Shop Deal
+                Shop Now
               </a>
             </div>
           </div>
@@ -398,7 +469,7 @@
       let isDragging = false;
 
       const onTouchStart = (e) => {
-        if (isAnimating) return;
+        if (isAnimating || isLoading) return;
         startX = e.touches[0].clientX;
         moveX = 0;
         isDragging = true;
@@ -406,14 +477,14 @@
       };
 
       const onTouchMove = (e) => {
-        if (!isDragging || isAnimating) return;
+        if (!isDragging || isAnimating || isLoading) return;
         moveX = e.touches[0].clientX - startX;
         const rotation = moveX / 18;
         el.style.transform = `translate3d(${moveX}px, 0, 0) rotate(${rotation}deg)`;
       };
 
       const onTouchEnd = () => {
-        if (!isDragging || isAnimating) return;
+        if (!isDragging || isAnimating || isLoading) return;
 
         isDragging = false;
         el.style.transition = 'transform 0.35s ease';
@@ -432,7 +503,7 @@
     }
 
     function swipeCurrent(direction) {
-      if (isAnimating) return;
+      if (isAnimating || isLoading) return;
 
       const currentProduct = products[currentIndex];
       const card = document.querySelector('.card');
@@ -441,7 +512,14 @@
       isAnimating = true;
 
       if (direction === 'left') {
-        recordNope(currentProduct.id);
+        recordSkip(currentProduct.id);
+      }
+
+      if (direction === 'right') {
+        const link = getDisplayAffiliateLink(currentProduct);
+        if (link && link !== '#') {
+          window.open(link, '_blank', 'noopener,noreferrer');
+        }
       }
 
       card.style.transition = 'transform 0.35s ease, opacity 0.25s ease';
@@ -459,7 +537,11 @@
       swipeCurrent(dir);
     };
 
+    window.reloadDeals = function() {
+      load();
+    };
+
     load();
   </script>
 </body>
-</html>
+  </html>
