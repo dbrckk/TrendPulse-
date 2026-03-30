@@ -123,8 +123,11 @@
       return list;
     }
 
-    function buildAffiliateLink(asin) {
-      return `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}&linkCode=ogi&th=1&psc=1`;
+    function normalizeAffiliateLink(product) {
+      if (product?.affiliate_link && /^https:\/\/www\.amazon\.com\/dp\//i.test(product.affiliate_link)) {
+        return product.affiliate_link;
+      }
+      return `https://www.amazon.com/dp/${product.asin}?tag=${AMAZON_TAG}&linkCode=ogi&th=1&psc=1`;
     }
 
     function trackOnce(key) {
@@ -207,6 +210,12 @@
       } catch {}
     };
 
+    async function handleBuyClick(product) {
+      await trackEvent(product.asin, "click");
+      const finalUrl = normalizeAffiliateLink(product);
+      window.open(finalUrl, "_blank", "noopener,noreferrer");
+    }
+
     async function loadProduct() {
       if (!asin) {
         document.getElementById("product").innerHTML = `
@@ -241,7 +250,6 @@
       const dealSlug = slug(data.name);
       const canonicalUrl = `${SITE_URL}/deal/${data.asin}/${dealSlug}/`;
       const imageList = getBestImageList(data);
-      const amazonLink = buildAffiliateLink(data.asin);
 
       setSeo(data, imageList[0], canonicalUrl);
 
@@ -280,13 +288,11 @@
                 ${data.description || "Trending Amazon deal worth checking right now. Prices can change quickly, so it may be worth looking before the offer expires."}
               </div>
 
-              <a href="${amazonLink}"
-                 target="_blank"
-                 rel="nofollow sponsored noopener noreferrer"
-                 onclick="trackEvent('${data.asin}', 'click')"
-                 class="block text-center bg-blue-600 hover:bg-blue-500 transition py-4 rounded-2xl font-black text-lg">
+              <button
+                onclick='handleBuyClick(${JSON.stringify(data).replace(/'/g, "&apos;")})'
+                class="block w-full text-center bg-blue-600 hover:bg-blue-500 transition py-4 rounded-2xl font-black text-lg">
                 👉 View Deal on Amazon
-              </a>
+              </button>
 
               <div class="mt-5 text-sm text-zinc-400">
                 ⏳ Price may change quickly. Deals are often time-limited.
@@ -308,6 +314,7 @@
       `;
 
       loadRelated(data.category, data.asin);
+      window.handleBuyClick = handleBuyClick;
     }
 
     async function loadRelated(category, currentAsin) {
@@ -352,4 +359,4 @@
     loadProduct();
   </script>
 </body>
-    </html>
+</html>
