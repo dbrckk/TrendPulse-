@@ -17,6 +17,7 @@ const SESSION_FILE = "x-session.json";
 
 const MIN_MINUTES = 40;
 const MAX_MINUTES = 80;
+const MAX_RECENT_ASINS = 12;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
@@ -65,7 +66,9 @@ function loadState() {
   return loadJsonFile(STATE_FILE, {
     next_post_at: isoAfterMinutes(randomDelayMinutes()),
     last_posted_asin: null,
-    last_posted_at: null
+    last_posted_at: null,
+    last_posted_category: null,
+    recent_asins: []
   });
 }
 
@@ -108,28 +111,42 @@ function truncateForTweet(text, maxLen = 280) {
   return text.slice(0, Math.max(0, maxLen - 1)).trimEnd() + "…";
 }
 
+function categoryHashtag(category) {
+  const map = {
+    Tech: "#TechDeals",
+    Kitchen: "#KitchenDeals",
+    Beauty: "#BeautyDeals",
+    Home: "#HomeDeals",
+    Fitness: "#FitnessDeals",
+    Kids: "#KidsDeals",
+    All: "#AmazonDeals"
+  };
+  return map[category] || "#AmazonDeals";
+}
+
 function buildTweetText(deal) {
   const url = buildDealUrl(deal);
   const price = formatPrice(deal.price);
   const discount = Number(deal.discount_percent || 0);
   const category = String(deal.category || "Amazon").trim();
+  const hashtag = categoryHashtag(category);
 
   const templates = [];
 
   if (price && discount > 0) {
-    templates.push(`🚨 DEAL ALERT: ${deal.name}\nNow ${price} (-${Math.round(discount)}%)\n${url}`);
-    templates.push(`🔥 This ${category.toLowerCase()} deal looks crazy:\n${deal.name}\nOnly ${price} today\n${url}`);
-    templates.push(`💥 Price drop on Amazon\n${deal.name}\nNow ${price} with ${Math.round(discount)}% off\n${url}`);
-    templates.push(`👀 If you were waiting on this deal:\n${deal.name}\nIt just dropped to ${price}\n${url}`);
+    templates.push(`🚨 DEAL ALERT\n${deal.name}\nNow ${price} (-${Math.round(discount)}%)\n${hashtag}\n${url}`);
+    templates.push(`🔥 This ${category.toLowerCase()} deal looks strong\n${deal.name}\nOnly ${price} today\n${hashtag}\n${url}`);
+    templates.push(`💥 Amazon price drop\n${deal.name}\nNow ${price} with ${Math.round(discount)}% off\n${hashtag}\n${url}`);
+    templates.push(`👀 Worth checking right now\n${deal.name}\nLive for ${price}\n${hashtag}\n${url}`);
   }
 
   if (price) {
-    templates.push(`🔥 Trending Amazon find:\n${deal.name}\nLive now for ${price}\n${url}`);
-    templates.push(`⚡ Spotted on TrendPulse:\n${deal.name}\nCurrent price: ${price}\n${url}`);
+    templates.push(`🔥 Trending deal on TrendPulse\n${deal.name}\nCurrent price: ${price}\n${hashtag}\n${url}`);
+    templates.push(`⚡ Amazon find worth a look\n${deal.name}\nNow ${price}\n${hashtag}\n${url}`);
   }
 
-  templates.push(`🔥 Amazon deal worth checking:\n${deal.name}\n${url}`);
-  templates.push(`🚀 Trending deal on TrendPulse:\n${deal.name}\n${url}`);
+  templates.push(`🔥 Amazon deal worth checking\n${deal.name}\n${hashtag}\n${url}`);
+  templates.push(`🚀 Spotted on TrendPulse\n${deal.name}\n${hashtag}\n${url}`);
 
   const chosen = templates[Math.floor(Math.random() * templates.length)];
   return truncateForTweet(chosen, 280);
@@ -142,23 +159,43 @@ async function fetchCandidateDeals() {
     .eq("is_active", true)
     .not("asin", "is", null)
     .order("score", { ascending: false })
-    .limit(120);
+    .limit(150);
 
   if (error) throw error;
   return data || [];
 }
 
+function weightedShuffle(items) {
+  return [...items]
+    .map(item => ({
+      item,
+      weight: Math.random() * Math.max(1, scoreValue(item))
+    }))
+    .sort((a, b) => b.weight - a.weight)
+    .map(x => x.item);
+}
+
 function pickDeal(candidates, state) {
-  const filtered = candidates
+  const recentAsins = Array.isArray(state.recent_asins) ? state.recent_asins : [];
+
+  const baseFiltered = candidates
     .filter(d => d.asin && d.name)
-    .filter(d => d.asin !== state.last_posted_asin);
+    .filter(d => !recentAsins.includes(d.asin));
 
-  if (!filtered.length) return null;
+  if (!baseFiltered.length) return null;
 
-  const sorted = [...filtered].sort((a, b) => scoreValue(b) - scoreValue(a));
-  const topPool = sorted.slice(0, Math.min(25, sorted.length));
-  const index = Math.floor(Math.random() * topPool.length);
-  return topPool[index];
+  const categoryDifferent = baseFiltered.filter(d => {
+    if (!state.last_posted_category) return true;
+    return String(d.category || "All") !== String(state.last_posted_category);
+  });
+
+  const usable = categoryDifferent.length ? categoryDifferent : baseFiltered;
+
+  const sorted = [...usable].sort((a, b) => scoreValue(b) - scoreValue(a));
+  const topPool = sorted.slice(0, Math.min(30, sorted.length));
+  const shuffledWeighted = weightedShuffle(topPool);
+
+  return shuffledWeighted[0] || null;
 }
 
 async function typeLikeHuman(page, selector, value) {
@@ -366,7 +403,7 @@ async function downloadImageToTemp(url, asin) {
   try {
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.4"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.5"
       }
     });
 
@@ -500,6 +537,12 @@ async function postDealToX(deal, text) {
   }
 }
 
+function updateRecentAsins(state, asin) {
+  const list = Array.isArray(state.recent_asins) ? state.recent_asins : [];
+  const next = [asin, ...list.filter(x => x !== asin)].slice(0, MAX_RECENT_ASINS);
+  return next;
+}
+
 async function main() {
   const state = loadState();
 
@@ -534,6 +577,8 @@ async function main() {
 
   state.last_posted_asin = deal.asin;
   state.last_posted_at = new Date().toISOString();
+  state.last_posted_category = deal.category || "All";
+  state.recent_asins = updateRecentAsins(state, deal.asin);
   state.next_post_at = isoAfterMinutes(randomDelayMinutes());
 
   saveState(state);
