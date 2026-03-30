@@ -2,12 +2,11 @@ import Parser from "rss-parser";
 import { createClient } from "@supabase/supabase-js";
 import * as cheerio from "cheerio";
 import fs from "fs";
-import path from "path";
 
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/10.0"
+    "User-Agent": "TrendPulseBot/11.0"
   }
 });
 
@@ -43,10 +42,6 @@ const MIN_KEEP_DISCOUNT = 8;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function ensureDir(dirPath) {
-  fs.mkdirSync(dirPath, { recursive: true });
 }
 
 function cleanText(input) {
@@ -98,12 +93,16 @@ function buildAffiliateLink(asin) {
   return `https://www.amazon.com/dp/${asin}?tag=${AFFILIATE_TAG}&linkCode=ogi&th=1&psc=1`;
 }
 
-function buildAmazonFallbackImage(asin) {
+function buildPrimaryImage(asin) {
+  return `https://m.media-amazon.com/images/I/${asin}.jpg`;
+}
+
+function buildFallbackImage(asin) {
   return `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`;
 }
 
-function buildPrimaryImage(asin) {
-  return `https://m.media-amazon.com/images/I/${asin}.jpg`;
+function dealUrl(product) {
+  return `${SITE_URL}/deal.html?asin=${encodeURIComponent(product.asin)}`;
 }
 
 function extractAsinFromAmazonUrl(url) {
@@ -208,18 +207,13 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/10.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/11.0"
       }
     });
 
-    if (!res.ok) {
-      console.log(`HTTP ${res.status} for ${url}`);
-      return null;
-    }
-
+    if (!res.ok) return null;
     return await res.text();
-  } catch (error) {
-    console.log(`Fetch error for ${url}: ${error.message}`);
+  } catch {
     return null;
   }
 }
@@ -230,7 +224,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/10.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/11.0"
       }
     });
 
@@ -260,14 +254,8 @@ function extractAmazonLinksFromHtml(html) {
   $("a").each((_, el) => {
     const href = $(el).attr("href");
     if (!href) return;
-
     const value = href.trim();
-    if (
-      value.includes("amazon.") ||
-      value.includes("amzn.to") ||
-      value.includes("/dp/") ||
-      value.includes("/gp/product/")
-    ) {
+    if (value.includes("amazon.") || value.includes("amzn.to") || value.includes("/dp/") || value.includes("/gp/product/")) {
       results.add(value);
     }
   });
@@ -324,12 +312,10 @@ function buildDescription(title, sourceDescription, price, discountPercent) {
 function chooseBestAmazonLink(links) {
   if (!links?.length) return null;
 
-  const normalized = links.filter(Boolean);
-
-  const us = normalized.find(link => looksLikeUsAmazon(link) && extractAsinFromAmazonUrl(link));
+  const us = links.find(link => looksLikeUsAmazon(link) && extractAsinFromAmazonUrl(link));
   if (us) return us;
 
-  const anyAmazon = normalized.find(link => isAmazonUrl(link) && extractAsinFromAmazonUrl(link));
+  const anyAmazon = links.find(link => isAmazonUrl(link) && extractAsinFromAmazonUrl(link));
   if (anyAmazon) return anyAmazon;
 
   return null;
@@ -354,8 +340,7 @@ async function extractDealFromArticle(item) {
 
   const $ = cheerio.load(html);
   const metaImage = extractMetaImage($, sourceUrl);
-  const foundLinks = extractAmazonLinksFromHtml(html)
-    .map(link => normalizeUrl(link, sourceUrl));
+  const foundLinks = extractAmazonLinksFromHtml(html).map(link => normalizeUrl(link, sourceUrl));
 
   if (!foundLinks.length) {
     console.log("No Amazon link found");
@@ -369,9 +354,7 @@ async function extractDealFromArticle(item) {
   }
 
   const finalUrl = await resolveFinalUrl(bestRawAmazonLink);
-  const asin =
-    extractAsinFromAmazonUrl(finalUrl) ||
-    extractAsinFromAmazonUrl(bestRawAmazonLink);
+  const asin = extractAsinFromAmazonUrl(finalUrl) || extractAsinFromAmazonUrl(bestRawAmazonLink);
 
   if (!isValidAsin(asin)) {
     console.log("Invalid ASIN");
@@ -396,7 +379,6 @@ async function extractDealFromArticle(item) {
     discount_percent: discountPercent ?? null,
     image_url: chooseImageUrl(metaImage, asin),
     affiliate_link: buildAffiliateLink(asin),
-    raw_amazon_url: finalUrl || bestRawAmazonLink,
     category: extractCategory(sourceTitle, sourceDescription),
     likes: 0,
     nopes: 0,
@@ -447,9 +429,7 @@ async function upsertProducts(products) {
 
   const { error } = await sb
     .from("products")
-    .upsert(products, {
-      onConflict: "asin"
-    });
+    .upsert(products, { onConflict: "asin" });
 
   if (error) throw error;
 
@@ -472,10 +452,7 @@ async function enforceMaxActiveDeals(maxDeals) {
 
   const { error: updateError } = await sb
     .from("products")
-    .update({
-      is_active: false,
-      updated_at: new Date().toISOString()
-    })
+    .update({ is_active: false, updated_at: new Date().toISOString() })
     .in("id", idsToDisable);
 
   if (updateError) throw updateError;
@@ -489,9 +466,7 @@ async function expireOldDeals() {
 
   const { error } = await sb
     .from("products")
-    .update({
-      is_active: false
-    })
+    .update({ is_active: false })
     .lt("updated_at", cutoff.toISOString())
     .eq("is_active", true);
 
@@ -503,7 +478,7 @@ async function expireOldDeals() {
 async function disableWeakDeals() {
   const { data, error } = await sb
     .from("products")
-    .select("id, asin, score, discount_percent, views, clicks, updated_at, is_active")
+    .select("id, score, discount_percent, views, clicks, updated_at")
     .eq("is_active", true);
 
   if (error) throw error;
@@ -525,9 +500,7 @@ async function disableWeakDeals() {
       score < MIN_KEEP_SCORE &&
       discount < MIN_KEEP_DISCOUNT;
 
-    if (lowQuality) {
-      idsToDisable.push(item.id);
-    }
+    if (lowQuality) idsToDisable.push(item.id);
   }
 
   if (!idsToDisable.length) {
@@ -537,9 +510,7 @@ async function disableWeakDeals() {
 
   const { error: updateError } = await sb
     .from("products")
-    .update({
-      is_active: false
-    })
+    .update({ is_active: false })
     .in("id", idsToDisable);
 
   if (updateError) throw updateError;
@@ -562,10 +533,14 @@ function fallbackImage(name, label = "TrendPulse Deal") {
   return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900"><rect width="100%" height="100%" fill="%23070a11"/><text x="50%" y="42%" text-anchor="middle" fill="white" font-size="52" font-family="Arial" font-weight="800">${escapeHtml(label)}</text><text x="50%" y="58%" text-anchor="middle" fill="%23cbd5e1" font-size="30" font-family="Arial">${escapeHtml(name || "Deal")}</text></svg>`;
 }
 
+function productLink(product) {
+  return `/deal.html?asin=${encodeURIComponent(product.asin)}`;
+}
+
 function renderCardGrid(items, label) {
   return items.map(p => `
     <article class="card">
-      <img src="${escapeHtml(p.image_url || buildAmazonFallbackImage(p.asin) || fallbackImage(p.name, label))}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(buildAmazonFallbackImage(p.asin) || fallbackImage(p.name, label))}';">
+      <img src="${escapeHtml(p.image_url || buildPrimaryImage(p.asin) || buildFallbackImage(p.asin) || fallbackImage(p.name, label))}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(buildFallbackImage(p.asin) || fallbackImage(p.name, label))}';">
       <div class="content">
         <div class="kicker">${escapeHtml(label)} · Score ${Math.round(Number(p.score || 0))}</div>
         <h2 class="title">${escapeHtml(p.name)}</h2>
@@ -575,7 +550,7 @@ function renderCardGrid(items, label) {
             ${p.original_price ? `<div class="old">${escapeHtml(formatPriceForHtml(p.original_price))}</div>` : ""}
             <div class="price">${escapeHtml(formatPriceForHtml(p.price))}</div>
           </div>
-          <a class="cta" href="/deal/${escapeHtml(p.asin)}/${escapeHtml(slugify(p.name))}/">View Deal</a>
+          <a class="cta" href="${escapeHtml(productLink(p))}">View Deal</a>
         </div>
       </div>
     </article>
@@ -684,25 +659,25 @@ function dealsPageTemplate(items) {
   <meta name="twitter:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <style>
-    body { margin: 0; font-family: Inter, sans-serif; background: #050505; color: white; }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
-    .nav { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 24px; }
-    .nav a { padding: 10px 14px; border-radius: 999px; text-decoration: none; color: #e4e4e7; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); font-weight: 700; font-size: 13px; }
-    h1 { font-size: clamp(34px, 6vw, 58px); line-height: .95; letter-spacing: -.05em; margin: 0; font-weight: 900; font-style: italic; }
-    p.lead { color: #a1a1aa; max-width: 760px; line-height: 1.7; font-size: 15px; }
-    .stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 24px; }
-    .pill { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 999px; padding: 10px 14px; font-size: 12px; font-weight: 800; color: #e4e4e7; text-transform: uppercase; letter-spacing: .12em; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
-    .card { background: linear-gradient(180deg, #111722 0%, #090b11 100%); border: 1px solid rgba(255,255,255,.08); border-radius: 26px; overflow: hidden; box-shadow: 0 24px 50px rgba(0,0,0,.28); }
-    .card img { width: 100%; height: 230px; object-fit: cover; background: white; }
-    .content { padding: 16px; }
-    .kicker { color: #93c5fd; font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
-    .title { margin: 8px 0 10px; font-size: 20px; line-height: 1.15; font-weight: 800; letter-spacing: -.03em; min-height: 46px; }
-    .desc { color: #c4c4cc; font-size: 14px; line-height: 1.55; min-height: 64px; }
-    .row { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-top: 14px; }
-    .price { font-size: 28px; font-weight: 900; letter-spacing: -.04em; }
-    .old { color: #71717a; text-decoration: line-through; font-size: 13px; font-weight: 700; }
-    .cta { display: inline-flex; align-items: center; justify-content: center; padding: 12px 14px; border-radius: 16px; text-decoration: none; background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%); color: white; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+    body { margin:0; font-family:Inter,sans-serif; background:#050505; color:white; }
+    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
+    .nav { display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 24px; }
+    .nav a { padding:10px 14px; border-radius:999px; text-decoration:none; color:#e4e4e7; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); font-weight:700; font-size:13px; }
+    h1 { font-size:clamp(34px,6vw,58px); line-height:.95; letter-spacing:-.05em; margin:0; font-weight:900; font-style:italic; }
+    p.lead { color:#a1a1aa; max-width:760px; line-height:1.7; font-size:15px; }
+    .stats { display:flex; gap:10px; flex-wrap:wrap; margin:16px 0 24px; }
+    .pill { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:999px; padding:10px 14px; font-size:12px; font-weight:800; color:#e4e4e7; text-transform:uppercase; letter-spacing:.12em; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; }
+    .card { background:linear-gradient(180deg,#111722 0%,#090b11 100%); border:1px solid rgba(255,255,255,.08); border-radius:26px; overflow:hidden; box-shadow:0 24px 50px rgba(0,0,0,.28); }
+    .card img { width:100%; height:230px; object-fit:cover; background:white; }
+    .content { padding:16px; }
+    .kicker { color:#93c5fd; font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+    .title { margin:8px 0 10px; font-size:20px; line-height:1.15; font-weight:800; letter-spacing:-.03em; min-height:46px; }
+    .desc { color:#c4c4cc; font-size:14px; line-height:1.55; min-height:64px; }
+    .row { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-top:14px; }
+    .price { font-size:28px; font-weight:900; letter-spacing:-.04em; }
+    .old { color:#71717a; text-decoration:line-through; font-size:13px; font-weight:700; }
+    .cta { display:inline-flex; align-items:center; justify-content:center; padding:12px 14px; border-radius:16px; text-decoration:none; background:linear-gradient(180deg,#3275ff 0%,#1d4ed8 100%); color:white; font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
   </style>
 </head>
 <body>
@@ -789,178 +764,6 @@ function simpleCategoryPageTemplate({ title, description, canonicalPath, items, 
   </div>
 </body>
 </html>`;
-}
-
-function staticDealPageTemplate(product) {
-  const slug = slugify(product.name);
-  const canonicalUrl = `${SITE_URL}/deal/${product.asin}/${slug}/`;
-  const image = product.image_url || buildAmazonFallbackImage(product.asin) || fallbackImage(product.name, "TrendPulse");
-  const description = product.description || "Trending Amazon deal updated from our live feed.";
-  const discount = Number(product.discount_percent || 0);
-  const score = Math.round(Number(product.score || 0));
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>${escapeHtml(product.name)} | TrendPulse</title>
-  <meta name="description" content="${escapeHtml(description)}" />
-  <meta name="robots" content="index, follow, max-image-preview:large" />
-  <meta name="theme-color" content="#050505" />
-  <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/icon-192.png" />
-  <link rel="manifest" href="/manifest.json" />
-  <meta property="og:type" content="product" />
-  <meta property="og:title" content="${escapeHtml(product.name)} | TrendPulse" />
-  <meta property="og:description" content="${escapeHtml(description)}" />
-  <meta property="og:image" content="${escapeHtml(image)}" />
-  <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${escapeHtml(product.name)} | TrendPulse" />
-  <meta name="twitter:description" content="${escapeHtml(description)}" />
-  <meta name="twitter:image" content="${escapeHtml(image)}" />
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"Product",
-    "name":"${escapeHtml(product.name)}",
-    "description":"${escapeHtml(description)}",
-    "image":["${escapeHtml(image)}"],
-    "offers":{
-      "@type":"Offer",
-      "priceCurrency":"USD",
-      "price":"${escapeHtml(product.price ?? "")}",
-      "url":"${escapeHtml(canonicalUrl)}",
-      "availability":"https://schema.org/InStock"
-    }
-  }
-  </script>
-  <style>
-    body { margin: 0; background: #050505; color: white; font-family: Inter, sans-serif; }
-    .wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
-    .nav { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
-    .nav a { padding: 10px 14px; border-radius: 999px; text-decoration: none; color: #e4e4e7; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); font-weight: 700; font-size: 13px; }
-    .card { background: linear-gradient(180deg, #111722 0%, #090b11 100%); border: 1px solid rgba(255,255,255,.08); border-radius: 28px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.35); }
-    .hero { display: grid; grid-template-columns: 1fr 1fr; }
-    .hero-image { background: white; min-height: 420px; }
-    .hero-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .content { padding: 26px; }
-    .kicker { color: #93c5fd; font-size: 12px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 12px; }
-    h1 { margin: 0 0 14px; font-size: clamp(30px, 5vw, 48px); line-height: .98; font-weight: 900; letter-spacing: -.05em; font-style: italic; }
-    .desc { color: #c4c4cc; font-size: 15px; line-height: 1.7; margin-bottom: 20px; }
-    .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
-    .pill { padding: 10px 12px; border-radius: 999px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); color: #e4e4e7; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-    .old-price { color: #71717a; font-size: 15px; text-decoration: line-through; font-weight: 700; margin-bottom: 2px; }
-    .price { font-size: 42px; font-weight: 900; letter-spacing: -.05em; margin-bottom: 18px; }
-    .cta { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 16px 18px; border-radius: 18px; text-decoration: none; background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%); color: white; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; box-shadow: 0 16px 30px rgba(37,99,235,.28); }
-    .section { margin-top: 28px; background: linear-gradient(180deg, #111722 0%, #090b11 100%); border: 1px solid rgba(255,255,255,.08); border-radius: 24px; padding: 22px; }
-    .section h2 { margin: 0 0 12px; font-size: 24px; font-weight: 900; letter-spacing: -.03em; }
-    .section p { margin: 0; color: #c4c4cc; line-height: 1.7; font-size: 15px; }
-    @media (max-width: 820px) {
-      .hero { grid-template-columns: 1fr; }
-      .hero-image { min-height: 320px; }
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <nav class="nav">
-      <a href="/">Home</a>
-      <a href="/deals.html">All Deals</a>
-      <a href="/tech.html">Tech</a>
-      <a href="/kitchen.html">Kitchen</a>
-      <a href="/beauty.html">Beauty</a>
-      <a href="/home.html">Home</a>
-    </nav>
-
-    <main>
-      <article class="card">
-        <div class="hero">
-          <div class="hero-image">
-            <img src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src='${escapeHtml(buildAmazonFallbackImage(product.asin) || fallbackImage(product.name, "TrendPulse"))}';">
-          </div>
-
-          <div class="content">
-            <div class="kicker">${escapeHtml(product.category || "All")} · Amazon Deal</div>
-            <h1>${escapeHtml(product.name)}</h1>
-            <p class="desc">${escapeHtml(description)}</p>
-
-            <div class="meta-row">
-              ${discount > 0 ? `<span class="pill">${discount}% off</span>` : ""}
-              <span class="pill">Score ${score}</span>
-              ${product.source_name ? `<span class="pill">${escapeHtml(product.source_name)}</span>` : ""}
-            </div>
-
-            ${product.original_price ? `<div class="old-price">${escapeHtml(formatPriceForHtml(product.original_price))}</div>` : ""}
-            <div class="price">${escapeHtml(formatPriceForHtml(product.price))}</div>
-
-            <a href="${escapeHtml(product.affiliate_link || buildAffiliateLink(product.asin))}" target="_blank" rel="nofollow sponsored noopener noreferrer" class="cta">
-              🔥 Get Deal on Amazon
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <section class="section">
-        <h2>Why this deal stands out</h2>
-        <p>
-          We surface trending Amazon bargains based on discount strength, category relevance, and live activity signals from our automated deal feed. This helps highlight products that are more likely to be worth checking before pricing or availability changes.
-        </p>
-      </section>
-
-      <section class="section">
-        <h2>More live deal categories</h2>
-        <p>
-          Explore more deals on our <a href="/deals.html" style="color:#60a5fa;">all deals page</a>, or browse category collections including
-          <a href="/tech.html" style="color:#60a5fa;">Tech</a>,
-          <a href="/kitchen.html" style="color:#60a5fa;">Kitchen</a>,
-          <a href="/beauty.html" style="color:#60a5fa;">Beauty</a>, and
-          <a href="/home.html" style="color:#60a5fa;">Home</a>.
-        </p>
-      </section>
-    </main>
-  </div>
-</body>
-</html>`;
-}
-
-function cleanGeneratedDealDirs() {
-  const dealRoot = path.join(process.cwd(), "deal");
-  if (!fs.existsSync(dealRoot)) return;
-
-  for (const entry of fs.readdirSync(dealRoot, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      fs.rmSync(path.join(dealRoot, entry.name), { recursive: true, force: true });
-    }
-  }
-}
-
-async function generateStaticDealPages() {
-  const { data, error } = await sb
-    .from("products")
-    .select("asin,name,description,price,original_price,image_url,affiliate_link,category,score,discount_percent,source_name,updated_at")
-    .eq("is_active", true)
-    .order("score", { ascending: false })
-    .order("updated_at", { ascending: false })
-    .limit(MAX_ACTIVE_DEALS);
-
-  if (error) throw error;
-
-  const items = data || [];
-  const dealRoot = path.join(process.cwd(), "deal");
-  ensureDir(dealRoot);
-  cleanGeneratedDealDirs();
-
-  for (const product of items) {
-    const slug = slugify(product.name);
-    const dir = path.join(dealRoot, product.asin, slug);
-    ensureDir(dir);
-    fs.writeFileSync(path.join(dir, "index.html"), staticDealPageTemplate(product), "utf8");
-  }
-
-  console.log(`Static deal pages generated: ${items.length}`);
 }
 
 async function generateEditorialPages() {
@@ -1106,7 +909,7 @@ async function generateEditorialPages() {
 async function generateSitemap() {
   const { data, error } = await sb
     .from("products")
-    .select("asin, name, updated_at")
+    .select("asin, updated_at")
     .eq("is_active", true)
     .limit(MAX_ACTIVE_DEALS);
 
@@ -1126,15 +929,12 @@ async function generateSitemap() {
     { loc: `${SITE_URL}/best-home-deals-this-week.html`, changefreq: "daily", priority: "0.85" }
   ];
 
-  const dealUrls = (data || []).map(item => {
-    const slug = slugify(item.name);
-    return {
-      loc: `${SITE_URL}/deal/${item.asin}/${slug}/`,
-      lastmod: item.updated_at ? new Date(item.updated_at).toISOString() : new Date().toISOString(),
-      changefreq: "daily",
-      priority: "0.7"
-    };
-  });
+  const dealUrls = (data || []).map(item => ({
+    loc: `${SITE_URL}/deal.html?asin=${encodeURIComponent(item.asin)}`,
+    lastmod: item.updated_at ? new Date(item.updated_at).toISOString() : new Date().toISOString(),
+    changefreq: "daily",
+    priority: "0.7"
+  }));
 
   const allUrls = [...staticUrls, ...dealUrls];
 
@@ -1154,19 +954,15 @@ ${allUrls.map(url => `  <url>
 }
 
 async function main() {
-  console.log("Starting sync V3");
+  console.log("Starting sync V3 robust");
 
   const activeCountBefore = await getActiveDealsCount();
   console.log(`Active deals before sync: ${activeCountBefore}`);
 
   let targetCount;
-  if (activeCountBefore === 0) {
-    targetCount = INITIAL_TARGET_ON_EMPTY;
-  } else if (activeCountBefore < MIN_ACTIVE_DEALS) {
-    targetCount = MIN_ACTIVE_DEALS;
-  } else {
-    targetCount = Math.min(activeCountBefore + 40, MAX_ACTIVE_DEALS);
-  }
+  if (activeCountBefore === 0) targetCount = INITIAL_TARGET_ON_EMPTY;
+  else if (activeCountBefore < MIN_ACTIVE_DEALS) targetCount = MIN_ACTIVE_DEALS;
+  else targetCount = Math.min(activeCountBefore + 40, MAX_ACTIVE_DEALS);
 
   targetCount = Math.min(targetCount, MAX_ACTIVE_DEALS);
   console.log(`Target count for this run: ${targetCount}`);
@@ -1220,12 +1016,7 @@ async function main() {
   await expireOldDeals();
   await disableWeakDeals();
   await enforceMaxActiveDeals(MAX_ACTIVE_DEALS);
-
-  const activeCountAfter = await getActiveDealsCount();
-  console.log(`Active deals after cleanup: ${activeCountAfter}`);
-
   await generateEditorialPages();
-  await generateStaticDealPages();
   await generateSitemap();
 
   console.log("Sync complete");
