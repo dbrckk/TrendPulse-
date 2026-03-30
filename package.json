@@ -1,15 +1,16 @@
 {
   "name": "trendpulse-bot",
-  "version": "2.1.0",
+  "version": "8.1.0",
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "node sync-deals.js"
+    "start": "node sync-deals.js",
+    "tweet": "node post-random-deal.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",
-    "@vercel/analytics": "^2.0.1",
     "cheerio": "^1.0.0",
+    "oauth-1.0a": "^2.2.6",
     "rss-parser": "^3.13.0"
   }
 }
