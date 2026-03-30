@@ -6,7 +6,7 @@ import fs from "fs";
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/6.0"
+    "User-Agent": "TrendPulseBot/7.0"
   }
 });
 
@@ -62,6 +62,15 @@ function slugify(text) {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .slice(0, 80);
+}
+
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function escapeXml(str) {
@@ -177,7 +186,7 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/6.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/7.0"
       }
     });
 
@@ -199,7 +208,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/6.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/7.0"
       }
     });
 
@@ -423,128 +432,144 @@ async function enforceMaxActiveDeals(maxDeals) {
   console.log(`${idsToDisable.length} extra deals disabled to keep max ${maxDeals}`);
 }
 
-async function generateSitemap() {
-  const { data, error } = await sb
-    .from("products")
-    .select("asin, name, updated_at")
-    .eq("is_active", true)
-    .order("score", { ascending: false })
-    .limit(MAX_ACTIVE_DEALS);
-
-  if (error) throw error;
-
-  const staticUrls = [
-    { loc: `${SITE_URL}/`, changefreq: "hourly", priority: "1.0" },
-    { loc: `${SITE_URL}/best-amazon-deals.html`, changefreq: "hourly", priority: "0.95" },
-    { loc: `${SITE_URL}/deals.html`, changefreq: "hourly", priority: "0.9" },
-    { loc: `${SITE_URL}/tech.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/kitchen.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/beauty.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/home.html`, changefreq: "daily", priority: "0.8" }
-  ];
-
-  const dealUrls = (data || []).map(item => {
-    const slug = slugify(item.name);
-    return {
-      loc: `${SITE_URL}/deal/${item.asin}/${slug}`,
-      lastmod: item.updated_at ? new Date(item.updated_at).toISOString() : new Date().toISOString(),
-      changefreq: "daily",
-      priority: "0.7"
-    };
-  });
-
-  const allUrls = [...staticUrls, ...dealUrls];
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
-${allUrls.map(url => `  <url>
-    <loc>${escapeXml(url.loc)}</loc>
-    ${url.lastmod ? `<lastmod>${escapeXml(url.lastmod)}</lastmod>` : ""}
-    <changefreq>${url.changefreq}</changefreq>
-    <priority>${url.priority}</priority>
-  </url>`).join("\n")}
-</urlset>
-`;
-
-  fs.writeFileSync("sitemap.xml", xml, "utf8");
-  console.log(`sitemap.xml generated with ${allUrls.length} URLs`);
+function formatPriceForHtml(v) {
+  if (v === null || v === undefined || v === "") return "Check price";
+  const n = Number(v);
+  if (Number.isNaN(n)) return "Check price";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: n % 1 === 0 ? 0 : 2
+  }).format(n);
 }
 
-async function main() {
-  console.log("Starting sync V6");
-
-  const activeCountBefore = await getActiveDealsCount();
-  console.log(`Active deals before sync: ${activeCountBefore}`);
-
-  let targetCount;
-  if (activeCountBefore === 0) {
-    targetCount = INITIAL_TARGET_ON_EMPTY;
-  } else if (activeCountBefore < MIN_ACTIVE_DEALS) {
-    targetCount = MIN_ACTIVE_DEALS;
-  } else {
-    targetCount = Math.min(activeCountBefore + 40, MAX_ACTIVE_DEALS);
-  }
-
-  targetCount = Math.min(targetCount, MAX_ACTIVE_DEALS);
-  console.log(`Target count for this run: ${targetCount}`);
-
-  const allItems = [];
-  for (const feedUrl of FEEDS) {
-    const items = await fetchFeedItems(feedUrl);
-    console.log(`${items.length} items loaded from ${feedUrl}`);
-    allItems.push(...items);
-    await sleep(REQUEST_DELAY_MS);
-  }
-
-  const uniqueArticles = [];
-  const seenArticleLinks = new Set();
-
-  for (const item of allItems) {
-    const link = item.link?.trim();
-    if (!link || seenArticleLinks.has(link)) continue;
-    seenArticleLinks.add(link);
-    uniqueArticles.push(item);
-  }
-
-  console.log(`${uniqueArticles.length} unique articles found`);
-
-  const results = [];
-  const seenAsins = new Set();
-
-  for (const item of uniqueArticles) {
-    try {
-      const product = await extractDealFromArticle(item);
-      if (!product) continue;
-      if (seenAsins.has(product.asin)) continue;
-
-      seenAsins.add(product.asin);
-      results.push(product);
-
-      if (results.length >= targetCount) {
-        console.log(`Reached target of ${targetCount} valid products`);
-        break;
-      }
-
-      await sleep(REQUEST_DELAY_MS);
-    } catch (error) {
-      console.log(`Article error: ${error.message}`);
-    }
-  }
-
-  console.log(`${results.length} valid products found`);
-
-  await upsertProducts(results);
-  await enforceMaxActiveDeals(MAX_ACTIVE_DEALS);
-
-  const activeCountAfter = await getActiveDealsCount();
-  console.log(`Active deals after sync: ${activeCountAfter}`);
-
-  await generateSitemap();
-
-  console.log("Sync complete");
+function fallbackImage(name, label = "TrendPulse Deal") {
+  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900"><rect width="100%" height="100%" fill="%23070a11"/><text x="50%" y="42%" text-anchor="middle" fill="white" font-size="52" font-family="Arial" font-weight="800">${escapeHtml(label)}</text><text x="50%" y="58%" text-anchor="middle" fill="%23cbd5e1" font-size="30" font-family="Arial">${escapeHtml(name || "Deal")}</text></svg>`;
 }
 
-main().catch(error => {
-  console.error("Fatal error:", error);
-  process.exit(1);
-});
+function renderCardGrid(items, label) {
+  return items.map(p => `
+    <article class="card">
+      <img src="${escapeHtml(p.image_url || fallbackImage(p.name, label))}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(fallbackImage(p.name, label))}';">
+      <div class="content">
+        <div class="kicker">${escapeHtml(label)} · Score ${Math.round(Number(p.score || 0))}</div>
+        <h2 class="title">${escapeHtml(p.name)}</h2>
+        <div class="desc">${escapeHtml(p.description || "Trending deal from our live feed.")}</div>
+        <div class="row">
+          <div>
+            ${p.original_price ? `<div class="old">${escapeHtml(formatPriceForHtml(p.original_price))}</div>` : ""}
+            <div class="price">${escapeHtml(formatPriceForHtml(p.price))}</div>
+          </div>
+          <a class="cta" href="/deal/${escapeHtml(p.asin)}/${escapeHtml(slugify(p.name))}">View Deal</a>
+        </div>
+      </div>
+    </article>
+  `).join("");
+}
+
+function editorialTemplate({ title, description, canonicalPath, intro, section1Title, section1Text, section2Title, section2Text, navExtra, items, label }) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(title)} | TrendPulse</title>
+  <meta name="description" content="${escapeHtml(description)}" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="${escapeHtml(SITE_URL + canonicalPath)}" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="${escapeHtml(title)} | TrendPulse" />
+  <meta property="og:description" content="${escapeHtml(description)}" />
+  <meta property="og:url" content="${escapeHtml(SITE_URL + canonicalPath)}" />
+  <meta property="og:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${escapeHtml(title)} | TrendPulse" />
+  <meta name="twitter:description" content="${escapeHtml(description)}" />
+  <meta name="twitter:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}" />
+  <style>
+    body { margin:0; background:#050505; color:white; font-family:Inter,sans-serif; }
+    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
+    .nav { display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 24px; }
+    .nav a { padding:10px 14px; border-radius:999px; text-decoration:none; color:#e4e4e7; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); font-weight:700; font-size:13px; }
+    h1 { font-size:clamp(34px,6vw,58px); line-height:.95; letter-spacing:-.05em; margin:0 0 14px; font-weight:900; font-style:italic; }
+    h2 { font-size:28px; margin:32px 0 12px; font-weight:900; letter-spacing:-.03em; }
+    p { color:#c4c4cc; line-height:1.75; font-size:15px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:20px; }
+    .card { background:linear-gradient(180deg,#111722 0%,#090b11 100%); border:1px solid rgba(255,255,255,.08); border-radius:24px; overflow:hidden; }
+    .card img { width:100%; height:220px; object-fit:cover; background:white; }
+    .content { padding:16px; }
+    .kicker { color:#93c5fd; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; }
+    .title { margin:8px 0; font-size:20px; line-height:1.15; font-weight:800; min-height:46px; }
+    .desc { color:#c4c4cc; font-size:14px; line-height:1.55; min-height:64px; }
+    .row { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-top:14px; }
+    .price { font-size:28px; font-weight:900; }
+    .old { color:#71717a; text-decoration:line-through; font-size:13px; font-weight:700; }
+    .cta { display:inline-flex; align-items:center; justify-content:center; padding:12px 14px; border-radius:16px; text-decoration:none; background:linear-gradient(180deg,#3275ff 0%,#1d4ed8 100%); color:white; font-size:12px; font-weight:900; text-transform:uppercase; }
+    .section { background:linear-gradient(180deg,#111722 0%,#090b11 100%); border:1px solid rgba(255,255,255,.08); border-radius:24px; padding:22px; margin-top:24px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/deals.html">All Deals</a>
+      <a href="/tech.html">Tech</a>
+      <a href="/kitchen.html">Kitchen</a>
+      <a href="/beauty.html">Beauty</a>
+      <a href="/home.html">Home</a>
+      ${navExtra}
+    </nav>
+
+    <header>
+      <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px;">TrendPulse Editorial</p>
+      <h1>${escapeHtml(title)}</h1>
+      ${intro.map(p => `<p>${escapeHtml(p)}</p>`).join("")}
+    </header>
+
+    <section class="section">
+      <h2>${escapeHtml(section1Title)}</h2>
+      <p>${escapeHtml(section1Text)}</p>
+    </section>
+
+    <section>
+      <div class="grid">
+        ${renderCardGrid(items, label)}
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>${escapeHtml(section2Title)}</h2>
+      <p>${escapeHtml(section2Text)}</p>
+    </section>
+  </div>
+</body>
+</html>`;
+}
+
+function dealsPageTemplate(items) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Amazon Deals Today | TrendPulse</title>
+  <meta name="description" content="Browse trending Amazon deals updated live. Discover hot discounts, top-rated products, and the best deals in the US." />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="${escapeHtml(SITE_URL + "/deals.html")}" />
+  <meta name="theme-color" content="#050505" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Amazon Deals Today | TrendPulse" />
+  <meta property="og:description" content="Browse trending Amazon deals updated live for shoppers in the US." />
+  <meta property="og:url" content="${escapeHtml(SITE_URL + "/deals.html")}" />
+  <meta property="og:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Amazon Deals Today | TrendPulse" />
+  <meta name="twitter:description" content="Browse trending Amazon deals updated live for shoppers in the US." />
+  <meta name="twitter:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <style>
+    body { margin: 0; font-family: Inter, sans-serif; background: #050505; color: white; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    .nav { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 24px; }
+    .nav a { padding: 10px 14px; border-radius: 999px; text-decoration: none; color: #e4e4e7; background: rgba(255,255,255,.04); border: 1px s
