@@ -5,49 +5,63 @@ const sb = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-async function updateScores(){
-
-  const { data: products } = await sb
+async function updateScores() {
+  const { data: products, error: productsError } = await sb
     .from("products")
-    .select("asin, price, discount_percent");
+    .select("asin, price, discount_percent, created_at, updated_at");
 
-  for(const p of products){
+  if (productsError) {
+    console.error(productsError);
+    process.exit(1);
+  }
 
-    const { data: stats } = await sb
+  for (const p of products || []) {
+    const { data: stats, error: statsError } = await sb
       .from("analytics")
       .select("event")
       .eq("asin", p.asin);
 
-    const views = stats.filter(e=>e.event==="view").length;
-    const clicks = stats.filter(e=>e.event==="click").length;
+    if (statsError) {
+      console.error(`Analytics error for ${p.asin}`, statsError);
+      continue;
+    }
+
+    const views = (stats || []).filter(e => e.event === "view").length;
+    const clicks = (stats || []).filter(e => e.event === "click").length;
 
     const ctr = views > 0 ? clicks / views : 0;
 
     let score = 0;
 
-    // DISCOUNT
-    score += (p.discount_percent || 0) * 1.5;
-
-    // CLICKS
+    score += Number(p.discount_percent || 0) * 1.5;
     score += clicks * 4;
-
-    // CTR (puissant)
     score += ctr * 120;
 
-    // LOW PRICE BONUS
-    if(p.price < 25) score += 25;
-    else if(p.price < 50) score += 15;
+    const price = Number(p.price || 0);
+    if (price > 0 && price < 25) score += 25;
+    else if (price > 0 && price < 50) score += 15;
 
-    // MINIMUM SCORE
-    if(views < 5) score *= 0.5;
+    if (views < 5) score *= 0.5;
 
-    await sb.from("products")
-      .update({ score })
+    const { error: updateError } = await sb
+      .from("products")
+      .update({
+        score: Math.round(score * 100) / 100,
+        views,
+        clicks
+      })
       .eq("asin", p.asin);
 
-    console.log(p.asin, score);
-  }
+    if (updateError) {
+      console.error(`Update error for ${p.asin}`, updateError);
+      continue;
+    }
 
+    console.log(`Updated ${p.asin} | views=${views} clicks=${clicks} score=${score}`);
+  }
 }
 
-updateScores();
+updateScores().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
