@@ -34,10 +34,10 @@ jobs:
           SITE_URL: https://trend-pulse.shop
         run: node sync-deals.js
 
-      - name: Commit sitemap updates
+      - name: Commit generated files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add sitemap.xml
-          git diff --cached --quiet || git commit -m "Update sitemap"
+          git add sitemap.xml deals.html tech.html kitchen.html beauty.html home.html best-amazon-deals.html best-tech-deals-under-50.html best-kitchen-deals-this-week.html best-beauty-deals-on-amazon.html best-home-deals-this-week.html
+          git diff --cached --quiet || git commit -m "Update generated SEO pages and sitemap"
           git push
