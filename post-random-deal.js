@@ -91,17 +91,13 @@ function shouldPost(state) {
   return Date.now() >= new Date(state.next_post_at).getTime();
 }
 
-function scoreValue(item) {
-  return Number(item.score || 0) + Number(item.likes || 0) * 2 - Number(item.nopes || 0);
-}
-
-function buildDealUrl(deal) {
+function slugToUrl(deal) {
   return `${SITE_URL}/deal/${deal.asin}/${slugify(deal.name)}/`;
 }
 
-function formatPrice(price) {
-  if (price === null || price === undefined || price === "") return null;
-  const n = Number(price);
+function formatPrice(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const n = Number(value);
   if (Number.isNaN(n)) return null;
   return `$${n.toFixed(n % 1 === 0 ? 0 : 2)}`;
 }
@@ -125,7 +121,7 @@ function categoryHashtag(category) {
 }
 
 function buildTweetText(deal) {
-  const url = buildDealUrl(deal);
+  const url = slugToUrl(deal);
   const price = formatPrice(deal.price);
   const discount = Number(deal.discount_percent || 0);
   const category = String(deal.category || "Amazon").trim();
@@ -133,23 +129,53 @@ function buildTweetText(deal) {
 
   const templates = [];
 
+  if (price && discount >= 40) {
+    templates.push(`🚨 BIG DEAL ALERT\n${deal.name}\nNow ${price} (-${Math.round(discount)}%)\n${hashtag}\n${url}`);
+    templates.push(`🔥 This one stands out\n${deal.name}\nDown to ${price} right now\n${hashtag}\n${url}`);
+  }
+
   if (price && discount > 0) {
-    templates.push(`🚨 DEAL ALERT\n${deal.name}\nNow ${price} (-${Math.round(discount)}%)\n${hashtag}\n${url}`);
-    templates.push(`🔥 This ${category.toLowerCase()} deal looks strong\n${deal.name}\nOnly ${price} today\n${hashtag}\n${url}`);
     templates.push(`💥 Amazon price drop\n${deal.name}\nNow ${price} with ${Math.round(discount)}% off\n${hashtag}\n${url}`);
-    templates.push(`👀 Worth checking right now\n${deal.name}\nLive for ${price}\n${hashtag}\n${url}`);
+    templates.push(`👀 Worth checking right now\n${deal.name}\nOnly ${price} today\n${hashtag}\n${url}`);
+    templates.push(`⚡ Deal spotted on TrendPulse\n${deal.name}\nNow ${price}\n${hashtag}\n${url}`);
   }
 
   if (price) {
-    templates.push(`🔥 Trending deal on TrendPulse\n${deal.name}\nCurrent price: ${price}\n${hashtag}\n${url}`);
-    templates.push(`⚡ Amazon find worth a look\n${deal.name}\nNow ${price}\n${hashtag}\n${url}`);
+    templates.push(`🔥 Trending ${category.toLowerCase()} deal\n${deal.name}\nCurrent price: ${price}\n${hashtag}\n${url}`);
+    templates.push(`🚀 Good Amazon find\n${deal.name}\nLive now for ${price}\n${hashtag}\n${url}`);
   }
 
   templates.push(`🔥 Amazon deal worth checking\n${deal.name}\n${hashtag}\n${url}`);
-  templates.push(`🚀 Spotted on TrendPulse\n${deal.name}\n${hashtag}\n${url}`);
+  templates.push(`👀 Spotted on TrendPulse\n${deal.name}\n${hashtag}\n${url}`);
 
-  const chosen = templates[Math.floor(Math.random() * templates.length)];
-  return truncateForTweet(chosen, 280);
+  return truncateForTweet(
+    templates[Math.floor(Math.random() * templates.length)],
+    280
+  );
+}
+
+function baseScore(item) {
+  return Number(item.score || 0) + Number(item.likes || 0) * 2 - Number(item.nopes || 0);
+}
+
+function priorityScore(item) {
+  let score = baseScore(item);
+
+  const discount = Number(item.discount_percent || 0);
+  const price = Number(item.price || 0);
+
+  if (discount >= 50) score += 60;
+  else if (discount >= 40) score += 40;
+  else if (discount >= 30) score += 25;
+  else if (discount >= 20) score += 12;
+
+  if (price > 0 && price <= 25) score += 28;
+  else if (price > 0 && price <= 50) score += 15;
+  else if (price > 0 && price <= 100) score += 7;
+
+  if (score >= 80) score += 12;
+
+  return score;
 }
 
 async function fetchCandidateDeals() {
@@ -169,7 +195,7 @@ function weightedShuffle(items) {
   return [...items]
     .map(item => ({
       item,
-      weight: Math.random() * Math.max(1, scoreValue(item))
+      weight: Math.random() * Math.max(1, priorityScore(item))
     }))
     .sort((a, b) => b.weight - a.weight)
     .map(x => x.item);
@@ -191,7 +217,7 @@ function pickDeal(candidates, state) {
 
   const usable = categoryDifferent.length ? categoryDifferent : baseFiltered;
 
-  const sorted = [...usable].sort((a, b) => scoreValue(b) - scoreValue(a));
+  const sorted = [...usable].sort((a, b) => priorityScore(b) - priorityScore(a));
   const topPool = sorted.slice(0, Math.min(30, sorted.length));
   const shuffledWeighted = weightedShuffle(topPool);
 
@@ -403,7 +429,7 @@ async function downloadImageToTemp(url, asin) {
   try {
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.6"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.7"
       }
     });
 
@@ -431,296 +457,202 @@ async function downloadImageToTemp(url, asin) {
   }
 }
 
-function buildBrandedCardHtml(deal, imageUrl) {
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildBrandedCardHtml(deal, imageUrl, styleVariant) {
   const price = formatPrice(deal.price) || "Check price";
   const originalPrice = formatPrice(deal.original_price);
   const discount = Number(deal.discount_percent || 0);
   const badge = discount > 0 ? `-${Math.round(discount)}% OFF` : "HOT DEAL";
   const category = deal.category || "Amazon Deal";
+  const safeName = escapeHtml(deal.name || "Trending Deal");
+  const safeCategory = escapeHtml(category);
+  const safeImage = escapeHtml(imageUrl || "");
+  const safeBadge = escapeHtml(badge);
+  const bg1 = "#050505";
+  const bg2 = "#0b1220";
 
-  const safeName = String(deal.name || "Trending Deal")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  const safeCategory = String(category)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  const safeImage = String(imageUrl || "")
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;");
-
-  return `
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <style>
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        width: 1200px;
-        height: 675px;
-        font-family: Arial, sans-serif;
-        background:
-          radial-gradient(circle at top right, rgba(37,99,235,.35), transparent 28%),
-          linear-gradient(180deg, #050505 0%, #0b1220 100%);
-        color: white;
-      }
-      .frame {
-        width: 1200px;
-        height: 675px;
-        padding: 28px;
-      }
-      .card {
-        width: 100%;
-        height: 100%;
-        display: grid;
-        grid-template-columns: 1.05fr 0.95fr;
-        background: linear-gradient(180deg, #111722 0%, #090b11 100%);
-        border: 1px solid rgba(255,255,255,.09);
-        border-radius: 34px;
-        overflow: hidden;
-        box-shadow: 0 30px 70px rgba(0,0,0,.35);
-      }
-      .left {
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 34px;
-        position: relative;
-      }
-      .left img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
-      .right {
-        padding: 34px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        position: relative;
-      }
-      .brand {
-        font-size: 20px;
-        font-weight: 900;
-        letter-spacing: .18em;
-        text-transform: uppercase;
-        color: #93c5fd;
-        margin-bottom: 10px;
-      }
-      .badge {
-        display: inline-block;
-        padding: 10px 14px;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #ff4d4d, #ff7a18);
-        font-weight: 900;
-        font-size: 18px;
-        letter-spacing: .05em;
-        align-self: flex-start;
-        margin-bottom: 18px;
-      }
-      .category {
-        color: #93c5fd;
-        font-size: 18px;
-        font-weight: 900;
-        letter-spacing: .14em;
-        text-transform: uppercase;
-        margin-bottom: 14px;
-      }
-      .title {
-        font-size: 54px;
-        line-height: .98;
-        font-weight: 900;
-        letter-spacing: -.05em;
-        font-style: italic;
-        display: -webkit-box;
-        -webkit-line-clamp: 4;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .pricebox {
-        margin-top: 24px;
-      }
-      .old {
-        color: #71717a;
-        font-size: 24px;
-        text-decoration: line-through;
-        font-weight: 700;
-        margin-bottom: 4px;
-      }
-      .price {
-        font-size: 68px;
-        line-height: 1;
-        font-weight: 900;
-        letter-spacing: -.05em;
-      }
-      .footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        margin-top: 24px;
-      }
-      .cta {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 18px 22px;
-        border-radius: 20px;
-        background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
-        font-weight: 900;
-        font-size: 22px;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-      }
-      .site {
-        color: #c4c4cc;
-        font-size: 18px;
-        font-weight: 700;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="frame">
-      <div class="card">
-        <div class="left">
-          <img src="${safeImage}" alt="">
-        </div>
-        <div class="right">
-          <div>
+  if (styleVariant === 2) {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <style>
+        * { box-sizing: border-box; }
+        body {
+          margin: 0;
+          width: 1200px;
+          height: 675px;
+          font-family: Arial, sans-serif;
+          background:
+            radial-gradient(circle at top center, rgba(37,99,235,.30), transparent 30%),
+            linear-gradient(180deg, ${bg1} 0%, ${bg2} 100%);
+          color: white;
+        }
+        .frame { width: 1200px; height: 675px; padding: 26px; }
+        .card {
+          width: 100%; height: 100%;
+          background: linear-gradient(180deg, #111722 0%, #090b11 100%);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 34px;
+          overflow: hidden;
+          position: relative;
+          padding: 28px;
+        }
+        .brand { color: #93c5fd; font-size: 20px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
+        .top { display:flex; justify-content:space-between; align-items:flex-start; }
+        .badge {
+          display:inline-block; padding: 12px 16px; border-radius:999px;
+          background: linear-gradient(135deg, #ff4d4d, #ff7a18);
+          font-size: 20px; font-weight: 900;
+        }
+        .image-wrap {
+          width: 100%;
+          height: 320px;
+          margin-top: 18px;
+          display:flex; align-items:center; justify-content:center;
+          background: #fff;
+          border-radius: 28px;
+          overflow: hidden;
+        }
+        .image-wrap img { width:100%; height:100%; object-fit:contain; }
+        .category {
+          margin-top: 20px;
+          color:#93c5fd;
+          font-size:18px;
+          font-weight:900;
+          letter-spacing:.14em;
+          text-transform:uppercase;
+        }
+        .title {
+          margin-top: 12px;
+          font-size: 50px;
+          line-height: .98;
+          font-weight: 900;
+          letter-spacing: -.05em;
+          font-style: italic;
+          display:-webkit-box;
+          -webkit-line-clamp:3;
+          -webkit-box-orient:vertical;
+          overflow:hidden;
+        }
+        .footer {
+          margin-top: 18px;
+          display:flex;
+          justify-content:space-between;
+          align-items:end;
+          gap: 16px;
+        }
+        .old { color:#71717a; font-size:24px; text-decoration:line-through; font-weight:700; margin-bottom:4px; }
+        .price { font-size:64px; font-weight:900; line-height:1; }
+        .cta {
+          display:inline-flex; align-items:center; justify-content:center;
+          padding:18px 22px; border-radius:20px;
+          background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
+          font-size:22px; font-weight:900; text-transform:uppercase; letter-spacing:.08em;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="frame">
+        <div class="card">
+          <div class="top">
             <div class="brand">TrendPulse</div>
-            <div class="badge">${badge}</div>
-            <div class="category">${safeCategory}</div>
-            <div class="title">${safeName}</div>
+            <div class="badge">${safeBadge}</div>
           </div>
-
-          <div>
-            <div class="pricebox">
-              ${originalPrice ? `<div class="old">${originalPrice}</div>` : ""}
-              <div class="price">${price}</div>
+          <div class="image-wrap">
+            <img src="${safeImage}" alt="">
+          </div>
+          <div class="category">${safeCategory}</div>
+          <div class="title">${safeName}</div>
+          <div class="footer">
+            <div>
+              ${originalPrice ? `<div class="old">${escapeHtml(originalPrice)}</div>` : ""}
+              <div class="price">${escapeHtml(price)}</div>
             </div>
-            <div class="footer">
-              <div class="cta">Get Deal</div>
-              <div class="site">trend-pulse.shop</div>
-            </div>
+            <div class="cta">Get Deal</div>
           </div>
         </div>
       </div>
-    </div>
-  </body>
-  </html>
-  `;
-}
-
-async function generateBrandedImage(deal, localImagePath) {
-  const outputPath = path.join(os.tmpdir(), `trendpulse-card-${deal.asin}.png`);
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage"
-    ]
-  });
-
-  try {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 675, deviceScaleFactor: 1 });
-
-    const imageUrl = localImagePath
-      ? `file://${localImagePath}`
-      : `https://images.amazon.com/images/P/${deal.asin}.01._SX500_.jpg`;
-
-    const html = buildBrandedCardHtml(deal, imageUrl);
-    await page.setContent(html, { waitUntil: "networkidle0" });
-
-    await page.screenshot({
-      path: outputPath,
-      type: "png"
-    });
-
-    return outputPath;
-  } finally {
-    await browser.close();
-  }
-}
-
-async function attachImageIfPossible(page, imagePath) {
-  if (!imagePath || !fs.existsSync(imagePath)) {
-    console.log("No image file available for upload");
-    return false;
+    </body>
+    </html>`;
   }
 
-  const inputSelectors = [
-    'input[data-testid="fileInput"]',
-    'input[type="file"]'
-  ];
-
-  for (const selector of inputSelectors) {
-    try {
-      const input = await page.waitForSelector(selector, { timeout: 10000 });
-      await input.uploadFile(imagePath);
-      await page.waitForTimeout(5000);
-      console.log("Image uploaded to composer");
-      return true;
-    } catch {}
-  }
-
-  console.log("Could not find image upload input on X");
-  return false;
-}
-
-async function publishTweet(page, text, imagePath = null) {
-  await page.goto("https://x.com/compose/post", {
-    waitUntil: "domcontentloaded",
-    timeout: 60000
-  });
-
-  await page.waitForTimeout(5000);
-
-  const editorSelectors = [
-    'div[data-testid="tweetTextarea_0"]',
-    'div[role="textbox"]',
-    'div[contenteditable="true"]'
-  ];
-
-  let editorFound = false;
-  for (const selector of editorSelectors) {
-    try {
-      await page.waitForSelector(selector, { timeout: 10000 });
-      await page.click(selector);
-      await page.keyboard.type(text, { delay: 18 });
-      editorFound = true;
-      break;
-    } catch {}
-  }
-
-  if (!editorFound) {
-    throw new Error("Could not find tweet editor");
-  }
-
-  await page.waitForTimeout(1500);
-
-  if (imagePath) {
-    await attachImageIfPossible(page, imagePath);
-  }
-
-  await page.waitForTimeout(2000);
-
-  const posted = await clickButtonByText(page, ["post", "tweet", "publier"]);
-  if (!posted) {
-    throw new Error("Could not find post button");
-  }
-
-  await page.waitForTimeout(6000);
-  await saveCookies(page);
-}
-
-async function postDealToX(deal, text) {
-  const browser = await puppeteer.launch({
-    headless: tr
+  if (styleVariant === 3) {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <style>
+        * { box-sizing: border-box; }
+        body {
+          margin: 0;
+          width: 1200px;
+          height: 675px;
+          font-family: Arial, sans-serif;
+          background:
+            radial-gradient(circle at left top, rgba(255,77,77,.22), transparent 24%),
+            radial-gradient(circle at right bottom, rgba(37,99,235,.22), transparent 28%),
+            linear-gradient(180deg, ${bg1} 0%, ${bg2} 100%);
+          color: white;
+        }
+        .wrap { width:1200px; height:675px; padding:26px; }
+        .card {
+          width:100%; height:100%;
+          display:grid;
+          grid-template-columns: 0.9fr 1.1fr;
+          gap: 20px;
+          background: linear-gradient(180deg, #111722 0%, #090b11 100%);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius:34px;
+          overflow:hidden;
+          padding:26px;
+        }
+        .left {
+          display:flex;
+          flex-direction:column;
+          justify-content:space-between;
+          gap: 18px;
+        }
+        .brand { color:#93c5fd; font-size:20px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
+        .badge {
+          display:inline-block; padding:16px 20px; border-radius:26px;
+          background: linear-gradient(135deg, #ff4d4d, #ff7a18);
+          font-size:38px; font-weight:900;
+          align-self:flex-start;
+        }
+        .pricebox {
+          background: rgba(255,255,255,.05);
+          border:1px solid rgba(255,255,255,.08);
+          border-radius:26px;
+          padding:20px;
+        }
+        .old { color:#71717a; font-size:24px; text-decoration:line-through; font-weight:700; margin-bottom:6px; }
+        .price { font-size:72px; font-weight:900; line-height:1; }
+        .cta {
+          margin-top:12px;
+          display:inline-flex; align-items:center; justify-content:center;
+          padding:18px 22px; border-radius:20px;
+          background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
+          font-size:22px; font-weight:900; text-transform:uppercase; letter-spacing:.08em;
+        }
+        .right {
+          background:#fff;
+          border-radius:28px;
+          overflow:hidden;
+          position:relative;
+        }
+        .right img { width:100%; height:100%; object-fit:contain; }
+        .overlay {
+          position:absolute; left:0; right:0; bottom:0;
+          padding:26px;
+          bac
