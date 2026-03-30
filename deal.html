@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Amazon Deal | TrendPulse</title>
+
+<meta name="robots" content="index, follow">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+body { background:#050505; color:white; font-family:Inter,sans-serif; margin:0; }
+.wrap { max-width:700px; margin:auto; padding:20px; }
+img { width:100%; border-radius:20px; background:white; }
+h1 { font-size:28px; font-weight:900; }
+.price { font-size:32px; font-weight:900; }
+.cta { display:block; background:#2563eb; padding:15px; text-align:center; border-radius:12px; margin-top:20px; }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<img id="img">
+
+<h1 id="title"></h1>
+
+<div class="price" id="price"></div>
+
+<p id="desc"></p>
+
+<a id="link" class="cta" target="_blank">🔥 Get Deal on Amazon</a>
+
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const id = urlParams.get('id');
+
+const sb = supabase.createClient(
+'https://hyrofyfhmabhlqbucjdp.supabase.co',
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+);
+
+async function load(){
+const { data } = await sb
+.from('products')
+.select('*')
+.eq('id', id)
+.single();
+
+if(!data) return;
+
+document.getElementById('title').innerText = data.name;
+document.getElementById('price').innerText = "$"+data.price;
+document.getElementById('desc').innerText = data.description;
+
+document.getElementById('img').src =
+data.image_url || `https://images.amazon.com/images/P/${data.asin}.01._SX500_.jpg`;
+
+document.getElementById('link').href = data.affiliate_link;
+
+document.title = data.name + " | TrendPulse";
+}
+
+load();
+</script>
+
+</body>
+</html>
