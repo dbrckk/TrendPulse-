@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Best Amazon Deals Today (Updated Daily) | TrendPulse</title>
+
+<meta name="description" content="Find the best Amazon deals today. Discover trending discounts, top-rated products, and daily updated deals in the US." />
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://trend-pulse.shop/best-amazon-deals.html">
+
+<link rel="icon" href="/favicon.ico">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+body { background:#050505; color:white; font-family:Inter,sans-serif; margin:0; }
+.wrap { max-width:1000px; margin:auto; padding:20px; }
+h1 { font-size:42px; font-weight:900; }
+p { color:#aaa; line-height:1.7; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; margin-top:20px; }
+.card { background:#111; border-radius:20px; overflow:hidden; border:1px solid #222; }
+.card img { width:100%; height:200px; object-fit:cover; background:white; }
+.content { padding:15px; }
+.title { font-weight:800; font-size:18px; }
+.price { font-size:24px; font-weight:900; }
+.cta { background:#2563eb; padding:10px; border-radius:12px; text-align:center; display:block; margin-top:10px; }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<h1>Best Amazon Deals Today</h1>
+
+<p>
+Looking for the best Amazon deals right now? You’re in the right place.  
+We track trending discounts, popular products, and price drops across Amazon to bring you the most relevant deals available today.
+</p>
+
+<p>
+Our system automatically scans deal sources and highlights products with strong discounts, high demand, and great value.
+</p>
+
+<div id="grid" class="grid"></div>
+
+</div>
+
+<script>
+const sb = supabase.createClient(
+'https://hyrofyfhmabhlqbucjdp.supabase.co',
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+);
+
+function price(v){
+if(!v) return "Check price";
+return "$"+v;
+}
+
+async function load(){
+const { data } = await sb
+.from('products')
+.select('*')
+.eq('is_active', true)
+.order('score', { ascending:false })
+.limit(30);
+
+document.getElementById('grid').innerHTML = data.map(p => `
+<div class="card">
+<img src="${p.image_url || `https://images.amazon.com/images/P/${p.asin}.01._SX500_.jpg`}">
+<div class="content">
+<div class="title">${p.name}</div>
+<div class="price">${price(p.price)}</div>
+<a class="cta" href="/deal.html?id=${p.id}">View Deal</a>
+</div>
+</div>
+`).join('');
+}
+
+load();
+</script>
+
+</body>
+</html>
