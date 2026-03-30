@@ -5,20 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Best Amazon Deals Today | TrendPulse</title>
-  <meta name="description" content="Live Amazon deals worth checking right now. Fast, simple, mobile-friendly, and focused on the best offers." />
+  <meta name="description" content="Live Amazon deals, best sellers, crazy discounts, and category-based shopping pages for tech, fashion, jewelry, home, beauty, and more." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://trend-pulse.shop/" />
   <meta name="theme-color" content="#050505" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Best Amazon Deals Today | TrendPulse" />
-  <meta property="og:description" content="Live Amazon deals worth checking right now." />
+  <meta property="og:description" content="Live Amazon deals, best sellers, and category pages that make shopping easier." />
   <meta property="og:url" content="https://trend-pulse.shop/" />
   <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Best Amazon Deals Today | TrendPulse" />
-  <meta name="twitter:description" content="Live Amazon deals worth checking right now." />
+  <meta name="twitter:description" content="Live Amazon deals, best sellers, and category pages that make shopping easier." />
   <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg" />
 
   <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -41,35 +41,11 @@
       overflow: hidden;
     }
     .deal-card {
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      transition: transform .18s ease, box-shadow .18s ease;
     }
     .deal-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 16px 40px rgba(0,0,0,.28);
-      border-color: rgba(255,255,255,.16);
-    }
-    .badge {
-      font-size: 11px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-weight: 800;
-      letter-spacing: .02em;
-      white-space: nowrap;
-    }
-    .chip {
-      font-size: 12px;
-      font-weight: 800;
-      border-radius: 999px;
-      padding: 10px 14px;
-      border: 1px solid rgb(39 39 42);
-      background: rgb(24 24 27);
-      color: rgb(228 228 231);
-      white-space: nowrap;
-    }
-    .chip.active {
-      background: white;
-      color: black;
-      border-color: white;
     }
   </style>
 </head>
@@ -80,91 +56,94 @@
     <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white font-semibold">All Deals</a>
   </header>
 
-  <section class="mb-4">
+  <section class="mb-5">
     <div class="grid md:grid-cols-[1fr_1fr] gap-4">
       <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 md:p-6 flex flex-col justify-center">
-        <div class="flex flex-wrap gap-2 mb-3">
-          <span class="badge bg-red-500 text-white">🔥 Live Deals</span>
-          <span class="badge bg-blue-500 text-white">🇺🇸 US Amazon</span>
-          <span class="badge bg-green-500 text-black">💰 Best Value</span>
+        <div class="flex flex-wrap gap-2 mb-3 text-xs font-black">
+          <span class="bg-red-500 text-white px-3 py-1 rounded-full">🔥 Live Deals</span>
+          <span class="bg-blue-500 text-white px-3 py-1 rounded-full">⭐ Best Sellers</span>
+          <span class="bg-yellow-400 text-black px-3 py-1 rounded-full">⚠ Crazy Deals</span>
         </div>
 
         <h1 class="text-4xl md:text-5xl font-black italic leading-[0.95] tracking-tight mb-3">
-          Strong Amazon Deals.<br>Less Noise.
+          Deals, Best Sellers,<br>and Amazon Finds<br>That Actually Matter
         </h1>
 
-        <p class="text-zinc-400 text-base md:text-lg leading-7 mb-4 max-w-xl">
-          Image, price, discount, buy button. That’s it.
+        <p class="text-zinc-400 text-base md:text-lg leading-7 mb-4">
+          Shop live discounts, popular products, and category pages built for faster browsing and better SEO.
         </p>
 
         <div class="flex flex-wrap gap-3">
-          <a href="#top-picks" class="bg-white text-black px-5 py-3 rounded-xl font-black">
-            Shop Top Picks
+          <a href="/best-sellers.html" class="bg-white text-black px-5 py-3 rounded-xl font-black">
+            Explore Best Sellers
           </a>
-          <a href="#all-live-deals" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
-            Browse Deals
+          <a href="/crazy-deals.html" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
+            View Crazy Deals
           </a>
         </div>
       </div>
 
-      <div id="hero-deal" class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden min-h-[360px] md:min-h-[400px]"></div>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 md:p-6">
+        <h2 class="text-2xl font-black tracking-tight mb-3">Top categories</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+          <a href="/tech.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Tech</a>
+          <a href="/fashion.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Fashion</a>
+          <a href="/jewelry.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Jewelry</a>
+          <a href="/shoes.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Shoes</a>
+          <a href="/home.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Home</a>
+          <a href="/kitchen.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Kitchen</a>
+          <a href="/beauty.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Beauty</a>
+          <a href="/sports.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Sports</a>
+          <a href="/gaming.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Gaming</a>
+          <a href="/health.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Health</a>
+          <a href="/baby.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Baby</a>
+          <a href="/pets.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Pets</a>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="mb-4">
+  <section class="mb-8">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
         <div class="text-zinc-500 text-sm mb-1">Live Deals</div>
         <div id="stat-total" class="text-2xl font-black">—</div>
       </div>
       <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-        <div class="text-zinc-500 text-sm mb-1">Trending</div>
-        <div id="stat-trending" class="text-2xl font-black">—</div>
+        <div class="text-zinc-500 text-sm mb-1">Best Sellers</div>
+        <div id="stat-bestsellers" class="text-2xl font-black">—</div>
       </div>
       <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-        <div class="text-zinc-500 text-sm mb-1">Under $25</div>
-        <div id="stat-under25" class="text-2xl font-black">—</div>
+        <div class="text-zinc-500 text-sm mb-1">Crazy Deals</div>
+        <div id="stat-crazy" class="text-2xl font-black">—</div>
       </div>
       <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-        <div class="text-zinc-500 text-sm mb-1">Hot Discounts</div>
-        <div id="stat-discounts" class="text-2xl font-black">—</div>
+        <div class="text-zinc-500 text-sm mb-1">Categories</div>
+        <div class="text-2xl font-black">14+</div>
       </div>
     </div>
   </section>
 
-  <section class="mb-6">
-    <div id="quick-filters" class="flex gap-3 overflow-x-auto pb-1">
-      <button class="chip active" data-filter="top">Top Picks</button>
-      <button class="chip" data-filter="trending">Trending</button>
-      <button class="chip" data-filter="value">Best Value</button>
-      <button class="chip" data-filter="under25">Under $25</button>
-      <button class="chip" data-filter="discounts">Big Discounts</button>
-      <button class="chip" data-filter="tech">Tech</button>
-      <button class="chip" data-filter="home">Home</button>
-      <button class="chip" data-filter="kitchen">Kitchen</button>
-      <button class="chip" data-filter="beauty">Beauty</button>
-    </div>
-  </section>
+  <section class="mb-10">
+    <div class="grid md:grid-cols-3 gap-4">
+      <a href="/best-sellers.html" class="deal-card block bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+        <div class="text-blue-400 font-black text-xs mb-2">BEST SELLERS</div>
+        <h2 class="text-2xl font-black tracking-tight mb-2">Most Popular Amazon Products</h2>
+        <p class="text-zinc-400 text-sm leading-7">For visitors who want products people already love, even without huge discounts.</p>
+      </a>
 
-  <section id="top-picks" class="mb-8">
-    <div class="flex items-end justify-between mb-4 gap-4">
-      <div>
-        <h2 class="text-2xl font-black tracking-tight">Top Picks</h2>
-        <p class="text-zinc-400 text-sm mt-1">The cleanest deals to check first.</p>
-      </div>
-      <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white">See all</a>
-    </div>
-    <div id="primary-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-  </section>
+      <a href="/crazy-deals.html" class="deal-card block bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+        <div class="text-yellow-400 font-black text-xs mb-2">CRAZY DEALS</div>
+        <h2 class="text-2xl font-black tracking-tight mb-2">Deep Discounts & Price Drops</h2>
+        <p class="text-zinc-400 text-sm leading-7">A home for suspiciously strong discounts and unusually sharp price drops.</p>
+      </a>
 
-  <section id="all-live-deals" class="mb-10">
-    <div class="flex items-end justify-between mb-4 gap-4">
-      <div>
-        <h2 class="text-2xl font-black tracking-tight">All Live Deals</h2>
-        <p id="filter-label" class="text-zinc-400 text-sm mt-1">Currently showing: Top Picks</p>
-      </div>
+      <a href="/best-amazon-deals.html" class="deal-card block bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+        <div class="text-red-400 font-black text-xs mb-2">EDITORIAL</div>
+        <h2 class="text-2xl font-black tracking-tight mb-2">SEO-Friendly Deal Guides</h2>
+        <p class="text-zinc-400 text-sm leading-7">Category pages and evergreen shopping guides built to bring in long-term traffic.</p>
+      </a>
     </div>
-    <div id="dynamic-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
   <footer class="text-center text-zinc-500 text-sm mt-10 pb-6">
@@ -176,243 +155,20 @@
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6ImFub24iLCJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
     const sb = supabase.createClient(SB_URL, SB_KEY);
 
-    let DEALS = [];
-
-    function dealUrl(p) {
-      return `/deal.html?asin=${encodeURIComponent(p.asin)}`;
-    }
-
-    function formatPrice(v) {
-      if (v === null || v === undefined || v === "") return "Check price";
-      const n = Number(v);
-      if (Number.isNaN(n)) return "Check price";
-      return `$${n.toFixed(n % 1 === 0 ? 0 : 2)}`;
-    }
-
-    function fallbackSvg(name, label = "TrendPulse") {
-      const safe = String(name || "Trending Deal")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-      return `data:image/svg+xml;utf8,
-      <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900">
-        <rect width="100%" height="100%" fill="%23070a11"/>
-        <text x="50%" y="42%" text-anchor="middle" fill="white" font-size="56" font-family="Arial" font-weight="800">${label}</text>
-        <text x="50%" y="58%" text-anchor="middle" fill="%23cbd5e1" font-size="30" font-family="Arial">${safe}</text>
-      </svg>`;
-    }
-
-    function getAmazonImageCandidates(asin) {
-      return [
-        `https://m.media-amazon.com/images/I/${asin}.jpg`,
-        `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`,
-        `https://images.amazon.com/images/P/${asin}.01._SX500_.jpg`
-      ];
-    }
-
-    function getBestImageList(product) {
-      const list = [];
-      if (product?.image_url) list.push(product.image_url);
-      for (const img of getAmazonImageCandidates(product?.asin || "")) {
-        if (img && !list.includes(img)) list.push(img);
-      }
-      list.push(fallbackSvg(product?.name || "Trending Deal"));
-      return list;
-    }
-
-    function buildSafeImageTag(images, alt, className) {
-      const safeAlt = String(alt || "").replace(/"/g, "&quot;");
-      const json = JSON.stringify(images).replace(/"/g, "&quot;");
-      return `
-        <img
-          src="${images[0]}"
-          data-images="${json}"
-          data-index="0"
-          alt="${safeAlt}"
-          class="${className}"
-          loading="lazy"
-          onerror="rotateImageFallback(this)"
-        >
-      `;
-    }
-
-    window.rotateImageFallback = function(imgEl) {
-      try {
-        const images = JSON.parse(imgEl.dataset.images || "[]");
-        let index = Number(imgEl.dataset.index || 0) + 1;
-        if (index >= images.length) return;
-        imgEl.dataset.index = String(index);
-        imgEl.src = images[index];
-      } catch {}
-    };
-
-    function getFilteredDeals(filter) {
-      const deals = [...DEALS];
-
-      switch (filter) {
-        case "trending":
-          return deals.sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 12);
-        case "value":
-          return deals
-            .filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 35)
-            .sort((a, b) => Number(b.score || 0) - Number(a.score || 0))
-            .slice(0, 12);
-        case "under25":
-          return deals
-            .filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) < 25)
-            .sort((a, b) => Number(b.score || 0) - Number(a.score || 0))
-            .slice(0, 12);
-        case "discounts":
-          return deals
-            .filter(p => Number(p.discount_percent || 0) >= 35)
-            .sort((a, b) => Number(b.discount_percent || 0) - Number(a.discount_percent || 0))
-            .slice(0, 12);
-        case "tech":
-          return deals.filter(p => p.category === "Tech").slice(0, 12);
-        case "home":
-          return deals.filter(p => p.category === "Home").slice(0, 12);
-        case "kitchen":
-          return deals.filter(p => p.category === "Kitchen").slice(0, 12);
-        case "beauty":
-          return deals.filter(p => p.category === "Beauty").slice(0, 12);
-        case "top":
-        default:
-          return deals.sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 12);
-      }
-    }
-
-    function renderSimpleCard(p) {
-      const imageList = getBestImageList(p);
-
-      return `
-        <div class="deal-card bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-          <a href="${dealUrl(p)}" class="block">
-            ${buildSafeImageTag(imageList, p.name, "w-full h-40 md:h-48 object-cover bg-white")}
-          </a>
-          <div class="p-3">
-            <div class="text-red-400 font-black text-[11px] mb-1">
-              ${p.discount_percent ? `-${Math.round(p.discount_percent)}% OFF` : "LIVE DEAL"}
-            </div>
-            <a href="${dealUrl(p)}" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">
-              ${p.name}
-            </a>
-            <div class="flex items-end gap-2 mb-3 flex-wrap">
-              <div class="text-xl md:text-2xl font-black">${formatPrice(p.price)}</div>
-              ${p.original_price ? `<div class="text-zinc-500 line-through text-xs">${formatPrice(p.original_price)}</div>` : ""}
-            </div>
-            <a href="${dealUrl(p)}" class="block text-center bg-blue-600 hover:bg-blue-500 transition px-4 py-3 rounded-xl font-black text-sm">
-              View Deal
-            </a>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderHeroDeal(p) {
-      const imageList = getBestImageList(p);
-
-      return `
-        <a href="${dealUrl(p)}" class="block h-full">
-          <div class="h-full grid grid-rows-[220px_auto] md:grid-rows-[230px_auto]">
-            <div class="bg-white">
-              ${buildSafeImageTag(imageList, p.name, "w-full h-full object-contain")}
-            </div>
-            <div class="p-5">
-              <div class="text-red-400 font-black text-xs mb-2">
-                ${p.discount_percent ? `🔥 ${Math.round(p.discount_percent)}% OFF` : "🔥 LIVE DEAL"}
-              </div>
-              <h2 class="text-2xl md:text-3xl font-black tracking-tight leading-tight mb-3 line-clamp-3">${p.name}</h2>
-              <div class="flex items-end gap-3 mb-4 flex-wrap">
-                <div class="text-3xl font-black">${formatPrice(p.price)}</div>
-                ${p.original_price ? `<div class="text-zinc-500 line-through text-lg">${formatPrice(p.original_price)}</div>` : ""}
-              </div>
-              <div class="inline-flex bg-blue-600 hover:bg-blue-500 transition px-5 py-3 rounded-xl font-black">
-                View Top Deal
-              </div>
-            </div>
-          </div>
-        </a>
-      `;
-    }
-
-    function fillGrid(id, items) {
-      const el = document.getElementById(id);
-      el.innerHTML = (items || []).map(renderSimpleCard).join("");
-    }
-
-    function setActiveChip(filter) {
-      document.querySelectorAll("#quick-filters .chip").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.filter === filter);
-      });
-    }
-
-    function setFilterLabel(filter) {
-      const labels = {
-        top: "Top Picks",
-        trending: "Trending",
-        value: "Best Value",
-        under25: "Under $25",
-        discounts: "Big Discounts",
-        tech: "Tech",
-        home: "Home",
-        kitchen: "Kitchen",
-        beauty: "Beauty"
-      };
-      document.getElementById("filter-label").textContent = `Currently showing: ${labels[filter] || "Top Picks"}`;
-    }
-
-    function applyFilter(filter) {
-      const filtered = getFilteredDeals(filter);
-      fillGrid("dynamic-grid", filtered);
-      setActiveChip(filter);
-      setFilterLabel(filter);
-    }
-
-    async function loadDeals() {
-      const { data, error } = await sb
+    async function loadStats() {
+      const { data } = await sb
         .from("products")
-        .select("*")
+        .select("is_best_seller,is_crazy_deal")
         .eq("is_active", true)
-        .order("score", { ascending: false })
-        .limit(140);
+        .limit(400);
 
-      if (error || !data) {
-        document.getElementById("primary-grid").innerHTML = `<div class="text-zinc-400">Unable to load deals right now.</div>`;
-        document.getElementById("dynamic-grid").innerHTML = `<div class="text-zinc-400">Unable to load deals right now.</div>`;
-        document.getElementById("hero-deal").innerHTML = `<div class="p-6 text-zinc-400">Unable to load the top deal right now.</div>`;
-        return;
-      }
-
-      DEALS = data || [];
-
-      const topPicks = [...DEALS].sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 8);
-      const trending = [...DEALS].sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 12);
-      const under25 = DEALS.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) < 25);
-      const bigDiscounts = DEALS.filter(p => Number(p.discount_percent || 0) >= 35);
-
-      fillGrid("primary-grid", topPicks);
-      fillGrid("dynamic-grid", trending);
-
-      document.getElementById("stat-total").textContent = DEALS.length;
-      document.getElementById("stat-trending").textContent = trending.length;
-      document.getElementById("stat-under25").textContent = under25.length;
-      document.getElementById("stat-discounts").textContent = bigDiscounts.length;
-
-      const hero = topPicks[0] || DEALS[0];
-      if (hero) {
-        document.getElementById("hero-deal").innerHTML = renderHeroDeal(hero);
-      } else {
-        document.getElementById("hero-deal").innerHTML = `<div class="p-6 text-zinc-400">No live deals available yet.</div>`;
-      }
-
-      document.querySelectorAll("#quick-filters .chip").forEach(btn => {
-        btn.addEventListener("click", () => applyFilter(btn.dataset.filter));
-      });
-
-      applyFilter("top");
+      const rows = data || [];
+      document.getElementById("stat-total").textContent = rows.length;
+      document.getElementById("stat-bestsellers").textContent = rows.filter(x => x.is_best_seller).length;
+      document.getElementById("stat-crazy").textContent = rows.filter(x => x.is_crazy_deal).length;
     }
 
-    loadDeals();
+    loadStats();
   </script>
 </body>
-  </html>
+            </html>
