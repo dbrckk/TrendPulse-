@@ -1,16 +1,16 @@
 {
-  "name": "trendpulse-bot",
-  "version": "8.3.0",
-  "type": "module",
+  "name": "trendpulse",
+  "version": "4.0.0",
   "private": true,
+  "type": "module",
+  "description": "TrendPulse - Amazon deals, best sellers, crazy deals, and SEO pages",
   "scripts": {
-    "start": "node sync-deals.js",
-    "tweet": "node post-random-deal.js"
+    "sync": "node sync-deals.js",
+    "score": "node update-score.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.56.0",
+    "@supabase/supabase-js": "^2.49.8",
     "cheerio": "^1.0.0",
-    "puppeteer": "^24.16.0",
     "rss-parser": "^3.13.0"
   }
 }
