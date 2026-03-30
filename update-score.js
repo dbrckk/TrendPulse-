@@ -9,31 +9,43 @@ async function updateScores(){
 
   const { data: products } = await sb
     .from("products")
-    .select("*");
+    .select("asin, price, discount_percent");
 
-  for (const p of products){
+  for(const p of products){
 
-    const { data: events } = await sb
+    const { data: stats } = await sb
       .from("analytics")
-      .select("*")
+      .select("event")
       .eq("asin", p.asin);
 
-    let views = events.filter(e => e.event === "view").length;
-    let clicks = events.filter(e => e.event === "click").length;
+    const views = stats.filter(e=>e.event==="view").length;
+    const clicks = stats.filter(e=>e.event==="click").length;
 
-    let ctr = views > 0 ? clicks / views : 0;
+    const ctr = views > 0 ? clicks / views : 0;
 
-    let score =
-      (p.discount_percent || 0) * 2 +
-      clicks * 5 +
-      ctr * 100 +
-      (p.price < 50 ? 20 : 0);
+    let score = 0;
+
+    // DISCOUNT
+    score += (p.discount_percent || 0) * 1.5;
+
+    // CLICKS
+    score += clicks * 4;
+
+    // CTR (puissant)
+    score += ctr * 120;
+
+    // LOW PRICE BONUS
+    if(p.price < 25) score += 25;
+    else if(p.price < 50) score += 15;
+
+    // MINIMUM SCORE
+    if(views < 5) score *= 0.5;
 
     await sb.from("products")
       .update({ score })
       .eq("asin", p.asin);
 
-    console.log(p.asin, "score:", score);
+    console.log(p.asin, score);
   }
 
 }
