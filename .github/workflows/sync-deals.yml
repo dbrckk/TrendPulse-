@@ -1,12 +1,9 @@
-name: Full Automation
+name: Sync Deals
 
 on:
-  schedule:
-    - cron: "0 */2 * * *"
   workflow_dispatch:
-
-permissions:
-  contents: write
+  schedule:
+    - cron: "17 */4 * * *"
 
 jobs:
   run:
@@ -16,34 +13,65 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          persist-credentials: true
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install deps
         run: npm install
 
       - name: Sync Deals
-        run: node sync-deals.js
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
-          SITE_URL: https://trend-pulse.shop
+          SITE_URL: ${{ secrets.SITE_URL }}
+        run: node sync-deals.js
 
       - name: Update Score
-        run: node update-score.js
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -f update-score.js ]; then
+            node update-score.js
+          else
+            echo "update-score.js not found, skipping."
+          fi
 
       - name: Commit generated files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add sitemap.xml deals.html tech.html kitchen.html beauty.html home.html best-amazon-deals.html best-tech-deals-under-50.html best-kitchen-deals-this-week.html best-beauty-deals-on-amazon.html best-home-deals-this-week.html deal
-          git diff --cached --quiet || git commit -m "Update deals, scores, SEO pages and sitemap"
-          git push
+
+          git add \
+            deals.html \
+            sitemap.xml \
+            best-amazon-deals.html \
+            best-sellers.html \
+            crazy-deals.html \
+            tech.html \
+            fashion.html \
+            jewelry.html \
+            shoes.html \
+            sports.html \
+            health.html \
+            baby.html \
+            pets.html \
+            office.html \
+            gaming.html \
+            outdoor.html \
+            home.html \
+            kitchen.html \
+            beauty.html || true
+
+          if git diff --cached --quiet; then
+            echo "No generated file changes to commit."
+          else
+            git commit -m "Auto-update generated deal pages"
+            git push
+          fi
