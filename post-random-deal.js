@@ -233,11 +233,13 @@ async function typeLikeHuman(page, selector, value) {
 
 async function clickButtonByText(page, textOptions) {
   const clicked = await page.evaluate((texts) => {
-    const nodes = Array.from(document.querySelectorAll('div[role="button"], button, a[role="button"], a'));
+    const nodes = Array.from(document.querySelectorAll('div[role="button"], button, a[role="button"], a, span'));
     for (const el of nodes) {
       const txt = (el.innerText || el.textContent || "").trim().toLowerCase();
+      if (!txt) continue;
       if (texts.some(t => txt === t || txt.includes(t))) {
-        el.click();
+        const target = el.closest('div[role="button"], button, a[role="button"], a') || el;
+        target.click();
         return true;
       }
     }
@@ -268,6 +270,22 @@ async function loadCookies(page) {
     console.log("Could not load saved cookies:", err.message);
     return false;
   }
+}
+
+async function saveDebugArtifacts(page, prefix) {
+  try {
+    const url = page.url();
+    const text = await page.evaluate(() => document.body.innerText.slice(0, 3000));
+    const html = await page.content();
+
+    fs.writeFileSync(`${prefix}-url.txt`, url, "utf8");
+    fs.writeFileSync(`${prefix}-text.txt`, text, "utf8");
+    fs.writeFileSync(`${prefix}.html`, html, "utf8");
+
+    try {
+      await page.screenshot({ path: `${prefix}.png`, fullPage: true });
+    } catch {}
+  } catch {}
 }
 
 async function isLoggedIn(page) {
@@ -315,12 +333,70 @@ async function waitForAnySelector(page, selectors, timeout = 15000) {
   return null;
 }
 
-async function tryOpenRealLoginStep(page) {
-  await sleep(2500);
+async function findVisibleTextInput(page, timeout = 12000) {
+  const started = Date.now();
 
+  while (Date.now() - started < timeout) {
+    const handle = await page.evaluateHandle(() => {
+      const inputs = Array.from(document.querySelectorAll("input"));
+      const found = inputs.find(input => {
+        const type = (input.getAttribute("type") || "text").toLowerCase();
+        const hidden = input.offsetParent === null && getComputedStyle(input).position !== "fixed";
+        if (hidden) return false;
+        if (type === "hidden" || type === "password" || type === "checkbox" || type === "radio") return false;
+        return true;
+      });
+      return found || null;
+    });
+
+    const element = handle.asElement();
+    if (element) return element;
+    await sleep(400);
+  }
+
+  return null;
+}
+
+async function findVisiblePasswordInput(page, timeout = 12000) {
+  const started = Date.now();
+
+  while (Date.now() - started < timeout) {
+    const handle = await page.evaluateHandle(() => {
+      const inputs = Array.from(document.querySelectorAll("input"));
+      const found = inputs.find(input => {
+        const type = (input.getAttribute("type") || "").toLowerCase();
+        const auto = (input.getAttribute("autocomplete") || "").toLowerCase();
+        const hidden = input.offsetParent === null && getComputedStyle(input).position !== "fixed";
+        if (hidden) return false;
+        return type === "password" || auto === "current-password";
+      });
+      return found || null;
+    });
+
+    const element = handle.asElement();
+    if (element) return element;
+    await sleep(400);
+  }
+
+  return null;
+}
+
+async function typeIntoElementHandle(handle, value) {
+  await handle.click({ clickCount: 3 });
+  await handle.type(value, { delay: 40 });
+}
+
+async function clickNext(page) {
+  const clicked = await clickButtonByText(page, ["next", "suivant"]);
+  if (!clicked) {
+    await page.keyboard.press("Enter");
+  }
+}
+
+async function clickLogin(page) {
   const clicked = await clickButtonByText(page, ["log in", "se connecter"]);
-  if (clicked) {
-    await sleep(3000);
+  if (!clicked) {
+    await page.keyboard.press("Enter");
   }
 }
 
@@ -330,86 +406,70 @@ async function loginToX(page) {
     timeout: 60000
   });
 
-  await sleep(3000);
-  await tryOpenRealLoginStep(page);
+  await sleep(5000);
 
-  const userInputSelectors = [
-    'input[autocomplete="username"]',
-    'input[name="text"]',
-    'input[inputmode="text"]',
-    'input[dir="auto"]',
-    'input'
-  ];
+  const logInGateClicked = await clickButtonByText(page, ["log in", "se connecter"]);
+  if (logInGateClicked) {
+    await sleep(3500);
+  }
 
-  let userSelector = await waitForAnySelector(page, userInputSelectors, 12000);
+  let firstInput = await findVisibleTextInput(page, 12000);
 
-  if (!userSelector) {
+  if (!firstInput) {
     await page.goto("https://x.com/login", {
       waitUntil: "domcontentloaded",
       timeout: 60000
     });
+    await sleep(5000);
 
-    await sleep(4000);
-    await tryOpenRealLoginStep(page);
-    userSelector = await waitForAnySelector(page, userInputSelectors, 12000);
+    const logInGateClicked2 = await clickButtonByText(page, ["log in", "se connecter"]);
+    if (logInGateClicked2) {
+      await sleep(3500);
+    }
+
+    firstInput = await findVisibleTextInput(page, 12000);
   }
 
-  if (!userSelector) {
+  if (!firstInput) {
+    await saveDebugArtifacts(page, "debug-login-first-step");
     const currentUrl = page.url();
     const preview = await page.evaluate(() => document.body.innerText.slice(0, 1200));
     console.log("Login URL at failure:", currentUrl);
     console.log("Login page preview:", preview);
-    throw new Error("Could not find username input on X login page");
+    throw new Error("Could not find first login input on X");
   }
 
-  await typeLikeHuman(page, userSelector, X_USERNAME);
+  await typeIntoElementHandle(firstInput, X_USERNAME);
+  await sleep(1200);
+  await clickNext(page);
+  await sleep(4500);
 
-  await sleep(1000);
-  let nextClicked = await clickButtonByText(page, ["next", "suivant"]);
-  if (!nextClicked) {
-    await page.keyboard.press("Enter");
-  }
+  let passwordInput = await findVisiblePasswordInput(page, 5000);
 
-  await sleep(3000);
+  if (!passwordInput) {
+    const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
 
-  const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
-  const emailChallengeVisible =
-    bodyText.includes("phone or email") ||
-    bodyText.includes("enter your phone number or username") ||
-    bodyText.includes("email");
+    const stillOnFirstStep =
+      bodyText.includes("phone, email, or username") ||
+      bodyText.includes("phone or email") ||
+      bodyText.includes("enter your phone number or username");
 
-  if (emailChallengeVisible && X_EMAIL) {
-    const challengeInputs = [
-      'input[data-testid="ocfEnterTextTextInput"]',
-      'input[name="text"]',
-      'input[inputmode="text"]',
-      'input'
-    ];
+    if (stillOnFirstStep && X_EMAIL) {
+      const maybeChallengeInput = await findVisibleTextInput(page, 8000);
 
-    const challengeSelector = await waitForAnySelector(page, challengeInputs, 8000);
-
-    if (challengeSelector) {
-      await typeLikeHuman(page, challengeSelector, X_EMAIL);
-      await sleep(1000);
-
-      const challengeNext = await clickButtonByText(page, ["next", "suivant"]);
-      if (!challengeNext) {
-        await page.keyboard.press("Enter");
+      if (maybeChallengeInput) {
+        await typeIntoElementHandle(maybeChallengeInput, X_EMAIL);
+        await sleep(1200);
+        await clickNext(page);
+        await sleep(4500);
       }
-
-      await sleep(3000);
     }
   }
 
-  const passwordSelectors = [
-    'input[name="password"]',
-    'input[autocomplete="current-password"]',
-    'input[type="password"]'
-  ];
+  passwordInput = await findVisiblePasswordInput(page, 12000);
 
-  const passwordSelector = await waitForAnySelector(page, passwordSelectors, 15000);
-
-  if (!passwordSelector) {
+  if (!passwordInput) {
+    await saveDebugArtifacts(page, "debug-login-password-step");
     const currentUrl = page.url();
     const preview = await page.evaluate(() => document.body.innerText.slice(0, 1200));
     console.log("Password step URL at failure:", currentUrl);
@@ -417,19 +477,16 @@ async function loginToX(page) {
     throw new Error("Could not find password input on X login page");
   }
 
-  await typeLikeHuman(page, passwordSelector, X_PASSWORD);
-
-  await sleep(1000);
-  const loginClicked = await clickButtonByText(page, ["log in", "se connecter"]);
-  if (!loginClicked) {
-    await page.keyboard.press("Enter");
-  }
-
-  await sleep(7000);
+  await typeIntoElementHandle(passwordInput, X_PASSWORD);
+  await sleep(1200);
+  await clickLogin(page);
+  await sleep(8000);
 
   const loggedIn = await isLoggedIn(page);
   if (!loggedIn) {
+    await saveDebugArtifacts(page, "debug-login-final");
     const finalBody = await page.evaluate(() => document.body.innerText.toLowerCase());
+
     if (
       finalBody.includes("confirmation code") ||
       finalBody.includes("verify") ||
@@ -439,6 +496,7 @@ async function loginToX(page) {
     ) {
       throw new Error("X requested an extra verification step (code/email/captcha).");
     }
+
     throw new Error("Login to X failed");
   }
 
@@ -467,7 +525,7 @@ async function downloadImageToTemp(url, asin) {
   try {
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.8"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.9"
       }
     });
 
@@ -994,6 +1052,7 @@ async function publishTweet(page, text, imagePath = null) {
   }
 
   if (!editorFound) {
+    await saveDebugArtifacts(page, "debug-compose-step");
     const currentUrl = page.url();
     const preview = await page.evaluate(() => document.body.innerText.slice(0, 1200));
     console.log("Compose URL at failure:", currentUrl);
@@ -1011,6 +1070,7 @@ async function publishTweet(page, text, imagePath = null) {
 
   const posted = await clickButtonByText(page, ["post", "tweet", "publier"]);
   if (!posted) {
+    await saveDebugArtifacts(page, "debug-post-button-step");
     throw new Error("Could not find post button");
   }
 
