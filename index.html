@@ -2,30 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-  <title>TrendPulse | Trending Amazon Deals in the US</title>
-  <meta name="description" content="Discover trending Amazon deals, popular discounts, and fast-moving product offers in the US. Swipe through top deals and shop instantly." />
+  <title>Best Amazon Deals Today | TrendPulse</title>
+  <meta name="description" content="Discover the best Amazon deals updated live. Swipe through trending discounts, find hot products fast, and shop top US deals instantly." />
+  <meta name="keywords" content="Amazon deals, best Amazon deals, trending deals, discounts, hot deals, US shopping deals, daily deals" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="theme-color" content="#050505" />
   <meta name="format-detection" content="telephone=no" />
-
   <link rel="canonical" href="https://trend-pulse.shop/" />
-  <link rel="manifest" href="/manifest.json" />
-<link rel="icon" href="/favicon.ico" sizes="any" />
-<link rel="apple-touch-icon" href="/icon-192.png" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="TrendPulse | Trending Amazon Deals in the US" />
-  <meta property="og:description" content="Swipe through trending Amazon deals, fast-moving discounts, and popular product offers." />
+  <meta property="og:title" content="Best Amazon Deals Today | TrendPulse" />
+  <meta property="og:description" content="Swipe through trending Amazon deals, hot discounts, and top product finds in the US." />
   <meta property="og:url" content="https://trend-pulse.shop/" />
   <meta property="og:site_name" content="TrendPulse" />
   <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="TrendPulse | Trending Amazon Deals in the US" />
-  <meta name="twitter:description" content="Swipe through trending Amazon deals, fast-moving discounts, and popular product offers." />
+  <meta name="twitter:title" content="Best Amazon Deals Today | TrendPulse" />
+  <meta name="twitter:description" content="Swipe through trending Amazon deals, hot discounts, and top product finds in the US." />
   <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg" />
+
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+
+  <link rel="preconnect" href="https://hyrofyfhmabhlqbucjdp.supabase.co" />
+  <link rel="preconnect" href="https://ws-na.amazon-adsystem.com" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -36,12 +42,7 @@
     "@type":"WebSite",
     "name":"TrendPulse",
     "url":"https://trend-pulse.shop/",
-    "description":"Trending Amazon deals and popular discounted products for shoppers in the United States.",
-    "potentialAction":{
-      "@type":"SearchAction",
-      "target":"https://trend-pulse.shop/?q={search_term_string}",
-      "query-input":"required name=search_term_string"
-    }
+    "description":"Trending Amazon deals and discounted products for shoppers in the United States."
   }
   </script>
 
@@ -50,14 +51,17 @@
 
     :root {
       --bg: #050505;
-      --card: #0f1014;
-      --muted: #a1a1aa;
+      --card: #0d1117;
+      --card-2: #111827;
       --line: rgba(255,255,255,.08);
-      --pill: #171923;
+      --muted: #a1a1aa;
+      --soft: #d4d4d8;
       --blue: #2563eb;
-      --white: #ffffff;
-      --red: #ef4444;
+      --blue-2: #60a5fa;
       --green: #22c55e;
+      --red: #ef4444;
+      --white: #ffffff;
+      --shadow: 0 24px 70px rgba(0,0,0,.42);
     }
 
     * {
@@ -71,11 +75,11 @@
 
     body {
       margin: 0;
-      background:
-        radial-gradient(circle at top, rgba(37,99,235,.12), transparent 26%),
-        linear-gradient(180deg, #050505 0%, #07080b 100%);
       color: var(--white);
       font-family: 'Inter', sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(37,99,235,.14), transparent 24%),
+        linear-gradient(180deg, #040404 0%, #07090e 100%);
       overflow: hidden;
       touch-action: none;
     }
@@ -85,19 +89,44 @@
       max-width: 100%;
     }
 
-    .page-shell {
-      min-height: 100vh;
-      padding:
-        max(18px, env(safe-area-inset-top))
-        18px
-        max(18px, env(safe-area-inset-bottom))
-        18px;
+    button, a {
+      transition: transform .18s ease, opacity .18s ease, background .18s ease;
     }
 
-    .glass {
-      background: rgba(255,255,255,.03);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--line);
+    button:active, a:active {
+      transform: scale(.985);
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      padding:
+        max(16px, env(safe-area-inset-top))
+        16px
+        max(18px, env(safe-area-inset-bottom))
+        16px;
+    }
+
+    .container-max {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: clamp(34px, 7vw, 56px);
+      line-height: .92;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -.06em;
+    }
+
+    .sub-copy {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 720px;
+      line-height: 1.55;
+      font-size: 14px;
     }
 
     .badge {
@@ -106,43 +135,55 @@
       gap: 8px;
       padding: 10px 14px;
       border-radius: 999px;
-      background: var(--pill);
       border: 1px solid var(--line);
-      color: #d4d4d8;
+      background: rgba(255,255,255,.04);
+      color: #e4e4e7;
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: .14em;
       text-transform: uppercase;
+      letter-spacing: .14em;
       white-space: nowrap;
+      backdrop-filter: blur(10px);
     }
 
-    .hero-title {
-      font-size: clamp(32px, 6vw, 52px);
-      line-height: .94;
-      font-weight: 900;
-      font-style: italic;
-      letter-spacing: -.05em;
+    .badge-hot {
+      background: linear-gradient(135deg, #ff4d4d, #ff7a18);
+      border: none;
+      box-shadow: 0 10px 24px rgba(255,95,31,.3);
+      color: white;
+    }
+
+    .badge-good {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border: none;
+      box-shadow: 0 10px 24px rgba(37,99,235,.24);
+      color: white;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .stack {
       position: relative;
       width: 100%;
-      max-width: 420px;
+      max-width: 430px;
       height: 68vh;
-      margin: 0 auto;
+      margin: 18px auto 0;
       perspective: 1400px;
     }
 
     .deal-card {
       position: absolute;
       inset: 0;
-      overflow: hidden;
       border-radius: 34px;
-      background: linear-gradient(180deg, #11131a 0%, #090a0f 100%);
+      overflow: hidden;
+      background: linear-gradient(180deg, #121722 0%, #090b11 100%);
       border: 1px solid rgba(255,255,255,.08);
-      box-shadow:
-        0 30px 80px rgba(0,0,0,.42),
-        inset 0 1px 0 rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
       will-change: transform, opacity;
       transition: transform .42s cubic-bezier(.22,1,.36,1), opacity .28s ease;
     }
@@ -161,24 +202,23 @@
       padding: 28px;
       background:
         radial-gradient(circle at center, rgba(37,99,235,.16), transparent 35%),
-        linear-gradient(180deg, #161922 0%, #0d0f15 100%);
+        linear-gradient(180deg, #131825 0%, #090c13 100%);
     }
 
     .deal-overlay {
       position: absolute;
       inset: 0;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.08) 0%, rgba(0,0,0,.20) 36%, rgba(0,0,0,.88) 100%);
+      background: linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.16) 34%, rgba(0,0,0,.90) 100%);
       pointer-events: none;
     }
 
     .top-row {
       position: absolute;
-      top: 18px;
-      left: 18px;
-      right: 18px;
+      top: 16px;
+      left: 16px;
+      right: 16px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 10px;
       z-index: 2;
@@ -187,53 +227,72 @@
     .top-left {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 8px;
       min-width: 0;
-      flex-wrap: wrap;
-    }
-
-    .pill-hot {
-      background: linear-gradient(135deg, #ff4d4d, #ff7a18);
-      color: white;
-      border: none;
-      box-shadow: 0 8px 20px rgba(255,95,31,.28);
     }
 
     .content {
       position: absolute;
-      left: 22px;
-      right: 22px;
-      bottom: 22px;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
       z-index: 2;
     }
 
     .product-title {
+      margin: 0 0 10px;
       font-size: clamp(28px, 7vw, 42px);
       line-height: .95;
       font-weight: 900;
       font-style: italic;
       letter-spacing: -.05em;
-      margin: 0 0 10px;
       text-transform: uppercase;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
       text-wrap: balance;
     }
 
     .product-desc {
-      color: #d4d4d8;
+      margin: 0 0 16px;
+      color: var(--soft);
       font-size: 15px;
-      line-height: 1.5;
-      margin: 0 0 18px;
+      line-height: 1.55;
       display: -webkit-box;
-      -webkit-box-orient: vertical;
       -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+
+    .signals {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 0 0 14px;
+    }
+
+    .signal-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #f4f4f5;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
     }
 
     .bottom-row {
       display: flex;
-      align-items: end;
+      align-items: flex-end;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
     }
 
     .price-box {
@@ -243,106 +302,160 @@
     }
 
     .old-price {
+      margin: 0 0 2px;
       color: #71717a;
       font-size: 14px;
+      font-weight: 700;
       text-decoration: line-through;
-      margin-bottom: 2px;
-      font-weight: 600;
     }
 
     .new-price {
       font-size: clamp(30px, 8vw, 48px);
       line-height: 1;
       font-weight: 900;
-      letter-spacing: -.04em;
+      letter-spacing: -.05em;
     }
 
     .cta-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 136px;
-      padding: 16px 20px;
+      min-width: 150px;
+      padding: 16px 18px;
       border-radius: 22px;
       background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
       color: white;
       text-decoration: none;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
-      letter-spacing: .04em;
+      letter-spacing: .08em;
       text-transform: uppercase;
-      box-shadow: 0 16px 28px rgba(37,99,235,.28);
-    }
-
-    .cta-btn:active {
-      transform: translateY(1px);
+      box-shadow: 0 16px 30px rgba(37,99,235,.28);
     }
 
     .controls {
       width: 100%;
-      max-width: 360px;
+      max-width: 390px;
       margin: 22px auto 0;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 16px;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .side-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .action-btn {
       width: 72px;
       height: 72px;
-      border-radius: 999px;
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, #171922 0%, #0f1118 100%);
-      color: #8b8b98;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #171b24 0%, #0e1118 100%);
+      color: #9ca3af;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 30px;
-      box-shadow: 0 14px 26px rgba(0,0,0,.28);
+      font-size: 29px;
+      box-shadow: 0 16px 28px rgba(0,0,0,.3);
     }
 
     .action-btn-main {
-      width: 90px;
-      height: 90px;
-      border-radius: 999px;
+      width: 92px;
+      height: 92px;
       border: none;
-      background: linear-gradient(180deg, #ffffff 0%, #ededed 100%);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff 0%, #ececec 100%);
       color: #000;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 20px 45px rgba(255,255,255,.16);
+      box-shadow: 0 22px 44px rgba(255,255,255,.18);
+      position: relative;
+    }
+
+    .action-btn-share {
+      width: 72px;
+      height: 72px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #161a23 0%, #0e1219 100%);
+      color: #60a5fa;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 16px 28px rgba(0,0,0,.3);
+    }
+
+    .pulse-ring {
+      position: absolute;
+      inset: -8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      animation: pulseRing 2s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(.95); opacity: .7; }
+      70% { transform: scale(1.1); opacity: 0; }
+      100% { transform: scale(1.1); opacity: 0; }
+    }
+
+    .like-burst {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(.7);
+      font-size: 82px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 12px 24px rgba(255,255,255,.16));
+    }
+
+    .like-burst.show {
+      animation: burst .55s ease forwards;
+    }
+
+    @keyframes burst {
+      0% { opacity: 0; transform: translate(-50%, -40%) scale(.4); }
+      35% { opacity: 1; transform: translate(-50%, -54%) scale(1.08); }
+      100% { opacity: 0; transform: translate(-50%, -80%) scale(1.25); }
     }
 
     .status-box {
       width: 100%;
-      max-width: 420px;
+      max-width: 430px;
       height: 68vh;
-      margin: 0 auto;
+      margin: 18px auto 0;
       border-radius: 34px;
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, #11131a 0%, #090a0f 100%);
+      background: linear-gradient(180deg, #111722 0%, #090b11 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
       padding: 28px;
-      box-shadow: 0 30px 80px rgba(0,0,0,.42);
     }
 
     .status-title {
+      margin: 0 0 8px;
       font-size: 24px;
       font-weight: 900;
-      margin: 0 0 8px;
-      letter-spacing: -.03em;
+      letter-spacing: -.04em;
     }
 
     .status-text {
       margin: 0;
       color: var(--muted);
-      line-height: 1.6;
       font-size: 15px;
+      line-height: 1.6;
     }
 
     .visually-hidden {
@@ -358,7 +471,7 @@
     }
 
     @media (max-width: 420px) {
-      .page-shell {
+      .app-shell {
         padding-left: 14px;
         padding-right: 14px;
       }
@@ -368,66 +481,67 @@
         height: 66vh;
       }
 
-      .content {
-        left: 18px;
-        right: 18px;
-        bottom: 18px;
+      .cta-btn {
+        min-width: 138px;
+        padding: 15px 16px;
       }
 
-      .cta-btn {
-        min-width: 122px;
-        padding: 14px 16px;
+      .controls {
+        max-width: 100%;
       }
     }
   </style>
-
-  <!-- Vercel Web Analytics -->
-  <script type="module">
-    import { inject } from 'https://cdn.jsdelivr.net/npm/@vercel/analytics@1/dist/index.mjs';
-    inject();
-  </script>
 </head>
 <body>
-  <div class="page-shell">
-    <header class="w-full max-w-[980px] mx-auto mb-5">
-      <div class="flex items-start justify-between gap-3 mb-3">
-        <div>
-          <p class="hero-title m-0">TRENDPULSE</p>
-          <div class="mt-2 flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
-            <span class="text-[12px] uppercase tracking-[0.18em] text-zinc-400 font-extrabold">Live Amazon Deals</span>
+  <div class="app-shell">
+    <div class="container-max">
+      <header class="mb-4">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <p class="hero-title">TRENDPULSE</p>
+            <div class="mt-2 flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+              <span class="text-[12px] uppercase tracking-[0.18em] text-zinc-400 font-extrabold">Live Amazon Deals</span>
+            </div>
+          </div>
+
+          <div class="toolbar shrink-0">
+            <button id="refresh-btn" onclick="reloadDeals()" class="badge" aria-label="Refresh deals">Refresh</button>
+            <div id="deal-count" class="badge">0 Deals</div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 shrink-0">
-          <button id="refresh-btn" onclick="reloadDeals()" class="badge" aria-label="Refresh deals">Refresh</button>
-          <div id="deal-count" class="badge">0 Deals</div>
+        <p class="sub-copy">
+          Swipe through trending Amazon bargains, discover hot discounts, and open the best US deals instantly.
+        </p>
+      </header>
+
+      <main>
+        <h1 class="visually-hidden">Best Amazon deals today on TrendPulse</h1>
+        <section aria-label="Trending Amazon deals">
+          <div id="app" class="stack"></div>
+          <div id="like-burst" class="like-burst">❤️</div>
+        </section>
+      </main>
+
+      <footer class="controls" aria-label="Deal actions">
+        <div class="side-actions">
+          <button id="btn-nope" onclick="forceSwipe('left')" class="action-btn" aria-label="Skip this deal">✕</button>
+          <button onclick="shareCurrentDeal()" class="action-btn-share" aria-label="Share this deal">↗</button>
         </div>
-      </div>
 
-      <p class="m-0 text-sm text-zinc-400 max-w-[680px]">
-        Discover trending Amazon bargains, popular discounts, and fast-moving product deals for shoppers in the United States.
-      </p>
-    </header>
+        <button id="btn-like" onclick="forceSwipe('right')" class="action-btn-main" aria-label="Get this deal now">
+          <span class="pulse-ring"></span>
+          <svg class="w-11 h-11" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </button>
 
-    <main class="w-full">
-      <h1 class="visually-hidden">TrendPulse trending Amazon deals</h1>
-      <section aria-label="Trending Amazon deals">
-        <div id="app" class="stack"></div>
-      </section>
-    </main>
-
-    <footer class="controls" aria-label="Deal actions">
-      <button id="btn-nope" onclick="forceSwipe('left')" class="action-btn" aria-label="Skip this deal">✕</button>
-
-      <button id="btn-like" onclick="forceSwipe('right')" class="action-btn-main" aria-label="Open this deal">
-        <svg class="w-11 h-11" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-        </svg>
-      </button>
-
-      <button onclick="clearNopesAndReload()" class="action-btn" aria-label="Reset skipped deals">↺</button>
-    </footer>
+        <div class="side-actions">
+          <button onclick="clearNopesAndReload()" class="action-btn" aria-label="Reset skipped deals">↺</button>
+        </div>
+      </footer>
+    </div>
   </div>
 
   <script>
@@ -466,6 +580,10 @@
       load();
     }
 
+    function vibrate(ms = 40) {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
+
     function sanitizeText(text) {
       return String(text || '')
         .replace(/</g, '&lt;')
@@ -486,6 +604,9 @@
     function getDisplayImage(product) {
       if (product.image_url && String(product.image_url).trim() !== '') {
         return product.image_url;
+      }
+      if (product.asin) {
+        return `https://images.amazon.com/images/P/${product.asin}.01._SX500_.jpg`;
       }
       return '';
     }
@@ -515,9 +636,22 @@
     }
 
     function getDisplayScore(product) {
-      const score = Number(product.score || 0);
-      if (!Number.isFinite(score)) return 0;
-      return Math.round(score);
+      const base = Number(product.score || 0);
+      const likes = Number(product.likes || 0);
+      const nopes = Number(product.nopes || 0);
+      const smartScore = base + (likes * 2) - (nopes * 1);
+      return Number.isFinite(smartScore) ? Math.round(smartScore) : 0;
+    }
+
+    function getDealLabel(product) {
+      const discount = getDisplayDiscount(product);
+      const price = Number(product.price || 0);
+      const score = getDisplayScore(product);
+
+      if (discount >= 50) return '🔥 Huge Discount';
+      if (price > 0 && price <= 25) return '💸 Under $25';
+      if (score >= 40) return '⭐ Best Value';
+      return '⚡ Trending Now';
     }
 
     function updateDealCount() {
@@ -552,18 +686,18 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600">
         <defs>
           <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stop-color="%23121825"/>
-            <stop offset="100%" stop-color="%23090b11"/>
+            <stop offset="0%" stop-color="%23131a28"/>
+            <stop offset="100%" stop-color="%23070a10"/>
           </linearGradient>
         </defs>
         <rect width="1200" height="1600" fill="url(%23g)"/>
-        <circle cx="600" cy="440" r="220" fill="%232563eb" opacity="0.12"/>
-        <text x="600" y="320" text-anchor="middle" fill="white" font-size="70" font-family="Arial, sans-serif" font-weight="800">TrendPulse</text>
-        <text x="600" y="410" text-anchor="middle" fill="%23a1a1aa" font-size="34" font-family="Arial, sans-serif">${safeCategory}</text>
-        <text x="600" y="760" text-anchor="middle" fill="white" font-size="68" font-family="Arial, sans-serif" font-weight="900">No product image</text>
-        <text x="600" y="860" text-anchor="middle" fill="%23cbd5e1" font-size="34" font-family="Arial, sans-serif">Tap to view the deal on Amazon</text>
-        <foreignObject x="120" y="980" width="960" height="360">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="color:white;font-size:52px;line-height:1.1;font-family:Arial,sans-serif;font-weight:900;text-align:center;">
+        <circle cx="600" cy="430" r="220" fill="%232563eb" opacity="0.14"/>
+        <text x="600" y="320" text-anchor="middle" fill="white" font-size="72" font-family="Arial, sans-serif" font-weight="800">TrendPulse</text>
+        <text x="600" y="405" text-anchor="middle" fill="%23cbd5e1" font-size="34" font-family="Arial, sans-serif">${safeCategory}</text>
+        <text x="600" y="760" text-anchor="middle" fill="white" font-size="66" font-family="Arial, sans-serif" font-weight="900">Image unavailable</text>
+        <text x="600" y="850" text-anchor="middle" fill="%23a1a1aa" font-size="34" font-family="Arial, sans-serif">Open the deal to view it on Amazon</text>
+        <foreignObject x="120" y="980" width="960" height="340">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="color:white;font-size:52px;line-height:1.08;font-family:Arial,sans-serif;font-weight:900;text-align:center;">
             ${safeName}
           </div>
         </foreignObject>
@@ -575,7 +709,7 @@
 
       isLoading = true;
       setButtonsDisabled(true);
-      renderState('Loading deals...', 'Fetching the latest trending Amazon offers.');
+      renderState('Loading deals...', 'Fetching the hottest Amazon deals right now.');
 
       try {
         const skippedIds = getSkippedIds();
@@ -605,25 +739,27 @@
           .not('asin', 'is', null)
           .order('score', { ascending: false })
           .order('discount_percent', { ascending: false })
-          .limit(60);
+          .limit(100);
 
         if (error) {
           console.error('Supabase error:', error);
-          renderState('Unable to load deals', error.message || 'Please try again in a moment.', true);
+          renderState('Unable to load deals', error.message || 'Please try again shortly.', true);
           return;
         }
 
-        products = (data || []).filter(item => {
-          if (!item || !item.id || !item.name || !item.asin) return false;
-          if (skippedIds.includes(item.id)) return false;
-          return true;
-        });
+        products = (data || [])
+          .filter(item => {
+            if (!item || !item.id || !item.name || !item.asin) return false;
+            if (skippedIds.includes(item.id)) return false;
+            return true;
+          })
+          .sort((a, b) => getDisplayScore(b) - getDisplayScore(a));
 
         currentIndex = 0;
         updateDealCount();
 
         if (!products.length) {
-          renderState('No deals available right now', 'Please check back later or reset your skipped deals.');
+          renderState('No deals available', 'Refresh later or reset your skipped deals.');
           return;
         }
 
@@ -655,14 +791,17 @@
         card.style.zIndex = 10 - i;
         card.style.transform = `scale(${1 - i * 0.05}) translateY(${i * 16}px)`;
 
-        const imageUrl = getDisplayImage(p) || createFallbackSVG(p.name, p.category);
-        const useFallbackClass = !getDisplayImage(p);
+        const displayImage = getDisplayImage(p);
+        const fallbackImage = createFallbackSVG(p.name, p.category);
+        const imageUrl = displayImage || fallbackImage;
+        const useFallbackClass = !displayImage;
         const shopUrl = getDisplayAffiliateLink(p);
         const safeName = sanitizeText(p.name);
         const safeDescription = sanitizeText(p.description || '');
         const safeCategory = sanitizeText(p.category || 'All');
         const discount = getDisplayDiscount(p);
         const score = getDisplayScore(p);
+        const dealLabel = getDealLabel(p);
 
         const hasOriginalPrice = p.original_price !== null && p.original_price !== undefined && p.original_price !== '';
         const hasPrice = p.price !== null && p.price !== undefined && p.price !== '';
@@ -680,10 +819,10 @@
             src="${imageUrl}"
             alt="${safeName}"
             class="deal-bg ${useFallbackClass ? 'fallback' : ''}"
-            loading="eager"
+            loading="${i === 0 ? 'eager' : 'lazy'}"
             decoding="async"
-            fetchpriority="high"
-            onerror="this.onerror=null; this.src='${createFallbackSVG(p.name, p.category)}'; this.classList.add('fallback');"
+            fetchpriority="${i === 0 ? 'high' : 'low'}"
+            onerror="this.onerror=null; this.src='${fallbackImage}'; this.classList.add('fallback');"
           >
 
           <div class="deal-overlay"></div>
@@ -691,8 +830,8 @@
           <div class="top-row">
             <div class="top-left">
               ${discount > 0
-                ? `<span class="badge pill-hot">-${discount}% Off</span>`
-                : `<span class="badge">Hot Deal</span>`
+                ? `<span class="badge badge-hot">-${discount}% Off</span>`
+                : `<span class="badge badge-good">Hot Deal</span>`
               }
               <span class="badge">${safeCategory}</span>
             </div>
@@ -701,7 +840,14 @@
 
           <div class="content">
             <h2 class="product-title">${safeName}</h2>
-            <p class="product-desc">${safeDescription || 'Trending Amazon product deal. Tap to check the latest price and availability.'}</p>
+
+            <div class="signals">
+              <span class="signal-pill">${sanitizeText(dealLabel)}</span>
+              ${hasPrice ? `<span class="signal-pill">💵 ${formatPrice(p.price)}</span>` : ''}
+              ${discount > 0 ? `<span class="signal-pill">📉 ${discount}% off</span>` : ''}
+            </div>
+
+            <p class="product-desc">${safeDescription || 'Trending Amazon product deal. Tap below to check the latest price and availability.'}</p>
 
             <div class="bottom-row">
               <div class="price-box">
@@ -714,9 +860,9 @@
                 target="_blank"
                 rel="nofollow sponsored noopener noreferrer"
                 class="cta-btn"
-                aria-label="Shop ${safeName} on Amazon"
+                aria-label="Get this deal now on Amazon"
               >
-                Shop Now
+                🔥 Get Deal Now
               </a>
             </div>
           </div>
@@ -728,6 +874,37 @@
           initDrag(card);
         }
       });
+    }
+
+    function showLikeBurst() {
+      const burst = document.getElementById('like-burst');
+      burst.classList.remove('show');
+      void burst.offsetWidth;
+      burst.classList.add('show');
+    }
+
+    function getCurrentProduct() {
+      return products[currentIndex] || null;
+    }
+
+    async function shareCurrentDeal() {
+      const currentProduct = getCurrentProduct();
+      if (!currentProduct) return;
+
+      const url = getDisplayAffiliateLink(currentProduct);
+      const title = currentProduct.name || 'Trending deal';
+      const text = `🔥 Found this great deal on TrendPulse: ${title}`;
+
+      try {
+        if (navigator.share) {
+          await navigator.share({ title, text, url });
+        } else {
+          await navigator.clipboard.writeText(url);
+          alert('Deal link copied to clipboard');
+        }
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
     }
 
     function initDrag(el) {
@@ -746,16 +923,16 @@
       const onTouchMove = (e) => {
         if (!isDragging || isAnimating || isLoading) return;
         moveX = e.touches[0].clientX - startX;
-        const rotation = moveX / 18;
+        const rotation = moveX / 16;
         el.style.transform = `translate3d(${moveX}px,0,0) rotate(${rotation}deg)`;
       };
 
       const onTouchEnd = () => {
         if (!isDragging || isAnimating || isLoading) return;
         isDragging = false;
-        el.style.transition = 'transform .35s ease';
+        el.style.transition = 'transform .28s ease';
 
-        if (Math.abs(moveX) > 120) {
+        if (Math.abs(moveX) > 105) {
           const direction = moveX > 0 ? 'right' : 'left';
           swipeCurrent(direction);
         } else {
@@ -771,32 +948,36 @@
     function swipeCurrent(direction) {
       if (isAnimating || isLoading) return;
 
-      const currentProduct = products[currentIndex];
+      const currentProduct = getCurrentProduct();
       const card = document.querySelector('.deal-card');
       if (!card || !currentProduct) return;
 
       isAnimating = true;
+      vibrate(direction === 'right' ? 50 : 28);
 
       if (direction === 'left') {
         recordSkip(currentProduct.id);
       }
 
       if (direction === 'right') {
+        showLikeBurst();
         const link = getDisplayAffiliateLink(currentProduct);
-        if (link && link !== '#') {
-          window.open(link, '_blank', 'noopener,noreferrer');
-        }
+        setTimeout(() => {
+          if (link && link !== '#') {
+            window.open(link, '_blank', 'noopener,noreferrer');
+          }
+        }, 120);
       }
 
-      card.style.transition = 'transform .35s ease, opacity .25s ease';
-      card.style.opacity = '0.9';
-      card.style.transform = `translate3d(${direction === 'right' ? 1000 : -1000}px,0,0) rotate(${direction === 'right' ? 18 : -18}deg)`;
+      card.style.transition = 'transform .26s ease, opacity .22s ease';
+      card.style.opacity = '0.88';
+      card.style.transform = `translate3d(${direction === 'right' ? 1100 : -1100}px,0,0) rotate(${direction === 'right' ? 16 : -16}deg)`;
 
       setTimeout(() => {
         currentIndex++;
         isAnimating = false;
         renderStack();
-      }, 250);
+      }, 220);
     }
 
     window.forceSwipe = function(dir) {
