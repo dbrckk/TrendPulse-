@@ -3,20 +3,15 @@ import { createClient } from "@supabase/supabase-js";
 import * as cheerio from "cheerio";
 
 const parser = new Parser({
-  timeout: 15000,
+  timeout: 20000,
   headers: {
-    "User-Agent": "TrendPulseBot/3.0"
+    "User-Agent": "TrendPulseBot/4.0"
   }
 });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AFFILIATE_TAG = process.env.AFFILIATE_TAG || "Drackk-20";
-
-const TARGET_DEALS_ON_EMPTY = 100;
-const MIN_ACTIVE_DEALS = 50;
-const MAX_ACTIVE_DEALS = 300;
-const ITEMS_PER_FEED = 40;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error("Missing required env vars: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
@@ -29,6 +24,12 @@ const FEEDS = [
   "https://moneysavingmom.com/category/amazon-deals/feed",
   "https://www.bargainbabe.com/amazon-deals/feed/"
 ];
+
+const INITIAL_TARGET_ON_EMPTY = 100;
+const MIN_ACTIVE_DEALS = 80;
+const MAX_ACTIVE_DEALS = 400;
+const ITEMS_PER_FEED = 80;
+const REQUEST_DELAY_MS = 1000;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -144,7 +145,7 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/3.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/4.0"
       }
     });
 
@@ -166,7 +167,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/3.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/4.0"
       }
     });
 
@@ -331,11 +332,21 @@ async function extractDealFromArticle(item) {
 async function fetchFeedItems(feedUrl) {
   try {
     const feed = await parser.parseURL(feedUrl);
-    return (feed.items || []).slice(0, 12);
+    return (feed.items || []).slice(0, ITEMS_PER_FEED);
   } catch (error) {
     console.log(`Feed error for ${feedUrl}: ${error.message}`);
     return [];
   }
+}
+
+async function getActiveDealsCount() {
+  const { count, error } = await sb
+    .from("products")
+    .select("*", { count: "exact", head: true })
+    .eq("is_active", true);
+
+  if (error) throw error;
+  return count || 0;
 }
 
 async function upsertProducts(products) {
@@ -357,15 +368,57 @@ async function upsertProducts(products) {
   console.log(`${products.length} products upserted`);
 }
 
+async function enforceMaxActiveDeals(maxDeals) {
+  const { data, error } = await sb
+    .from("products")
+    .select("id, score, updated_at")
+    .eq("is_active", true)
+    .order("score", { ascending: false })
+    .order("updated_at", { ascending: false });
+
+  if (error) throw error;
+  if (!data || data.length <= maxDeals) return;
+
+  const idsToDisable = data.slice(maxDeals).map(row => row.id);
+  if (!idsToDisable.length) return;
+
+  const { error: updateError } = await sb
+    .from("products")
+    .update({
+      is_active: false,
+      updated_at: new Date().toISOString()
+    })
+    .in("id", idsToDisable);
+
+  if (updateError) throw updateError;
+
+  console.log(`${idsToDisable.length} extra deals disabled to keep max ${maxDeals}`);
+}
+
 async function main() {
-  console.log("Starting sync V3");
+  console.log("Starting sync V4");
+
+  const activeCountBefore = await getActiveDealsCount();
+  console.log(`Active deals before sync: ${activeCountBefore}`);
+
+  let targetCount;
+  if (activeCountBefore === 0) {
+    targetCount = INITIAL_TARGET_ON_EMPTY;
+  } else if (activeCountBefore < MIN_ACTIVE_DEALS) {
+    targetCount = MIN_ACTIVE_DEALS;
+  } else {
+    targetCount = activeCountBefore;
+  }
+
+  targetCount = Math.min(targetCount, MAX_ACTIVE_DEALS);
+  console.log(`Target count for this run: ${targetCount}`);
 
   const allItems = [];
   for (const feedUrl of FEEDS) {
     const items = await fetchFeedItems(feedUrl);
     console.log(`${items.length} items loaded from ${feedUrl}`);
     allItems.push(...items);
-    await sleep(1200);
+    await sleep(REQUEST_DELAY_MS);
   }
 
   const uniqueArticles = [];
@@ -392,14 +445,25 @@ async function main() {
       seenAsins.add(product.asin);
       results.push(product);
 
-      await sleep(1200);
+      if (results.length >= targetCount) {
+        console.log(`Reached target of ${targetCount} valid products`);
+        break;
+      }
+
+      await sleep(REQUEST_DELAY_MS);
     } catch (error) {
       console.log(`Article error: ${error.message}`);
     }
   }
 
   console.log(`${results.length} valid products found`);
+
   await upsertProducts(results);
+  await enforceMaxActiveDeals(MAX_ACTIVE_DEALS);
+
+  const activeCountAfter = await getActiveDealsCount();
+  console.log(`Active deals after sync: ${activeCountAfter}`);
+
   console.log("Sync complete");
 }
 
