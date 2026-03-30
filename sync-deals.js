@@ -1,17 +1,19 @@
 import Parser from "rss-parser";
 import { createClient } from "@supabase/supabase-js";
 import * as cheerio from "cheerio";
+import fs from "fs";
 
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/5.0"
+    "User-Agent": "TrendPulseBot/6.0"
   }
 });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AFFILIATE_TAG = process.env.AFFILIATE_TAG || "Drackk-20";
+const SITE_URL = process.env.SITE_URL || "https://trend-pulse.shop";
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error("Missing required env vars: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
@@ -19,9 +21,6 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-/**
- * Existing feeds kept + DealNews official RSS feeds
- */
 const FEEDS = [
   "https://hip2save.com/feed/",
   "https://moneysavingmom.com/category/amazon-deals/feed",
@@ -51,6 +50,27 @@ function cleanText(input) {
     .replace(/&quot;/g, '"')
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function slugify(text) {
+  return String(text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 80);
+}
+
+function escapeXml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 function isValidAsin(asin) {
@@ -157,7 +177,7 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/5.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/6.0"
       }
     });
 
@@ -179,7 +199,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/5.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/6.0"
       }
     });
 
@@ -403,8 +423,55 @@ async function enforceMaxActiveDeals(maxDeals) {
   console.log(`${idsToDisable.length} extra deals disabled to keep max ${maxDeals}`);
 }
 
+async function generateSitemap() {
+  const { data, error } = await sb
+    .from("products")
+    .select("asin, name, updated_at")
+    .eq("is_active", true)
+    .order("score", { ascending: false })
+    .limit(MAX_ACTIVE_DEALS);
+
+  if (error) throw error;
+
+  const staticUrls = [
+    { loc: `${SITE_URL}/`, changefreq: "hourly", priority: "1.0" },
+    { loc: `${SITE_URL}/best-amazon-deals.html`, changefreq: "hourly", priority: "0.95" },
+    { loc: `${SITE_URL}/deals.html`, changefreq: "hourly", priority: "0.9" },
+    { loc: `${SITE_URL}/tech.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/kitchen.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/beauty.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/home.html`, changefreq: "daily", priority: "0.8" }
+  ];
+
+  const dealUrls = (data || []).map(item => {
+    const slug = slugify(item.name);
+    return {
+      loc: `${SITE_URL}/deal/${item.asin}/${slug}`,
+      lastmod: item.updated_at ? new Date(item.updated_at).toISOString() : new Date().toISOString(),
+      changefreq: "daily",
+      priority: "0.7"
+    };
+  });
+
+  const allUrls = [...staticUrls, ...dealUrls];
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+${allUrls.map(url => `  <url>
+    <loc>${escapeXml(url.loc)}</loc>
+    ${url.lastmod ? `<lastmod>${escapeXml(url.lastmod)}</lastmod>` : ""}
+    <changefreq>${url.changefreq}</changefreq>
+    <priority>${url.priority}</priority>
+  </url>`).join("\n")}
+</urlset>
+`;
+
+  fs.writeFileSync("sitemap.xml", xml, "utf8");
+  console.log(`sitemap.xml generated with ${allUrls.length} URLs`);
+}
+
 async function main() {
-  console.log("Starting sync V5");
+  console.log("Starting sync V6");
 
   const activeCountBefore = await getActiveDealsCount();
   console.log(`Active deals before sync: ${activeCountBefore}`);
@@ -471,6 +538,8 @@ async function main() {
 
   const activeCountAfter = await getActiveDealsCount();
   console.log(`Active deals after sync: ${activeCountAfter}`);
+
+  await generateSitemap();
 
   console.log("Sync complete");
 }
