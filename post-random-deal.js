@@ -11,6 +11,8 @@ const X_PASSWORD = process.env.X_PASSWORD;
 const X_EMAIL = process.env.X_EMAIL || "";
 
 const STATE_FILE = "tweet-state.json";
+const SESSION_FILE = "x-session.json";
+
 const MIN_MINUTES = 40;
 const MAX_MINUTES = 80;
 
@@ -44,28 +46,39 @@ function isoAfterMinutes(minutes) {
   return new Date(Date.now() + minutes * 60 * 1000).toISOString();
 }
 
-function loadState() {
-  if (!fs.existsSync(STATE_FILE)) {
-    return {
-      next_post_at: isoAfterMinutes(randomDelayMinutes()),
-      last_posted_asin: null,
-      last_posted_at: null
-    };
-  }
-
+function loadJsonFile(filepath, fallbackValue) {
+  if (!fs.existsSync(filepath)) return fallbackValue;
   try {
-    return JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
+    return JSON.parse(fs.readFileSync(filepath, "utf8"));
   } catch {
-    return {
-      next_post_at: isoAfterMinutes(randomDelayMinutes()),
-      last_posted_asin: null,
-      last_posted_at: null
-    };
+    return fallbackValue;
   }
 }
 
+function saveJsonFile(filepath, value) {
+  fs.writeFileSync(filepath, JSON.stringify(value, null, 2), "utf8");
+}
+
+function loadState() {
+  return loadJsonFile(STATE_FILE, {
+    next_post_at: isoAfterMinutes(randomDelayMinutes()),
+    last_posted_asin: null,
+    last_posted_at: null
+  });
+}
+
 function saveState(state) {
-  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), "utf8");
+  saveJsonFile(STATE_FILE, state);
+}
+
+function loadSession() {
+  return loadJsonFile(SESSION_FILE, {
+    cookies: []
+  });
+}
+
+function saveSession(session) {
+  saveJsonFile(SESSION_FILE, session);
 }
 
 function shouldPost(state) {
@@ -150,6 +163,53 @@ async function clickButtonByText(page, textOptions) {
   return clicked;
 }
 
+async function saveCookies(page) {
+  const browserCookies = await page.browserContext().cookies();
+  saveSession({ cookies: browserCookies });
+  console.log(`Saved ${browserCookies.length} cookies to ${SESSION_FILE}`);
+}
+
+async function loadCookies(page) {
+  const session = loadSession();
+  if (!session.cookies || !session.cookies.length) {
+    console.log("No saved session cookies found");
+    return false;
+  }
+
+  try {
+    await page.browserContext().setCookie(...session.cookies);
+    console.log(`Loaded ${session.cookies.length} cookies from ${SESSION_FILE}`);
+    return true;
+  } catch (err) {
+    console.log("Could not load saved cookies:", err.message);
+    return false;
+  }
+}
+
+async function isLoggedIn(page) {
+  await page.goto("https://x.com/home", {
+    waitUntil: "domcontentloaded",
+    timeout: 60000
+  });
+
+  await page.waitForTimeout(5000);
+
+  const url = page.url().toLowerCase();
+  if (url.includes("/home")) {
+    const hasComposer = await page.evaluate(() => {
+      return !!document.querySelector('a[href="/compose/post"], div[data-testid="SideNav_NewTweet_Button"], div[data-testid="tweetTextarea_0"]');
+    });
+    if (hasComposer) return true;
+  }
+
+  const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
+  if (bodyText.includes("for you") || bodyText.includes("following") || bodyText.includes("what is happening")) {
+    return true;
+  }
+
+  return false;
+}
+
 async function loginToX(page) {
   await page.goto("https://x.com/i/flow/login", {
     waitUntil: "domcontentloaded",
@@ -186,11 +246,11 @@ async function loginToX(page) {
 
   await page.waitForTimeout(3000);
 
-  const emailChallengeVisible = await page.evaluate(() => {
-    return document.body.innerText.toLowerCase().includes("phone or email") ||
-           document.body.innerText.toLowerCase().includes("email") ||
-           document.body.innerText.toLowerCase().includes("enter your phone number or username");
-  });
+  const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
+  const emailChallengeVisible =
+    bodyText.includes("phone or email") ||
+    bodyText.includes("enter your phone number or username") ||
+    bodyText.includes("email");
 
   if (emailChallengeVisible && X_EMAIL) {
     const challengeInputs = [
@@ -244,21 +304,40 @@ async function loginToX(page) {
     await page.keyboard.press("Enter");
   }
 
-  await page.waitForTimeout(6000);
+  await page.waitForTimeout(7000);
 
-  const currentUrl = page.url();
-  if (currentUrl.includes("login") || currentUrl.includes("flow")) {
-    const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
+  const loggedIn = await isLoggedIn(page);
+  if (!loggedIn) {
+    const finalBody = await page.evaluate(() => document.body.innerText.toLowerCase());
     if (
-      bodyText.includes("check your email") ||
-      bodyText.includes("verify") ||
-      bodyText.includes("confirmation code") ||
-      bodyText.includes("captcha") ||
-      bodyText.includes("suspicious")
+      finalBody.includes("confirmation code") ||
+      finalBody.includes("verify") ||
+      finalBody.includes("check your email") ||
+      finalBody.includes("captcha") ||
+      finalBody.includes("suspicious")
     ) {
-      throw new Error("X requested an extra verification step (email/code/captcha). Manual intervention needed.");
+      throw new Error("X requested an extra verification step (code/email/captcha).");
     }
+    throw new Error("Login to X failed");
   }
+
+  await saveCookies(page);
+}
+
+async function ensureLoggedIn(page) {
+  const loaded = await loadCookies(page);
+
+  if (loaded) {
+    const ok = await isLoggedIn(page);
+    if (ok) {
+      console.log("Using saved X session");
+      return;
+    }
+    console.log("Saved session is no longer valid");
+  }
+
+  console.log("Performing fresh X login");
+  await loginToX(page);
 }
 
 async function publishTweet(page, text) {
@@ -280,7 +359,7 @@ async function publishTweet(page, text) {
     try {
       await page.waitForSelector(selector, { timeout: 10000 });
       await page.click(selector);
-      await page.keyboard.type(text, { delay: 20 });
+      await page.keyboard.type(text, { delay: 18 });
       editorFound = true;
       break;
     } catch {}
@@ -298,6 +377,7 @@ async function publishTweet(page, text) {
   }
 
   await page.waitForTimeout(5000);
+  await saveCookies(page);
 }
 
 async function postDealToX(text) {
@@ -315,7 +395,7 @@ async function postDealToX(text) {
     await page.setViewport({ width: 1366, height: 900 });
     await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
 
-    await loginToX(page);
+    await ensureLoggedIn(page);
     await publishTweet(page, text);
   } finally {
     await browser.close();
