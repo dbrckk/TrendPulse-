@@ -39,7 +39,6 @@
     }
   </style>
 </head>
-
 <body class="max-w-5xl mx-auto px-4 py-6">
 
   <header class="flex justify-between items-center mb-6">
@@ -54,7 +53,7 @@
       <div class="flex items-end justify-between mb-4 gap-4">
         <div>
           <h2 class="text-2xl font-black tracking-tight">🔥 Similar Deals</h2>
-          <p class="text-zinc-400 text-sm mt-1">More offers from the same category.</p>
+          <p class="text-zinc-400 text-sm mt-1">More live deals from the same category.</p>
         </div>
       </div>
       <div id="related" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
@@ -68,8 +67,18 @@
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
     const sb = supabase.createClient(SB_URL, SB_KEY);
 
-    const pathParts = window.location.pathname.split("/").filter(Boolean);
-    const asin = pathParts[1] || new URLSearchParams(window.location.search).get("asin");
+    function getAsinFromUrl() {
+      const qAsin = new URLSearchParams(window.location.search).get("asin");
+      if (qAsin) return qAsin;
+
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const idx = parts.indexOf("deal");
+      if (idx !== -1 && parts[idx + 1]) return parts[idx + 1];
+
+      return null;
+    }
+
+    const asin = getAsinFromUrl();
 
     function slug(text) {
       return String(text || "")
@@ -105,20 +114,16 @@
       return [
         `https://m.media-amazon.com/images/I/${asin}.jpg`,
         `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`,
-        `https://images.amazon.com/images/P/${asin}.01._SX500_.jpg`,
-        `https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&MarketPlace=US&Operation=GetImage&ASIN=${asin}&Service=Amazon&TemplateId=LargeImage`
+        `https://images.amazon.com/images/P/${asin}.01._SX500_.jpg`
       ];
     }
 
     function getBestImageList(product) {
       const list = [];
-
       if (product?.image_url) list.push(product.image_url);
-
       for (const img of getAmazonImageCandidates(product?.asin || "")) {
         if (img && !list.includes(img)) list.push(img);
       }
-
       list.push(fallbackSvg(product?.name || "Trending Deal"));
       return list;
     }
@@ -130,23 +135,10 @@
       return `https://www.amazon.com/dp/${product.asin}?tag=${AMAZON_TAG}&linkCode=ogi&th=1&psc=1`;
     }
 
-    function trackOnce(key) {
-      try {
-        if (localStorage.getItem(key)) return false;
-        localStorage.setItem(key, "1");
-        return true;
-      } catch {
-        return true;
-      }
-    }
-
     async function trackEvent(asin, type) {
       try {
-        await sb.from("analytics").insert({
-          asin: asin,
-          event: type
-        });
-      } catch (e) {}
+        await sb.from("analytics").insert({ asin, event: type });
+      } catch {}
     }
 
     function getBadges(p) {
@@ -202,9 +194,7 @@
       try {
         const images = JSON.parse(imgEl.dataset.images || "[]");
         let index = Number(imgEl.dataset.index || 0) + 1;
-
         if (index >= images.length) return;
-
         imgEl.dataset.index = String(index);
         imgEl.src = images[index];
       } catch {}
@@ -212,8 +202,7 @@
 
     async function handleBuyClick(product) {
       await trackEvent(product.asin, "click");
-      const finalUrl = normalizeAffiliateLink(product);
-      window.open(finalUrl, "_blank", "noopener,noreferrer");
+      window.open(normalizeAffiliateLink(product), "_blank", "noopener,noreferrer");
     }
 
     async function loadProduct() {
@@ -243,12 +232,9 @@
         return;
       }
 
-      if (trackOnce("view_" + data.asin)) {
-        trackEvent(data.asin, "view");
-      }
+      await trackEvent(data.asin, "view");
 
-      const dealSlug = slug(data.name);
-      const canonicalUrl = `${SITE_URL}/deal/${data.asin}/${dealSlug}/`;
+      const canonicalUrl = `${SITE_URL}/deal.html?asin=${encodeURIComponent(data.asin)}`;
       const imageList = getBestImageList(data);
 
       setSeo(data, imageList[0], canonicalUrl);
@@ -259,11 +245,7 @@
         <article class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 md:p-7">
           <div class="grid md:grid-cols-2 gap-8 items-start">
             <div>
-              ${buildSafeImageTag(
-                imageList,
-                data.name,
-                "w-full h-80 md:h-[420px] object-contain bg-white rounded-2xl"
-              )}
+              ${buildSafeImageTag(imageList, data.name, "w-full h-80 md:h-[420px] object-contain bg-white rounded-2xl")}
             </div>
 
             <div>
@@ -272,25 +254,21 @@
               </div>
 
               <div class="text-red-400 font-black text-sm mb-2">
-                ${data.discount_percent ? `🔥 ${Math.round(data.discount_percent)}% OFF` : "🔥 Deal Available"}
+                ${data.discount_percent ? `🔥 ${Math.round(data.discount_percent)}% OFF` : "🔥 Live Deal"}
               </div>
 
-              <h1 class="text-3xl md:text-4xl font-black tracking-tight leading-tight mb-4">
-                ${data.name}
-              </h1>
+              <h1 class="text-3xl md:text-4xl font-black tracking-tight leading-tight mb-4">${data.name}</h1>
 
               <div class="flex items-end gap-4 mb-6 flex-wrap">
                 <div class="text-4xl font-black">${formatPrice(data.price)}</div>
-                <div class="text-zinc-500 line-through text-xl">${formatPrice(data.original_price || ((Number(data.price) || 0) + 20))}</div>
+                ${data.original_price ? `<div class="text-zinc-500 line-through text-xl">${formatPrice(data.original_price)}</div>` : ""}
               </div>
 
               <div class="text-zinc-400 leading-7 mb-6">
-                ${data.description || "Trending Amazon deal worth checking right now. Prices can change quickly, so it may be worth looking before the offer expires."}
+                ${data.description || "Trending Amazon deal worth checking right now. Prices may change quickly."}
               </div>
 
-              <button
-                onclick='handleBuyClick(${JSON.stringify(data).replace(/'/g, "&apos;")})'
-                class="block w-full text-center bg-blue-600 hover:bg-blue-500 transition py-4 rounded-2xl font-black text-lg">
+              <button id="buy-btn" class="block w-full text-center bg-blue-600 hover:bg-blue-500 transition py-4 rounded-2xl font-black text-lg">
                 👉 View Deal on Amazon
               </button>
 
@@ -313,8 +291,8 @@
         </article>
       `;
 
+      document.getElementById("buy-btn").addEventListener("click", () => handleBuyClick(data));
       loadRelated(data.category, data.asin);
-      window.handleBuyClick = handleBuyClick;
     }
 
     async function loadRelated(category, currentAsin) {
@@ -332,17 +310,12 @@
 
       (data || []).forEach(p => {
         const imageList = getBestImageList(p);
-
         const card = document.createElement("a");
-        card.href = `/deal/${p.asin}/${slug(p.name)}/`;
+        card.href = `/deal.html?asin=${encodeURIComponent(p.asin)}`;
         card.className = "bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden block";
 
         card.innerHTML = `
-          ${buildSafeImageTag(
-            imageList,
-            p.name,
-            "w-full h-36 object-cover bg-white"
-          )}
+          ${buildSafeImageTag(imageList, p.name, "w-full h-36 object-cover bg-white")}
           <div class="p-3">
             <div class="text-red-400 font-black text-xs mb-1">
               ${p.discount_percent ? `-${Math.round(p.discount_percent)}%` : "Deal"}
