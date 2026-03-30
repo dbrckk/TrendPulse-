@@ -13,6 +13,11 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AFFILIATE_TAG = process.env.AFFILIATE_TAG || "Drackk-20";
 
+const TARGET_DEALS_ON_EMPTY = 100;
+const MIN_ACTIVE_DEALS = 50;
+const MAX_ACTIVE_DEALS = 300;
+const ITEMS_PER_FEED = 40;
+
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error("Missing required env vars: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
 }
