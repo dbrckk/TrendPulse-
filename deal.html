@@ -36,13 +36,25 @@ body { background:#000; color:white; font-family:system-ui; }
 
 <script>
 const SB_URL = "https://hyrofyfhmabhlqbucjdp.supabase.co";
-const SB_KEY = "TON_ANON_KEY_ICI";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
+
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 // GET ASIN FROM URL
 const path = window.location.pathname.split("/");
 const asin = path[2];
 
+// TRACK EVENT
+async function trackEvent(asin, type){
+  try {
+    await sb.from("analytics").insert({
+      asin: asin,
+      event: type
+    });
+  } catch(e) {}
+}
+
+// LOAD PRODUCT
 async function loadProduct() {
 
   const { data } = await sb
@@ -53,10 +65,13 @@ async function loadProduct() {
 
   if(!data) return;
 
+  // TRACK VIEW
+  trackEvent(data.asin, "view");
+
   const img = data.image_url || `https://images.amazon.com/images/P/${data.asin}.01._SX500_.jpg`;
 
   // SEO
-  document.title = `${data.name} - ${data.price}$ | TrendPulse`;
+  document.title = `${data.name} - $${data.price} | TrendPulse`;
   document.getElementById("desc").content =
     `${data.name} now at $${data.price}. Save ${Math.round(data.discount_percent)}% today.`;
 
@@ -81,7 +96,7 @@ async function loadProduct() {
       </div>
 
       <a href="${data.affiliate_link}" target="_blank"
-         onclick="trackClick('${data.asin}')"
+         onclick="trackEvent('${data.asin}', 'click')"
          class="block text-center bg-blue-600 py-4 rounded-xl font-black text-lg">
         👉 View Deal on Amazon
       </a>
@@ -105,6 +120,7 @@ async function loadRelated(cat) {
     .limit(6);
 
   const container = document.getElementById("related");
+  container.innerHTML = "";
 
   data.forEach(p => {
     const div = document.createElement("a");
@@ -121,13 +137,6 @@ async function loadRelated(cat) {
 
     container.appendChild(div);
   });
-}
-
-// TRACK CLICK
-async function trackClick(asin){
-  await sb.from("products").update({
-    clicks: (Math.random()*2+1) // simple boost (amélioration ensuite)
-  }).eq("asin", asin);
 }
 
 // SLUG
