@@ -1,1 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
+  <title>Amazon Deals Today | TrendPulse</title>
+  <meta name="description" content="Browse trending Amazon deals updated live. Discover hot discounts, top-rated products, and the best deals in the US." />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://trend-pulse.shop/deals.html" />
+  <meta name="theme-color" content="#050505" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Amazon Deals Today | TrendPulse" />
+  <meta property="og:description" content="Browse trending Amazon deals updated live for shoppers in the US." />
+  <meta property="og:url" content="https://trend-pulse.shop/deals.html" />
+  <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Amazon Deals Today | TrendPulse" />
+  <meta name="twitter:description" content="Browse trending Amazon deals updated live for shoppers in the US." />
+  <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <link rel="preconnect" href="https://hyrofyfhmabhlqbucjdp.supabase.co" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"CollectionPage",
+    "name":"Amazon Deals Today",
+    "url":"https://trend-pulse.shop/deals.html",
+    "description":"Trending Amazon deals and discounted products in the United States."
+  }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    body { margin: 0; font-family: Inter, sans-serif; background: #050505; color: white; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    .nav { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 24px; }
+    .nav a {
+      padding: 10px 14px; border-radius: 999px; text-decoration: none; color: #e4e4e7;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); font-weight: 700; font-size: 13px;
+    }
+    h1 { font-size: clamp(34px, 6vw, 58px); line-height: .95; letter-spacing: -.05em; margin: 0; font-weight: 900; font-style: italic; }
+    p.lead { color: #a1a1aa; max-width: 760px; line-height: 1.7; font-size: 15px; }
+    .stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 24px; }
+    .pill {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 999px; padding: 10px 14px; font-size: 12px; font-weight: 800; color: #e4e4e7;
+      text-transform: uppercase; letter-spacing: .12em;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: linear-gradient(180deg, #111722 0%, #090b11 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 24px 50px rgba(0,0,0,.28);
+    }
+    .card img {
+      width: 100%;
+      height: 230px;
+      object-fit: cover;
+      background: white;
+    }
+    .content { padding: 16px; }
+    .kicker { color: #93c5fd; font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .title {
+      margin: 8px 0 10px;
+      font-size: 20px;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 46px;
+    }
+    .desc {
+      color: #c4c4cc; font-size: 14px; line-height: 1.55; min-height: 64px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .row { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-top: 14px; }
+    .price { font-size: 28px; font-weight: 900; letter-spacing: -.04em; }
+    .old { color: #71717a; text-decoration: line-through; font-size: 13px; font-weight: 700; }
+    .cta {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 12px 14px; border-radius: 16px; text-decoration: none;
+      background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
+      color: white; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em;
+    }
+    .empty {
+      padding: 40px 20px; border-radius: 24px; border: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, #111722 0%, #090b11 100%); color: #a1a1aa; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px;">TrendPulse</p>
+      <h1>Amazon Deals Today</h1>
+      <p class="lead">
+        Explore live Amazon deals, trending product discounts, and popular bargain picks updated from our automated deal feed.
+      </p>
+
+      <nav class="nav" aria-label="Site navigation">
+        <a href="/">Home</a>
+        <a href="/deals.html">All Deals</a>
+        <a href="/tech.html">Tech</a>
+        <a href="/kitchen.html">Kitchen</a>
+        <a href="/beauty.html">Beauty</a>
+        <a href="/home.html">Home</a>
+      </nav>
+
+      <div class="stats">
+        <div class="pill" id="deal-count">Loading deals</div>
+        <div class="pill">Updated live</div>
+        <div class="pill">US Amazon offers</div>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <div id="grid" class="grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const SB_URL = 'https://hyrofyfhmabhlqbucjdp.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs';
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+
+    function formatPrice(value) {
+      if (value === null || value === undefined || value === '') return 'Check price';
+      const n = Number(value);
+      if (Number.isNaN(n)) return 'Check price';
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: n % 1 === 0 ? 0 : 2
+      }).format(n);
+    }
+
+    function fallbackImage(name) {
+      const safeName = String(name || 'Trending Deal').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `data:image/svg+xml;utf8,
+      <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+        <defs>
+          <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stop-color="%23121a29"/>
+            <stop offset="100%" stop-color="%23070a11"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="900" fill="url(%23g)"/>
+        <circle cx="600" cy="220" r="140" fill="%232563eb" opacity="0.14"/>
+        <text x="600" y="220" text-anchor="middle" fill="white" font-size="56" font-family="Arial" font-weight="800">TrendPulse</text>
+        <text x="600" y="420" text-anchor="middle" fill="%23cbd5e1" font-size="40" font-family="Arial">Image unavailable</text>
+        <foreignObject x="120" y="500" width="960" height="220">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial;color:white;font-size:42px;font-weight:900;line-height:1.1;text-align:center;">
+            ${safeName}
+          </div>
+        </foreignObject>
+      </svg>`;
+    }
+
+    function renderCard(p) {
+      const img = p.image_url || fallbackImage(p.name);
+      const oldPrice = p.original_price ? `<div class="old">${formatPrice(p.original_price)}</div>` : '';
+      const desc = p.description || 'Trending Amazon deal updated from our live feed.';
+      return `
+        <article class="card">
+          <img src="${img}" alt="${p.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${fallbackImage(p.name)}';">
+          <div class="content">
+            <div class="kicker">${p.category || 'All'} · Score ${Math.round(Number(p.score || 0))}</div>
+            <h2 class="title">${p.name}</h2>
+            <p class="desc">${desc}</p>
+            <div class="row">
+              <div>
+                ${oldPrice}
+                <div class="price">${formatPrice(p.price)}</div>
+              </div>
+              <a class="cta" href="${p.affiliate_link || '#'}" target="_blank" rel="nofollow sponsored noopener noreferrer">Shop Now</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    async function loadDeals() {
+      const { data, error } = await sb
+        .from('products')
+        .select('name, description, price, original_price, image_url, affiliate_link, category, score, is_active')
+        .eq('is_active', true)
+        .order('score', { ascending: false })
+        .order('updated_at', { ascending: false })
+        .limit(60);
+
+      const grid = document.getElementById('grid');
+      const count = document.getElementById('deal-count');
+
+      if (error) {
+        grid.innerHTML = `<div class="empty">Unable to load deals right now.</div>`;
+        count.textContent = 'Error';
+        return;
+      }
+
+      const items = data || [];
+      count.textContent = `${items.length} live deals`;
+
+      if (!items.length) {
+        grid.innerHTML = `<div class="empty">No deals available right now. Please check back soon.</div>`;
+        return;
+      }
+
+      grid.innerHTML = items.map(renderCard).join('');
+    }
+
+    loadDeals();
+  </script>
+</body>
+  </html>
