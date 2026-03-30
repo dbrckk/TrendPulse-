@@ -1,1 +1,20 @@
-
+{
+  "cookies": [
+    {
+      "name": "auth_token",
+      "value": "COLLE_ICI",
+      "domain": ".x.com",
+      "path": "/",
+      "httpOnly": true,
+      "secure": true
+    },
+    {
+      "name": "ct0",
+      "value": "COLLE_ICI",
+      "domain": ".x.com",
+      "path": "/",
+      "httpOnly": false,
+      "secure": true
+    }
+  ]
+}
