@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/deal/:asin/:slug",
+      "destination": "/deal.html?asin=:asin"
+    },
+    {
+      "source": "/deal/:asin",
+      "destination": "/deal.html?asin=:asin"
+    }
+  ]
+}
