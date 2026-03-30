@@ -14,21 +14,19 @@
 
 <style>
 body { background:#000; color:white; font-family:system-ui; }
+.badge { font-size:12px; padding:4px 10px; border-radius:999px; font-weight:bold; }
 </style>
 </head>
 
 <body class="max-w-4xl mx-auto px-4 py-6">
 
-<!-- HEADER -->
 <header class="flex justify-between mb-6">
   <a href="/" class="font-black italic text-xl">TrendPulse</a>
   <span class="text-zinc-400 text-sm">Amazon Deal</span>
 </header>
 
-<!-- PRODUCT -->
 <div id="product"></div>
 
-<!-- RELATED -->
 <section class="mt-12">
   <h2 class="text-xl font-bold mb-4">🔥 Similar Deals</h2>
   <div id="related" class="grid grid-cols-2 gap-4"></div>
@@ -40,22 +38,28 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
-// GET ASIN FROM URL
 const path = window.location.pathname.split("/");
 const asin = path[2];
 
-// TRACK EVENT
 async function trackEvent(asin, type){
   try {
-    await sb.from("analytics").insert({
-      asin: asin,
-      event: type
-    });
-  } catch(e) {}
+    await sb.from("analytics").insert({ asin, event:type });
+  } catch(e){}
 }
 
-// LOAD PRODUCT
-async function loadProduct() {
+// 🔥 BADGE SYSTEM
+function getBadges(p){
+  let badges = [];
+
+  if(p.score > 80) badges.push({text:"🔥 Trending", color:"bg-red-500"});
+  if(p.discount_percent > 40) badges.push({text:"⚡ Hot Deal", color:"bg-yellow-500"});
+  if(p.price < 25) badges.push({text:"💰 Best Value", color:"bg-green-500"});
+  if(p.clicks > 20) badges.push({text:"👀 Popular", color:"bg-blue-500"});
+
+  return badges;
+}
+
+async function loadProduct(){
 
   const { data } = await sb
     .from("products")
@@ -65,22 +69,24 @@ async function loadProduct() {
 
   if(!data) return;
 
-  // TRACK VIEW
-  trackEvent(data.asin, "view");
+  trackEvent(data.asin,"view");
 
   const img = data.image_url || `https://images.amazon.com/images/P/${data.asin}.01._SX500_.jpg`;
 
-  // SEO
-  document.title = `${data.name} - $${data.price} | TrendPulse`;
+  document.title = `${data.name} - $${data.price}`;
   document.getElementById("desc").content =
     `${data.name} now at $${data.price}. Save ${Math.round(data.discount_percent)}% today.`;
 
-  const el = document.getElementById("product");
+  const badges = getBadges(data);
 
-  el.innerHTML = `
+  document.getElementById("product").innerHTML = `
     <div class="bg-zinc-900 rounded-2xl p-6">
 
       <img src="${img}" class="w-full h-80 object-contain bg-white rounded-xl mb-6">
+
+      <div class="flex gap-2 flex-wrap mb-3">
+        ${badges.map(b => `<span class="badge ${b.color}">${b.text}</span>`).join("")}
+      </div>
 
       <div class="text-red-400 font-bold mb-2">
         🔥 ${Math.round(data.discount_percent)}% OFF
@@ -96,7 +102,7 @@ async function loadProduct() {
       </div>
 
       <a href="${data.affiliate_link}" target="_blank"
-         onclick="trackEvent('${data.asin}', 'click')"
+         onclick="trackEvent('${data.asin}','click')"
          class="block text-center bg-blue-600 py-4 rounded-xl font-black text-lg">
         👉 View Deal on Amazon
       </a>
@@ -111,8 +117,7 @@ async function loadProduct() {
   loadRelated(data.category);
 }
 
-// RELATED DEALS
-async function loadRelated(cat) {
+async function loadRelated(cat){
   const { data } = await sb
     .from("products")
     .select("*")
@@ -139,7 +144,6 @@ async function loadRelated(cat) {
   });
 }
 
-// SLUG
 function slug(t){
   return t.toLowerCase().replace(/[^a-z0-9]+/g,"-");
 }
