@@ -1,1 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Best Amazon Beauty Deals | TrendPulse</title>
+  <meta name="description" content="Find the best Amazon beauty deals, skincare discounts, hair care products, personal care bargains, and trending beauty offers." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://trend-pulse.shop/beauty.html" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    body { margin:0; font-family:Inter,sans-serif; background:#050505; color:white; }
+    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
+    .nav { display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 24px; }
+    .nav a { padding:10px 14px; border-radius:999px; text-decoration:none; color:#e4e4e7; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); font-weight:700; font-size:13px; }
+    h1 { font-size:clamp(34px,6vw,58px); line-height:.95; letter-spacing:-.05em; margin:0; font-weight:900; font-style:italic; }
+    .lead { color:#a1a1aa; max-width:760px; line-height:1.7; font-size:15px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:24px; }
+    .card { background:linear-gradient(180deg,#111722 0%,#090b11 100%); border:1px solid rgba(255,255,255,.08); border-radius:26px; overflow:hidden; }
+    .card img { width:100%; height:230px; object-fit:cover; background:white; }
+    .content { padding:16px; }
+    .title { margin:8px 0; font-size:20px; line-height:1.15; font-weight:800; min-height:46px; }
+    .desc { color:#c4c4cc; font-size:14px; line-height:1.55; min-height:64px; }
+    .row { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-top:14px; }
+    .price { font-size:28px; font-weight:900; }
+    .old { color:#71717a; text-decoration:line-through; font-size:13px; font-weight:700; }
+    .cta { display:inline-flex; align-items:center; justify-content:center; padding:12px 14px; border-radius:16px; text-decoration:none; background:linear-gradient(180deg,#3275ff 0%,#1d4ed8 100%); color:white; font-size:12px; font-weight:900; text-transform:uppercase; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px;">TrendPulse</p>
+    <h1>Best Amazon Beauty Deals</h1>
+    <p class="lead">Browse discounted skincare, beauty, grooming, hair care, and personal care products trending on Amazon right now.</p>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/deals.html">All Deals</a>
+      <a href="/tech.html">Tech</a>
+      <a href="/kitchen.html">Kitchen</a>
+      <a href="/beauty.html">Beauty</a>
+      <a href="/home.html">Home</a>
+    </nav>
+    <div id="grid" class="grid"></div>
+  </div>
 
+  <script>
+    const SB_URL = 'https://hyrofyfhmabhlqbucjdp.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs';
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+    function price(v){ if(v===null||v===undefined||v==='') return 'Check price'; const n=Number(v); if(Number.isNaN(n)) return 'Check price'; return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:n%1===0?0:2}).format(n); }
+    function fallback(name){ return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900"><rect width="100%" height="100%" fill="%23070a11"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="56" font-family="Arial" font-weight="800">TrendPulse Beauty</text><text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" fill="%23cbd5e1" font-size="32" font-family="Arial">${String(name||'Beauty deal')}</text></svg>`; }
+    async function load() {
+      const { data } = await sb.from('products').select('name, description, price, original_price, image_url, affiliate_link, score').eq('is_active', true).eq('category', 'Beauty').order('score', { ascending:false }).limit(60);
+      const grid = document.getElementById('grid');
+      grid.innerHTML = (data||[]).map(p => `
+        <article class="card">
+          <img src="${p.image_url || fallback(p.name)}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='${fallback(p.name)}';">
+          <div class="content">
+            <div style="color:#93c5fd;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;">Beauty · Score ${Math.round(Number(p.score||0))}</div>
+            <h2 class="title">${p.name}</h2>
+            <div class="desc">${p.description || 'Trending Amazon beauty deal from our live feed.'}</div>
+            <div class="row">
+              <div>
+                ${p.original_price ? `<div class="old">${price(p.original_price)}</div>` : ''}
+                <div class="price">${price(p.price)}</div>
+              </div>
+              <a class="cta" href="${p.affiliate_link || '#'}" target="_blank" rel="nofollow sponsored noopener noreferrer">Shop Now</a>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+    load();
+  </script>
+</body>
+</html>
