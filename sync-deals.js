@@ -2,11 +2,12 @@ import Parser from "rss-parser";
 import { createClient } from "@supabase/supabase-js";
 import * as cheerio from "cheerio";
 import fs from "fs";
+import path from "path";
 
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/7.0"
+    "User-Agent": "TrendPulseBot/8.0"
   }
 });
 
@@ -39,6 +40,10 @@ const MAX_DESCRIPTION_LENGTH = 240;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
 }
 
 function cleanText(input) {
@@ -186,7 +191,7 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/7.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.0"
       }
     });
 
@@ -208,7 +213,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/7.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.0"
       }
     });
 
@@ -460,7 +465,7 @@ function renderCardGrid(items, label) {
             ${p.original_price ? `<div class="old">${escapeHtml(formatPriceForHtml(p.original_price))}</div>` : ""}
             <div class="price">${escapeHtml(formatPriceForHtml(p.price))}</div>
           </div>
-          <a class="cta" href="/deal/${escapeHtml(p.asin)}/${escapeHtml(slugify(p.name))}">View Deal</a>
+          <a class="cta" href="/deal/${escapeHtml(p.asin)}/${escapeHtml(slugify(p.name))}/">View Deal</a>
         </div>
       </div>
     </article>
@@ -572,4 +577,556 @@ function dealsPageTemplate(items) {
     body { margin: 0; font-family: Inter, sans-serif; background: #050505; color: white; }
     .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
     .nav { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 24px; }
-    .nav a { padding: 10px 14px; border-radius: 999px; text-decoration: none; color: #e4e4e7; background: rgba(255,255,255,.04); border: 1px s
+    .nav a { padding: 10px 14px; border-radius: 999px; text-decoration: none; color: #e4e4e7; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); font-weight: 700; font-size: 13px; }
+    h1 { font-size: clamp(34px, 6vw, 58px); line-height: .95; letter-spacing: -.05em; margin: 0; font-weight: 900; font-style: italic; }
+    p.lead { color: #a1a1aa; max-width: 760px; line-height: 1.7; font-size: 15px; }
+    .stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 24px; }
+    .pill { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 999px; padding: 10px 14px; font-size: 12px; font-weight: 800; color: #e4e4e7; text-transform: uppercase; letter-spacing: .12em; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+    .card { background: linear-gradient(180deg, #111722 0%, #090b11 100%); border: 1px solid rgba(255,255,255,.08); border-radius: 26px; overflow: hidden; box-shadow: 0 24px 50px rgba(0,0,0,.28); }
+    .card img { width: 100%; height: 230px; object-fit: cover; background: white; }
+    .content { padding: 16px; }
+    .kicker { color: #93c5fd; font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .title { margin: 8px 0 10px; font-size: 20px; line-height: 1.15; font-weight: 800; letter-spacing: -.03em; min-height: 46px; }
+    .desc { color: #c4c4cc; font-size: 14px; line-height: 1.55; min-height: 64px; }
+    .row { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-top: 14px; }
+    .price { font-size: 28px; font-weight: 900; letter-spacing: -.04em; }
+    .old { color: #71717a; text-decoration: line-through; font-size: 13px; font-weight: 700; }
+    .cta { display: inline-flex; align-items: center; justify-content: center; padding: 12px 14px; border-radius: 16px; text-decoration: none; background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%); color: white; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px;">TrendPulse</p>
+      <h1>Amazon Deals Today</h1>
+      <p class="lead">Explore live Amazon deals, trending product discounts, and popular bargain picks updated from our automated deal feed.</p>
+      <nav class="nav" aria-label="Site navigation">
+        <a href="/">Home</a>
+        <a href="/best-amazon-deals.html">Editorial Deals</a>
+        <a href="/deals.html">All Deals</a>
+        <a href="/tech.html">Tech</a>
+        <a href="/kitchen.html">Kitchen</a>
+        <a href="/beauty.html">Beauty</a>
+        <a href="/home.html">Home</a>
+      </nav>
+      <div class="stats">
+        <div class="pill">${items.length} live deals</div>
+        <div class="pill">Updated live</div>
+        <div class="pill">US Amazon offers</div>
+      </div>
+    </header>
+    <main>
+      <section>
+        <div class="grid">
+          ${renderCardGrid(items, "All")}
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>`;
+}
+
+function simpleCategoryPageTemplate({ title, description, canonicalPath, items, label }) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(title)} | TrendPulse</title>
+  <meta name="description" content="${escapeHtml(description)}" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="${escapeHtml(SITE_URL + canonicalPath)}" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <style>
+    body { margin:0; font-family:Inter,sans-serif; background:#050505; color:white; }
+    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
+    .nav { display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 24px; }
+    .nav a { padding:10px 14px; border-radius:999px; text-decoration:none; color:#e4e4e7; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); font-weight:700; font-size:13px; }
+    h1 { font-size:clamp(34px,6vw,58px); line-height:.95; letter-spacing:-.05em; margin:0; font-weight:900; font-style:italic; }
+    .lead { color:#a1a1aa; max-width:760px; line-height:1.7; font-size:15px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:24px; }
+    .card { background:linear-gradient(180deg,#111722 0%,#090b11 100%); border:1px solid rgba(255,255,255,.08); border-radius:26px; overflow:hidden; }
+    .card img { width:100%; height:230px; object-fit:cover; background:white; }
+    .content { padding:16px; }
+    .kicker { color:#93c5fd; font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+    .title { margin:8px 0; font-size:20px; line-height:1.15; font-weight:800; min-height:46px; }
+    .desc { color:#c4c4cc; font-size:14px; line-height:1.55; min-height:64px; }
+    .row { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-top:14px; }
+    .price { font-size:28px; font-weight:900; }
+    .old { color:#71717a; text-decoration:line-through; font-size:13px; font-weight:700; }
+    .cta { display:inline-flex; align-items:center; justify-content:center; padding:12px 14px; border-radius:16px; text-decoration:none; background:linear-gradient(180deg,#3275ff 0%,#1d4ed8 100%); color:white; font-size:12px; font-weight:900; text-transform:uppercase; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px;">TrendPulse</p>
+    <h1>${escapeHtml(title)}</h1>
+    <p class="lead">${escapeHtml(description)}</p>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/deals.html">All Deals</a>
+      <a href="/best-amazon-deals.html">Editorial Deals</a>
+      <a href="/tech.html">Tech</a>
+      <a href="/kitchen.html">Kitchen</a>
+      <a href="/beauty.html">Beauty</a>
+      <a href="/home.html">Home</a>
+    </nav>
+    <div class="grid">
+      ${renderCardGrid(items, label)}
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function staticDealPageTemplate(product) {
+  const slug = slugify(product.name);
+  const canonicalUrl = `${SITE_URL}/deal/${product.asin}/${slug}/`;
+  const image = product.image_url || buildAmazonImage(product.asin) || fallbackImage(product.name, "TrendPulse");
+  const description = product.description || "Trending Amazon deal updated from our live feed.";
+  const discount = Number(product.discount_percent || 0);
+  const score = Math.round(Number(product.score || 0));
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>${escapeHtml(product.name)} | TrendPulse</title>
+  <meta name="description" content="${escapeHtml(description)}" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="theme-color" content="#050505" />
+  <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <meta property="og:type" content="product" />
+  <meta property="og:title" content="${escapeHtml(product.name)} | TrendPulse" />
+  <meta property="og:description" content="${escapeHtml(description)}" />
+  <meta property="og:image" content="${escapeHtml(image)}" />
+  <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${escapeHtml(product.name)} | TrendPulse" />
+  <meta name="twitter:description" content="${escapeHtml(description)}" />
+  <meta name="twitter:image" content="${escapeHtml(image)}" />
+
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Product",
+    "name":"${escapeHtml(product.name)}",
+    "description":"${escapeHtml(description)}",
+    "image":["${escapeHtml(image)}"],
+    "offers":{
+      "@type":"Offer",
+      "priceCurrency":"USD",
+      "price":"${escapeHtml(product.price ?? "")}",
+      "url":"${escapeHtml(canonicalUrl)}",
+      "availability":"https://schema.org/InStock"
+    }
+  }
+  </script>
+
+  <style>
+    body { margin: 0; background: #050505; color: white; font-family: Inter, sans-serif; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .nav { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .nav a { padding: 10px 14px; border-radius: 999px; text-decoration: none; color: #e4e4e7; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); font-weight: 700; font-size: 13px; }
+    .card { background: linear-gradient(180deg, #111722 0%, #090b11 100%); border: 1px solid rgba(255,255,255,.08); border-radius: 28px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.35); }
+    .hero { display: grid; grid-template-columns: 1fr 1fr; }
+    .hero-image { background: white; min-height: 420px; }
+    .hero-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .content { padding: 26px; }
+    .kicker { color: #93c5fd; font-size: 12px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 12px; }
+    h1 { margin: 0 0 14px; font-size: clamp(30px, 5vw, 48px); line-height: .98; font-weight: 900; letter-spacing: -.05em; font-style: italic; }
+    .desc { color: #c4c4cc; font-size: 15px; line-height: 1.7; margin-bottom: 20px; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+    .pill { padding: 10px 12px; border-radius: 999px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); color: #e4e4e7; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .old-price { color: #71717a; font-size: 15px; text-decoration: line-through; font-weight: 700; margin-bottom: 2px; }
+    .price { font-size: 42px; font-weight: 900; letter-spacing: -.05em; margin-bottom: 18px; }
+    .cta { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 16px 18px; border-radius: 18px; text-decoration: none; background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%); color: white; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; box-shadow: 0 16px 30px rgba(37,99,235,.28); }
+    .section { margin-top: 28px; background: linear-gradient(180deg, #111722 0%, #090b11 100%); border: 1px solid rgba(255,255,255,.08); border-radius: 24px; padding: 22px; }
+    .section h2 { margin: 0 0 12px; font-size: 24px; font-weight: 900; letter-spacing: -.03em; }
+    .section p { margin: 0; color: #c4c4cc; line-height: 1.7; font-size: 15px; }
+    @media (max-width: 820px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-image { min-height: 320px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/deals.html">All Deals</a>
+      <a href="/tech.html">Tech</a>
+      <a href="/kitchen.html">Kitchen</a>
+      <a href="/beauty.html">Beauty</a>
+      <a href="/home.html">Home</a>
+    </nav>
+
+    <main>
+      <article class="card">
+        <div class="hero">
+          <div class="hero-image">
+            <img src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src='${escapeHtml(fallbackImage(product.name, "TrendPulse"))}';">
+          </div>
+
+          <div class="content">
+            <div class="kicker">${escapeHtml(product.category || "All")} · Amazon Deal</div>
+            <h1>${escapeHtml(product.name)}</h1>
+            <p class="desc">${escapeHtml(description)}</p>
+
+            <div class="meta-row">
+              ${discount > 0 ? `<span class="pill">${discount}% off</span>` : ""}
+              <span class="pill">Score ${score}</span>
+              ${product.source_name ? `<span class="pill">${escapeHtml(product.source_name)}</span>` : ""}
+            </div>
+
+            ${product.original_price ? `<div class="old-price">${escapeHtml(formatPriceForHtml(product.original_price))}</div>` : ""}
+            <div class="price">${escapeHtml(formatPriceForHtml(product.price))}</div>
+
+            <a href="${escapeHtml(product.affiliate_link || "#")}" target="_blank" rel="nofollow sponsored noopener noreferrer" class="cta">
+              🔥 Get Deal on Amazon
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <section class="section">
+        <h2>Why this deal stands out</h2>
+        <p>
+          We surface trending Amazon bargains based on discount strength, category relevance, and live activity signals from our automated deal feed. This helps highlight products that are more likely to be worth checking before pricing or availability changes.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>More live deal categories</h2>
+        <p>
+          Explore more deals on our <a href="/deals.html" style="color:#60a5fa;">all deals page</a>, or browse category collections including
+          <a href="/tech.html" style="color:#60a5fa;">Tech</a>,
+          <a href="/kitchen.html" style="color:#60a5fa;">Kitchen</a>,
+          <a href="/beauty.html" style="color:#60a5fa;">Beauty</a>, and
+          <a href="/home.html" style="color:#60a5fa;">Home</a>.
+        </p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>`;
+}
+
+function cleanGeneratedDealDirs() {
+  const dealRoot = path.join(process.cwd(), "deal");
+  if (!fs.existsSync(dealRoot)) return;
+
+  for (const entry of fs.readdirSync(dealRoot, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      fs.rmSync(path.join(dealRoot, entry.name), { recursive: true, force: true });
+    }
+  }
+}
+
+async function generateStaticDealPages() {
+  const { data, error } = await sb
+    .from("products")
+    .select("asin,name,description,price,original_price,image_url,affiliate_link,category,score,discount_percent,source_name,updated_at")
+    .eq("is_active", true)
+    .order("score", { ascending: false })
+    .order("updated_at", { ascending: false })
+    .limit(MAX_ACTIVE_DEALS);
+
+  if (error) throw error;
+
+  const items = data || [];
+  const dealRoot = path.join(process.cwd(), "deal");
+  ensureDir(dealRoot);
+  cleanGeneratedDealDirs();
+
+  for (const product of items) {
+    const slug = slugify(product.name);
+    const dir = path.join(dealRoot, product.asin, slug);
+    ensureDir(dir);
+    fs.writeFileSync(path.join(dir, "index.html"), staticDealPageTemplate(product), "utf8");
+  }
+
+  console.log(`Static deal pages generated: ${items.length}`);
+}
+
+async function generateEditorialPages() {
+  const { data, error } = await sb
+    .from("products")
+    .select("asin,name,description,price,original_price,image_url,affiliate_link,category,score,is_active,updated_at")
+    .eq("is_active", true)
+    .order("score", { ascending: false })
+    .order("updated_at", { ascending: false })
+    .limit(MAX_ACTIVE_DEALS);
+
+  if (error) throw error;
+
+  const items = data || [];
+  const tech = items.filter(p => p.category === "Tech");
+  const kitchen = items.filter(p => p.category === "Kitchen");
+  const beauty = items.filter(p => p.category === "Beauty");
+  const home = items.filter(p => p.category === "Home");
+  const techUnder50 = tech.filter(p => Number(p.price) > 0 && Number(p.price) <= 50);
+
+  fs.writeFileSync("deals.html", dealsPageTemplate(items.slice(0, 60)), "utf8");
+
+  fs.writeFileSync("tech.html", simpleCategoryPageTemplate({
+    title: "Best Amazon Tech Deals",
+    description: "Discover discounted tech, electronics, gadgets, laptop accessories, audio gear, and trending Amazon devices updated from our live deal feed.",
+    canonicalPath: "/tech.html",
+    items: tech.slice(0, 60),
+    label: "Tech"
+  }), "utf8");
+
+  fs.writeFileSync("kitchen.html", simpleCategoryPageTemplate({
+    title: "Best Amazon Kitchen Deals",
+    description: "Explore discounted coffee makers, cookware, kitchen tools, appliances, and trending Amazon kitchen bargains updated from our deal feed.",
+    canonicalPath: "/kitchen.html",
+    items: kitchen.slice(0, 60),
+    label: "Kitchen"
+  }), "utf8");
+
+  fs.writeFileSync("beauty.html", simpleCategoryPageTemplate({
+    title: "Best Amazon Beauty Deals",
+    description: "Browse discounted skincare, beauty, grooming, hair care, and personal care products trending on Amazon right now.",
+    canonicalPath: "/beauty.html",
+    items: beauty.slice(0, 60),
+    label: "Beauty"
+  }), "utf8");
+
+  fs.writeFileSync("home.html", simpleCategoryPageTemplate({
+    title: "Best Amazon Home Deals",
+    description: "Explore home bargains including decor, storage, bedding, vacuums, and trending Amazon household deals updated from our live feed.",
+    canonicalPath: "/home.html",
+    items: home.slice(0, 60),
+    label: "Home"
+  }), "utf8");
+
+  fs.writeFileSync("best-amazon-deals.html", editorialTemplate({
+    title: "Best Amazon Deals Today",
+    description: "Find the best Amazon deals today. Discover trending discounts, top-rated products, and daily updated deals in the US.",
+    canonicalPath: "/best-amazon-deals.html",
+    intro: [
+      "Looking for the best Amazon deals right now? You’re in the right place. We track trending discounts, popular products, and price drops across Amazon to bring you the most relevant deals available today.",
+      "Our system automatically scans deal sources and highlights products with strong discounts, high demand, and great value."
+    ],
+    section1Title: "Why these Amazon deals matter",
+    section1Text: "The most attractive deals are often the ones that combine useful products with meaningful discounts and current shopping momentum. Instead of showing random bargains, we focus on live deal signals and current relevance.",
+    section2Title: "How to use this page",
+    section2Text: "Browse the featured products below, then open any item to view its dedicated deal page. You can also explore focused collections in Tech, Kitchen, Beauty, and Home to find more relevant offers faster.",
+    navExtra: `<a href="/best-tech-deals-under-50.html">Tech Under $50</a><a href="/best-kitchen-deals-this-week.html">Kitchen This Week</a><a href="/best-beauty-deals-on-amazon.html">Beauty Deals</a><a href="/best-home-deals-this-week.html">Home This Week</a>`,
+    items: items.slice(0, 30),
+    label: "All"
+  }), "utf8");
+
+  fs.writeFileSync("best-tech-deals-under-50.html", editorialTemplate({
+    title: "Best Tech Deals Under $50",
+    description: "Browse the best Amazon tech deals under $50. Find affordable gadgets, headphones, accessories, and trending electronics at low prices.",
+    canonicalPath: "/best-tech-deals-under-50.html",
+    intro: [
+      "Looking for affordable Amazon electronics that still feel worth buying? This page highlights cheap tech deals under $50, including headphones, small accessories, portable gadgets, and practical home-office items.",
+      "Budget-friendly deals tend to move fast because they combine low price with impulse-buy appeal."
+    ],
+    section1Title: "Why tech deals under $50 are worth watching",
+    section1Text: "Lower-priced tech products often outperform bigger-ticket items when it comes to shopping momentum. Accessories, chargers, earbuds, desk gear, and small smart devices can drop to highly attractive price points without requiring a major buying decision.",
+    section2Title: "How we choose these budget tech deals",
+    section2Text: "We surface products based on category fit, score, and recency. This helps show budget electronics that are more likely to be useful, popular, and worth checking right now.",
+    navExtra: `<a href="/best-tech-deals-under-50.html">Tech Under $50</a>`,
+    items: techUnder50.slice(0, 36),
+    label: "Tech"
+  }), "utf8");
+
+  fs.writeFileSync("best-kitchen-deals-this-week.html", editorialTemplate({
+    title: "Best Kitchen Deals This Week",
+    description: "Discover the best kitchen deals this week on Amazon, including cookware, coffee makers, small appliances, and useful kitchen tools.",
+    canonicalPath: "/best-kitchen-deals-this-week.html",
+    intro: [
+      "Kitchen deals are some of the most practical Amazon bargains to watch because they often combine everyday usefulness with meaningful discounts.",
+      "From coffee makers and cookware to utensils and countertop appliances, this page highlights some of the best live kitchen offers worth checking this week."
+    ],
+    section1Title: "Why kitchen bargains matter",
+    section1Text: "Kitchen products are some of the easiest deals to justify because they are used frequently and can improve everyday routines immediately.",
+    section2Title: "How to spot a good kitchen deal",
+    section2Text: "The best kitchen deals usually balance three things: usefulness, discount level, and product quality. That is why we sort for current relevance and live activity instead of showing random low-quality offers.",
+    navExtra: `<a href="/best-kitchen-deals-this-week.html">Kitchen This Week</a>`,
+    items: kitchen.slice(0, 36),
+    label: "Kitchen"
+  }), "utf8");
+
+  fs.writeFileSync("best-beauty-deals-on-amazon.html", editorialTemplate({
+    title: "Best Beauty Deals on Amazon",
+    description: "Discover the best beauty deals on Amazon including skincare, haircare, personal care, grooming, and trending beauty products.",
+    canonicalPath: "/best-beauty-deals-on-amazon.html",
+    intro: [
+      "Beauty deals on Amazon can be especially attractive because many products are replenishment purchases.",
+      "When skincare, personal care, haircare, or grooming items go on sale, shoppers often take advantage quickly because the products are already part of their routine."
+    ],
+    section1Title: "Why beauty deals perform well",
+    section1Text: "Beauty bargains tend to combine strong repeat demand with simple buying decisions. If someone already knows the kind of product they want, a discount can be enough to trigger a fast purchase.",
+    section2Title: "What to look for in a beauty discount",
+    section2Text: "The best beauty deals usually stand out when they lower the price of products people already use regularly. Discounts on skincare, haircare, and personal care essentials can create stronger value than one-time novelty products.",
+    navExtra: `<a href="/best-beauty-deals-on-amazon.html">Beauty Deals</a>`,
+    items: beauty.slice(0, 36),
+    label: "Beauty"
+  }), "utf8");
+
+  fs.writeFileSync("best-home-deals-this-week.html", editorialTemplate({
+    title: "Best Home Deals This Week",
+    description: "Find the best Amazon home deals this week including storage, decor, bedding, vacuums, furniture, and household essentials.",
+    canonicalPath: "/best-home-deals-this-week.html",
+    intro: [
+      "Home deals can be some of the most practical Amazon bargains because they apply to everyday life immediately.",
+      "This page focuses on discounted storage products, bedding, decor, vacuums, and useful household items from our live deal feed."
+    ],
+    section1Title: "What makes a strong home deal",
+    section1Text: "Home products tend to perform well when the value is obvious and the product solves a clear problem.",
+    section2Title: "Why check these deals regularly",
+    section2Text: "Home deals can change quickly because stock availability and promotional pricing are often temporary. If a product is both useful and discounted, it tends to get attention fast.",
+    navExtra: `<a href="/best-home-deals-this-week.html">Home This Week</a>`,
+    items: home.slice(0, 36),
+    label: "Home"
+  }), "utf8");
+
+  console.log("Editorial pages generated");
+}
+
+async function generateSitemap() {
+  const { data, error } = await sb
+    .from("products")
+    .select("asin, name, updated_at")
+    .eq("is_active", true)
+    .order("score", { ascending: false })
+    .limit(MAX_ACTIVE_DEALS);
+
+  if (error) throw error;
+
+  const staticUrls = [
+    { loc: `${SITE_URL}/`, changefreq: "hourly", priority: "1.0" },
+    { loc: `${SITE_URL}/best-amazon-deals.html`, changefreq: "hourly", priority: "0.95" },
+    { loc: `${SITE_URL}/deals.html`, changefreq: "hourly", priority: "0.9" },
+    { loc: `${SITE_URL}/tech.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/kitchen.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/beauty.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/home.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/best-tech-deals-under-50.html`, changefreq: "daily", priority: "0.85" },
+    { loc: `${SITE_URL}/best-kitchen-deals-this-week.html`, changefreq: "daily", priority: "0.85" },
+    { loc: `${SITE_URL}/best-beauty-deals-on-amazon.html`, changefreq: "daily", priority: "0.85" },
+    { loc: `${SITE_URL}/best-home-deals-this-week.html`, changefreq: "daily", priority: "0.85" }
+  ];
+
+  const dealUrls = (data || []).map(item => {
+    const slug = slugify(item.name);
+    return {
+      loc: `${SITE_URL}/deal/${item.asin}/${slug}/`,
+      lastmod: item.updated_at ? new Date(item.updated_at).toISOString() : new Date().toISOString(),
+      changefreq: "daily",
+      priority: "0.7"
+    };
+  });
+
+  const allUrls = [...staticUrls, ...dealUrls];
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+${allUrls.map(url => `  <url>
+    <loc>${escapeXml(url.loc)}</loc>
+    ${url.lastmod ? `<lastmod>${escapeXml(url.lastmod)}</lastmod>` : ""}
+    <changefreq>${url.changefreq}</changefreq>
+    <priority>${url.priority}</priority>
+  </url>`).join("\n")}
+</urlset>
+`;
+
+  fs.writeFileSync("sitemap.xml", xml, "utf8");
+  console.log(`sitemap.xml generated with ${allUrls.length} URLs`);
+}
+
+async function main() {
+  console.log("Starting sync V8");
+
+  const activeCountBefore = await getActiveDealsCount();
+  console.log(`Active deals before sync: ${activeCountBefore}`);
+
+  let targetCount;
+  if (activeCountBefore === 0) {
+    targetCount = INITIAL_TARGET_ON_EMPTY;
+  } else if (activeCountBefore < MIN_ACTIVE_DEALS) {
+    targetCount = MIN_ACTIVE_DEALS;
+  } else {
+    targetCount = Math.min(activeCountBefore + 40, MAX_ACTIVE_DEALS);
+  }
+
+  targetCount = Math.min(targetCount, MAX_ACTIVE_DEALS);
+  console.log(`Target count for this run: ${targetCount}`);
+
+  const allItems = [];
+  for (const feedUrl of FEEDS) {
+    const items = await fetchFeedItems(feedUrl);
+    console.log(`${items.length} items loaded from ${feedUrl}`);
+    allItems.push(...items);
+    await sleep(REQUEST_DELAY_MS);
+  }
+
+  const uniqueArticles = [];
+  const seenArticleLinks = new Set();
+
+  for (const item of allItems) {
+    const link = item.link?.trim();
+    if (!link || seenArticleLinks.has(link)) continue;
+    seenArticleLinks.add(link);
+    uniqueArticles.push(item);
+  }
+
+  console.log(`${uniqueArticles.length} unique articles found`);
+
+  const results = [];
+  const seenAsins = new Set();
+
+  for (const item of uniqueArticles) {
+    try {
+      const product = await extractDealFromArticle(item);
+      if (!product) continue;
+      if (seenAsins.has(product.asin)) continue;
+
+      seenAsins.add(product.asin);
+      results.push(product);
+
+      if (results.length >= targetCount) {
+        console.log(`Reached target of ${targetCount} valid products`);
+        break;
+      }
+
+      await sleep(REQUEST_DELAY_MS);
+    } catch (error) {
+      console.log(`Article error: ${error.message}`);
+    }
+  }
+
+  console.log(`${results.length} valid products found`);
+
+  await upsertProducts(results);
+  await enforceMaxActiveDeals(MAX_ACTIVE_DEALS);
+
+  const activeCountAfter = await getActiveDealsCount();
+  console.log(`Active deals after sync: ${activeCountAfter}`);
+
+  await generateEditorialPages();
+  await generateStaticDealPages();
+  await generateSitemap();
+
+  console.log("Sync complete");
+}
+
+main().catch(error => {
+  console.error("Fatal error:", error);
+  process.exit(1);
+});
