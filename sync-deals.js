@@ -3,9 +3,9 @@ import { createClient } from "@supabase/supabase-js";
 import * as cheerio from "cheerio";
 
 const parser = new Parser({
-  timeout: 20000,
+  timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/4.0"
+    "User-Agent": "TrendPulseBot/5.0"
   }
 });
 
@@ -19,17 +19,24 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+/**
+ * Existing feeds kept + DealNews official RSS feeds
+ */
 const FEEDS = [
   "https://hip2save.com/feed/",
   "https://moneysavingmom.com/category/amazon-deals/feed",
-  "https://www.bargainbabe.com/amazon-deals/feed/"
+  "https://www.bargainbabe.com/amazon-deals/feed/",
+  "https://www.dealnews.com/?rss=1&sort=time",
+  "https://www.dealnews.com/?rss=1&sort=hotness",
+  "https://www.dealnews.com/f1682/Staff-Pick/?rss=1"
 ];
 
-const INITIAL_TARGET_ON_EMPTY = 100;
+const INITIAL_TARGET_ON_EMPTY = 140;
 const MIN_ACTIVE_DEALS = 80;
 const MAX_ACTIVE_DEALS = 400;
-const ITEMS_PER_FEED = 80;
-const REQUEST_DELAY_MS = 1000;
+const ITEMS_PER_FEED = 120;
+const REQUEST_DELAY_MS = 900;
+const MAX_DESCRIPTION_LENGTH = 240;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -40,6 +47,8 @@ function cleanText(input) {
     .replace(/<[^>]*>/g, " ")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -68,9 +77,7 @@ function extractAsinFromAmazonUrl(url) {
 
   for (const pattern of patterns) {
     const match = decoded.match(pattern);
-    if (match?.[1]) {
-      return match[1].toUpperCase();
-    }
+    if (match?.[1]) return match[1].toUpperCase();
   }
 
   return null;
@@ -83,7 +90,9 @@ function extractPriceFromText(text) {
   const patterns = [
     /\$([0-9]+(?:\.[0-9]{1,2})?)/,
     /only\s+\$([0-9]+(?:\.[0-9]{1,2})?)/i,
-    /price[:\s]+\$?([0-9]+(?:\.[0-9]{1,2})?)/i
+    /price[:\s]+\$?([0-9]+(?:\.[0-9]{1,2})?)/i,
+    /for\s+\$([0-9]+(?:\.[0-9]{1,2})?)/i,
+    /under\s+\$([0-9]+(?:\.[0-9]{1,2})?)/i
   ];
 
   for (const pattern of patterns) {
@@ -104,7 +113,8 @@ function extractDiscountPercent(text) {
   const patterns = [
     /([0-9]{1,2})%\s*off/i,
     /save\s+([0-9]{1,2})%/i,
-    /([0-9]{1,2})\s*percent\s*off/i
+    /([0-9]{1,2})\s*percent\s*off/i,
+    /up to\s+([0-9]{1,2})%\s*off/i
   ];
 
   for (const pattern of patterns) {
@@ -124,11 +134,13 @@ function estimateOriginalPrice(price, discountPercent) {
   return Math.round(original * 100) / 100;
 }
 
-function scoreProduct({ price, discount_percent, name }) {
-  const discountScore = Number(discount_percent || 0) * 2;
+function scoreProduct({ price, discount_percent, name, source_name }) {
+  const discountScore = Number(discount_percent || 0) * 2.2;
   const lowPriceBoost = price && price < 50 ? 10 : 0;
-  const dealKeywordBoost = /amazon|deal|sale|save|discount|hot|under|clearance/i.test(name || "") ? 5 : 0;
-  return Math.round((discountScore + lowPriceBoost + dealKeywordBoost) * 100) / 100;
+  const midPriceBoost = price && price >= 50 && price < 120 ? 4 : 0;
+  const keywordBoost = /amazon|deal|sale|save|discount|hot|under|clearance|staff pick|popular/i.test(name || "") ? 6 : 0;
+  const sourceBoost = /dealnews/i.test(source_name || "") ? 4 : 0;
+  return Math.round((discountScore + lowPriceBoost + midPriceBoost + keywordBoost + sourceBoost) * 100) / 100;
 }
 
 function normalizeUrl(url, baseUrl) {
@@ -145,7 +157,7 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/4.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/5.0"
       }
     });
 
@@ -167,7 +179,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/4.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/5.0"
       }
     });
 
@@ -178,14 +190,14 @@ async function resolveFinalUrl(url) {
 }
 
 function extractMetaImage($, sourceUrl) {
-  const ogImage =
+  const candidate =
     $('meta[property="og:image"]').attr("content") ||
     $('meta[property="og:image:url"]').attr("content") ||
     $('meta[name="twitter:image"]').attr("content") ||
     $('meta[name="twitter:image:src"]').attr("content") ||
     null;
 
-  return ogImage ? normalizeUrl(ogImage, sourceUrl) : null;
+  return candidate ? normalizeUrl(candidate, sourceUrl) : null;
 }
 
 function extractAmazonLinksFromHtml(html) {
@@ -199,7 +211,6 @@ function extractAmazonLinksFromHtml(html) {
     if (!href) return;
 
     const value = href.trim();
-
     if (
       value.includes("amazon.com") ||
       value.includes("amzn.to") ||
@@ -225,10 +236,10 @@ function extractCategory(title, description) {
 
   if (/coffee|kitchen|cookware|dish|pan|knife|food|appliance/.test(text)) return "Kitchen";
   if (/toothbrush|beauty|skincare|soap|cleaner|makeup|hair/.test(text)) return "Beauty";
-  if (/fitbit|tracker|headphone|speaker|tablet|laptop|tech|electronic|monitor|keyboard|mouse/.test(text)) return "Tech";
+  if (/fitbit|tracker|headphone|speaker|tablet|laptop|tech|electronic|monitor|keyboard|mouse|ssd|router|tv/.test(text)) return "Tech";
   if (/toy|kid|baby|alphabet|lego|game/.test(text)) return "Kids";
   if (/fitness|sport|exercise|health|workout/.test(text)) return "Fitness";
-  if (/home|furniture|decor|storage|bedding/.test(text)) return "Home";
+  if (/home|furniture|decor|storage|bedding|vacuum/.test(text)) return "Home";
 
   return "All";
 }
@@ -245,7 +256,7 @@ function buildDescription(title, sourceDescription, price, discountPercent) {
   const cleanDesc = cleanText(sourceDescription);
 
   if (cleanDesc && cleanDesc.length > 20) {
-    return cleanDesc.slice(0, 240);
+    return cleanDesc.slice(0, MAX_DESCRIPTION_LENGTH);
   }
 
   if (price && discountPercent) {
@@ -273,8 +284,8 @@ async function extractDealFromArticle(item) {
 
   const $ = cheerio.load(html);
   const metaImage = extractMetaImage($, sourceUrl);
-
   const foundLinks = extractAmazonLinksFromHtml(html);
+
   if (!foundLinks.length) {
     console.log("No Amazon link found");
     return null;
@@ -291,6 +302,7 @@ async function extractDealFromArticle(item) {
     const price = extractPriceFromText(mergedText);
     const discountPercent = extractDiscountPercent(mergedText);
     const originalPrice = discountPercent ? estimateOriginalPrice(price, discountPercent) : null;
+    const sourceName = new URL(sourceUrl).hostname.replace(/^www\./, "");
     const description = buildDescription(sourceTitle, sourceDescription, price, discountPercent);
 
     const product = {
@@ -307,21 +319,19 @@ async function extractDealFromArticle(item) {
       likes: 0,
       nopes: 0,
       source_url: sourceUrl,
-      source_name: new URL(sourceUrl).hostname,
+      source_name: sourceName,
       amazon_url: finalUrl,
       is_active: true,
       score: scoreProduct({
         price,
         discount_percent: discountPercent,
-        name: sourceTitle
+        name: sourceTitle,
+        source_name: sourceName
       }),
       updated_at: new Date().toISOString()
     };
 
-    if (!isStrongEnoughProduct(product)) {
-      return null;
-    }
-
+    if (!isStrongEnoughProduct(product)) return null;
     return product;
   }
 
@@ -361,9 +371,7 @@ async function upsertProducts(products) {
       onConflict: "asin"
     });
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   console.log(`${products.length} products upserted`);
 }
@@ -396,7 +404,7 @@ async function enforceMaxActiveDeals(maxDeals) {
 }
 
 async function main() {
-  console.log("Starting sync V4");
+  console.log("Starting sync V5");
 
   const activeCountBefore = await getActiveDealsCount();
   console.log(`Active deals before sync: ${activeCountBefore}`);
@@ -407,7 +415,7 @@ async function main() {
   } else if (activeCountBefore < MIN_ACTIVE_DEALS) {
     targetCount = MIN_ACTIVE_DEALS;
   } else {
-    targetCount = activeCountBefore;
+    targetCount = Math.min(activeCountBefore + 40, MAX_ACTIVE_DEALS);
   }
 
   targetCount = Math.min(targetCount, MAX_ACTIVE_DEALS);
