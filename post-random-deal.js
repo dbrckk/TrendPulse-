@@ -8,10 +8,6 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SITE_URL = process.env.SITE_URL || "https://trend-pulse.shop";
 
-const X_USERNAME = process.env.X_USERNAME;
-const X_PASSWORD = process.env.X_PASSWORD;
-const X_EMAIL = process.env.X_EMAIL || "";
-
 const STATE_FILE = "tweet-state.json";
 const SESSION_FILE = "x-session.json";
 
@@ -21,10 +17,6 @@ const MAX_RECENT_ASINS = 12;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
-}
-
-if (!X_USERNAME || !X_PASSWORD) {
-  throw new Error("Missing X_USERNAME or X_PASSWORD");
 }
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -225,12 +217,6 @@ function pickDeal(candidates, state) {
   return shuffledWeighted[0] || null;
 }
 
-async function typeLikeHuman(page, selector, value) {
-  await page.waitForSelector(selector, { timeout: 20000 });
-  await page.click(selector, { clickCount: 3 });
-  await page.type(selector, value, { delay: 35 });
-}
-
 async function clickButtonByText(page, textOptions) {
   const clicked = await page.evaluate((texts) => {
     const nodes = Array.from(document.querySelectorAll('div[role="button"], button, a[role="button"], a, span'));
@@ -297,14 +283,7 @@ async function isLoggedIn(page) {
   await sleep(5000);
 
   const url = page.url().toLowerCase();
-  if (url.includes("/home")) {
-    const hasComposer = await page.evaluate(() => {
-      return !!document.querySelector(
-        'a[href="/compose/post"], div[data-testid="SideNav_NewTweet_Button"], div[data-testid="tweetTextarea_0"], div[role="textbox"]'
-      );
-    });
-    if (hasComposer) return true;
-  }
+  if (!url.includes("/home")) return false;
 
   const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
   if (
@@ -316,207 +295,30 @@ async function isLoggedIn(page) {
     return true;
   }
 
-  return false;
-}
-
-async function waitForAnySelector(page, selectors, timeout = 15000) {
-  const started = Date.now();
-
-  while (Date.now() - started < timeout) {
-    for (const selector of selectors) {
-      const exists = await page.$(selector);
-      if (exists) return selector;
-    }
-    await sleep(400);
-  }
-
-  return null;
-}
-
-async function findVisibleTextInput(page, timeout = 12000) {
-  const started = Date.now();
-
-  while (Date.now() - started < timeout) {
-    const handle = await page.evaluateHandle(() => {
-      const inputs = Array.from(document.querySelectorAll("input"));
-      const found = inputs.find(input => {
-        const type = (input.getAttribute("type") || "text").toLowerCase();
-        const hidden = input.offsetParent === null && getComputedStyle(input).position !== "fixed";
-        if (hidden) return false;
-        if (type === "hidden" || type === "password" || type === "checkbox" || type === "radio") return false;
-        return true;
-      });
-      return found || null;
-    });
-
-    const element = handle.asElement();
-    if (element) return element;
-    await sleep(400);
-  }
-
-  return null;
-}
-
-async function findVisiblePasswordInput(page, timeout = 12000) {
-  const started = Date.now();
-
-  while (Date.now() - started < timeout) {
-    const handle = await page.evaluateHandle(() => {
-      const inputs = Array.from(document.querySelectorAll("input"));
-      const found = inputs.find(input => {
-        const type = (input.getAttribute("type") || "").toLowerCase();
-        const auto = (input.getAttribute("autocomplete") || "").toLowerCase();
-        const hidden = input.offsetParent === null && getComputedStyle(input).position !== "fixed";
-        if (hidden) return false;
-        return type === "password" || auto === "current-password";
-      });
-      return found || null;
-    });
-
-    const element = handle.asElement();
-    if (element) return element;
-    await sleep(400);
-  }
-
-  return null;
-}
-
-async function typeIntoElementHandle(handle, value) {
-  await handle.click({ clickCount: 3 });
-  await handle.type(value, { delay: 40 });
-}
-
-async function clickNext(page) {
-  const clicked = await clickButtonByText(page, ["next", "suivant"]);
-  if (!clicked) {
-    await page.keyboard.press("Enter");
-  }
-}
-
-async function clickLogin(page) {
-  const clicked = await clickButtonByText(page, ["log in", "se connecter"]);
-  if (!clicked) {
-    await page.keyboard.press("Enter");
-  }
-}
-
-async function loginToX(page) {
-  await page.goto("https://x.com/i/flow/login", {
-    waitUntil: "domcontentloaded",
-    timeout: 60000
+  const hasComposer = await page.evaluate(() => {
+    return !!document.querySelector(
+      'a[href="/compose/post"], div[data-testid="SideNav_NewTweet_Button"], div[data-testid="tweetTextarea_0"], div[role="textbox"]'
+    );
   });
 
-  await sleep(5000);
-
-  const logInGateClicked = await clickButtonByText(page, ["log in", "se connecter"]);
-  if (logInGateClicked) {
-    await sleep(3500);
-  }
-
-  let firstInput = await findVisibleTextInput(page, 12000);
-
-  if (!firstInput) {
-    await page.goto("https://x.com/login", {
-      waitUntil: "domcontentloaded",
-      timeout: 60000
-    });
-    await sleep(5000);
-
-    const logInGateClicked2 = await clickButtonByText(page, ["log in", "se connecter"]);
-    if (logInGateClicked2) {
-      await sleep(3500);
-    }
-
-    firstInput = await findVisibleTextInput(page, 12000);
-  }
-
-  if (!firstInput) {
-    await saveDebugArtifacts(page, "debug-login-first-step");
-    const currentUrl = page.url();
-    const preview = await page.evaluate(() => document.body.innerText.slice(0, 1200));
-    console.log("Login URL at failure:", currentUrl);
-    console.log("Login page preview:", preview);
-    throw new Error("Could not find first login input on X");
-  }
-
-  await typeIntoElementHandle(firstInput, X_USERNAME);
-  await sleep(1200);
-  await clickNext(page);
-  await sleep(4500);
-
-  let passwordInput = await findVisiblePasswordInput(page, 5000);
-
-  if (!passwordInput) {
-    const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
-
-    const stillOnFirstStep =
-      bodyText.includes("phone, email, or username") ||
-      bodyText.includes("phone or email") ||
-      bodyText.includes("enter your phone number or username");
-
-    if (stillOnFirstStep && X_EMAIL) {
-      const maybeChallengeInput = await findVisibleTextInput(page, 8000);
-
-      if (maybeChallengeInput) {
-        await typeIntoElementHandle(maybeChallengeInput, X_EMAIL);
-        await sleep(1200);
-        await clickNext(page);
-        await sleep(4500);
-      }
-    }
-  }
-
-  passwordInput = await findVisiblePasswordInput(page, 12000);
-
-  if (!passwordInput) {
-    await saveDebugArtifacts(page, "debug-login-password-step");
-    const currentUrl = page.url();
-    const preview = await page.evaluate(() => document.body.innerText.slice(0, 1200));
-    console.log("Password step URL at failure:", currentUrl);
-    console.log("Password page preview:", preview);
-    throw new Error("Could not find password input on X login page");
-  }
-
-  await typeIntoElementHandle(passwordInput, X_PASSWORD);
-  await sleep(1200);
-  await clickLogin(page);
-  await sleep(8000);
-
-  const loggedIn = await isLoggedIn(page);
-  if (!loggedIn) {
-    await saveDebugArtifacts(page, "debug-login-final");
-    const finalBody = await page.evaluate(() => document.body.innerText.toLowerCase());
-
-    if (
-      finalBody.includes("confirmation code") ||
-      finalBody.includes("verify") ||
-      finalBody.includes("check your email") ||
-      finalBody.includes("captcha") ||
-      finalBody.includes("suspicious")
-    ) {
-      throw new Error("X requested an extra verification step (code/email/captcha).");
-    }
-
-    throw new Error("Login to X failed");
-  }
-
-  await saveCookies(page);
+  return hasComposer;
 }
 
 async function ensureLoggedIn(page) {
   const loaded = await loadCookies(page);
 
-  if (loaded) {
-    const ok = await isLoggedIn(page);
-    if (ok) {
-      console.log("Using saved X session");
-      return;
-    }
-    console.log("Saved session is no longer valid");
+  if (!loaded) {
+    throw new Error("No valid X session found. Create x-session.json manually and store it in GitHub.");
   }
 
-  console.log("Performing fresh X login");
-  await loginToX(page);
+  const ok = await isLoggedIn(page);
+  if (ok) {
+    console.log("Using saved X session");
+    return;
+  }
+
+  await saveDebugArtifacts(page, "debug-invalid-session");
+  throw new Error("Saved X session is invalid or expired. Refresh x-session.json.");
 }
 
 async function downloadImageToTemp(url, asin) {
@@ -525,7 +327,7 @@ async function downloadImageToTemp(url, asin) {
   try {
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.9"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/9.0"
       }
     });
 
@@ -575,233 +377,6 @@ function buildBrandedCardHtml(deal, imageUrl, styleVariant) {
   const bg1 = "#050505";
   const bg2 = "#0b1220";
 
-  if (styleVariant === 2) {
-    return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <style>
-        * { box-sizing: border-box; }
-        body {
-          margin: 0;
-          width: 1200px;
-          height: 675px;
-          font-family: Arial, sans-serif;
-          background:
-            radial-gradient(circle at top center, rgba(37,99,235,.30), transparent 30%),
-            linear-gradient(180deg, ${bg1} 0%, ${bg2} 100%);
-          color: white;
-        }
-        .frame { width: 1200px; height: 675px; padding: 26px; }
-        .card {
-          width: 100%; height: 100%;
-          background: linear-gradient(180deg, #111722 0%, #090b11 100%);
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius: 34px;
-          overflow: hidden;
-          position: relative;
-          padding: 28px;
-        }
-        .brand { color: #93c5fd; font-size: 20px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
-        .top { display:flex; justify-content:space-between; align-items:flex-start; }
-        .badge {
-          display:inline-block; padding: 12px 16px; border-radius:999px;
-          background: linear-gradient(135deg, #ff4d4d, #ff7a18);
-          font-size: 20px; font-weight: 900;
-        }
-        .image-wrap {
-          width: 100%;
-          height: 320px;
-          margin-top: 18px;
-          display:flex; align-items:center; justify-content:center;
-          background: #fff;
-          border-radius: 28px;
-          overflow: hidden;
-        }
-        .image-wrap img { width:100%; height:100%; object-fit:contain; }
-        .category {
-          margin-top: 20px;
-          color:#93c5fd;
-          font-size:18px;
-          font-weight:900;
-          letter-spacing:.14em;
-          text-transform:uppercase;
-        }
-        .title {
-          margin-top: 12px;
-          font-size: 50px;
-          line-height: .98;
-          font-weight: 900;
-          letter-spacing: -.05em;
-          font-style: italic;
-          display:-webkit-box;
-          -webkit-line-clamp:3;
-          -webkit-box-orient:vertical;
-          overflow:hidden;
-        }
-        .footer {
-          margin-top: 18px;
-          display:flex;
-          justify-content:space-between;
-          align-items:end;
-          gap: 16px;
-        }
-        .old { color:#71717a; font-size:24px; text-decoration:line-through; font-weight:700; margin-bottom:4px; }
-        .price { font-size:64px; font-weight:900; line-height:1; }
-        .cta {
-          display:inline-flex; align-items:center; justify-content:center;
-          padding:18px 22px; border-radius:20px;
-          background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
-          font-size:22px; font-weight:900; text-transform:uppercase; letter-spacing:.08em;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="frame">
-        <div class="card">
-          <div class="top">
-            <div class="brand">TrendPulse</div>
-            <div class="badge">${safeBadge}</div>
-          </div>
-          <div class="image-wrap">
-            <img src="${safeImage}" alt="">
-          </div>
-          <div class="category">${safeCategory}</div>
-          <div class="title">${safeName}</div>
-          <div class="footer">
-            <div>
-              ${originalPrice ? `<div class="old">${escapeHtml(originalPrice)}</div>` : ""}
-              <div class="price">${escapeHtml(price)}</div>
-            </div>
-            <div class="cta">Get Deal</div>
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>`;
-  }
-
-  if (styleVariant === 3) {
-    return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <style>
-        * { box-sizing: border-box; }
-        body {
-          margin: 0;
-          width: 1200px;
-          height: 675px;
-          font-family: Arial, sans-serif;
-          background:
-            radial-gradient(circle at left top, rgba(255,77,77,.22), transparent 24%),
-            radial-gradient(circle at right bottom, rgba(37,99,235,.22), transparent 28%),
-            linear-gradient(180deg, ${bg1} 0%, ${bg2} 100%);
-          color: white;
-        }
-        .wrap { width:1200px; height:675px; padding:26px; }
-        .card {
-          width:100%; height:100%;
-          display:grid;
-          grid-template-columns: 0.9fr 1.1fr;
-          gap: 20px;
-          background: linear-gradient(180deg, #111722 0%, #090b11 100%);
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius:34px;
-          overflow:hidden;
-          padding:26px;
-        }
-        .left {
-          display:flex;
-          flex-direction:column;
-          justify-content:space-between;
-          gap: 18px;
-        }
-        .brand { color:#93c5fd; font-size:20px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
-        .badge {
-          display:inline-block; padding:16px 20px; border-radius:26px;
-          background: linear-gradient(135deg, #ff4d4d, #ff7a18);
-          font-size:38px; font-weight:900;
-          align-self:flex-start;
-        }
-        .pricebox {
-          background: rgba(255,255,255,.05);
-          border:1px solid rgba(255,255,255,.08);
-          border-radius:26px;
-          padding:20px;
-        }
-        .old { color:#71717a; font-size:24px; text-decoration:line-through; font-weight:700; margin-bottom:6px; }
-        .price { font-size:72px; font-weight:900; line-height:1; }
-        .cta {
-          margin-top:12px;
-          display:inline-flex; align-items:center; justify-content:center;
-          padding:18px 22px; border-radius:20px;
-          background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
-          font-size:22px; font-weight:900; text-transform:uppercase; letter-spacing:.08em;
-        }
-        .right {
-          background:#fff;
-          border-radius:28px;
-          overflow:hidden;
-          position:relative;
-        }
-        .right img { width:100%; height:100%; object-fit:contain; }
-        .overlay {
-          position:absolute; left:0; right:0; bottom:0;
-          padding:26px;
-          background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.88) 100%);
-        }
-        .category {
-          color:#93c5fd;
-          font-size:18px;
-          font-weight:900;
-          letter-spacing:.14em;
-          text-transform:uppercase;
-          margin-bottom:10px;
-        }
-        .title {
-          font-size:46px;
-          line-height:.98;
-          font-weight:900;
-          letter-spacing:-.05em;
-          font-style:italic;
-          display:-webkit-box;
-          -webkit-line-clamp:4;
-          -webkit-box-orient:vertical;
-          overflow:hidden;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="wrap">
-        <div class="card">
-          <div class="left">
-            <div>
-              <div class="brand">TrendPulse</div>
-              <div style="height:14px"></div>
-              <div class="badge">${safeBadge}</div>
-            </div>
-            <div class="pricebox">
-              ${originalPrice ? `<div class="old">${escapeHtml(originalPrice)}</div>` : ""}
-              <div class="price">${escapeHtml(price)}</div>
-              <div class="cta">Get Deal</div>
-            </div>
-          </div>
-          <div class="right">
-            <img src="${safeImage}" alt="">
-            <div class="overlay">
-              <div class="category">${safeCategory}</div>
-              <div class="title">${safeName}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>`;
-  }
-
   return `
   <!DOCTYPE html>
   <html lang="en">
@@ -819,11 +394,7 @@ function buildBrandedCardHtml(deal, imageUrl, styleVariant) {
           linear-gradient(180deg, ${bg1} 0%, ${bg2} 100%);
         color: white;
       }
-      .frame {
-        width: 1200px;
-        height: 675px;
-        padding: 28px;
-      }
+      .frame { width: 1200px; height: 675px; padding: 28px; }
       .card {
         width: 100%;
         height: 100%;
@@ -833,7 +404,6 @@ function buildBrandedCardHtml(deal, imageUrl, styleVariant) {
         border: 1px solid rgba(255,255,255,.09);
         border-radius: 34px;
         overflow: hidden;
-        box-shadow: 0 30px 70px rgba(0,0,0,.35);
       }
       .left {
         background: #fff;
@@ -841,7 +411,6 @@ function buildBrandedCardHtml(deal, imageUrl, styleVariant) {
         align-items: center;
         justify-content: center;
         padding: 34px;
-        position: relative;
       }
       .left img {
         width: 100%;
@@ -853,7 +422,6 @@ function buildBrandedCardHtml(deal, imageUrl, styleVariant) {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        position: relative;
       }
       .brand {
         font-size: 20px;
@@ -892,9 +460,6 @@ function buildBrandedCardHtml(deal, imageUrl, styleVariant) {
         -webkit-line-clamp: 4;
         -webkit-box-orient: vertical;
         overflow: hidden;
-      }
-      .pricebox {
-        margin-top: 24px;
       }
       .old {
         color: #71717a;
@@ -950,10 +515,8 @@ function buildBrandedCardHtml(deal, imageUrl, styleVariant) {
           </div>
 
           <div>
-            <div class="pricebox">
-              ${originalPrice ? `<div class="old">${escapeHtml(originalPrice)}</div>` : ""}
-              <div class="price">${escapeHtml(price)}</div>
-            </div>
+            ${originalPrice ? `<div class="old">${escapeHtml(originalPrice)}</div>` : ""}
+            <div class="price">${escapeHtml(price)}</div>
             <div class="footer">
               <div class="cta">Get Deal</div>
               <div class="site">trend-pulse.shop</div>
@@ -1053,10 +616,6 @@ async function publishTweet(page, text, imagePath = null) {
 
   if (!editorFound) {
     await saveDebugArtifacts(page, "debug-compose-step");
-    const currentUrl = page.url();
-    const preview = await page.evaluate(() => document.body.innerText.slice(0, 1200));
-    console.log("Compose URL at failure:", currentUrl);
-    console.log("Compose page preview:", preview);
     throw new Error("Could not find tweet editor");
   }
 
