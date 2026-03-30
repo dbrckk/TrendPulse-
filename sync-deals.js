@@ -7,7 +7,7 @@ import path from "path";
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/9.0"
+    "User-Agent": "TrendPulseBot/10.0"
   }
 });
 
@@ -95,11 +95,15 @@ function isValidAsin(asin) {
 }
 
 function buildAffiliateLink(asin) {
-  return `https://www.amazon.com/dp/${asin}?tag=${AFFILIATE_TAG}`;
+  return `https://www.amazon.com/dp/${asin}?tag=${AFFILIATE_TAG}&linkCode=ogi&th=1&psc=1`;
 }
 
-function buildAmazonImage(asin) {
-  return `https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&MarketPlace=US&Operation=GetImage&ASIN=${asin}&Service=Amazon&TemplateId=LargeImage`;
+function buildAmazonFallbackImage(asin) {
+  return `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`;
+}
+
+function buildPrimaryImage(asin) {
+  return `https://m.media-amazon.com/images/I/${asin}.jpg`;
 }
 
 function extractAsinFromAmazonUrl(url) {
@@ -118,6 +122,25 @@ function extractAsinFromAmazonUrl(url) {
   }
 
   return null;
+}
+
+function isAmazonUrl(url) {
+  if (!url) return false;
+  return /amazon\.(com|fr|de|co\.uk|ca|it|es|nl|com\.mx|com\.au|co\.jp)/i.test(url) || /amzn\.to/i.test(url);
+}
+
+function looksLikeUsAmazon(url) {
+  if (!url) return false;
+  return /amazon\.com\//i.test(url) || /amzn\.to/i.test(url);
+}
+
+function normalizeUrl(url, baseUrl) {
+  if (!url) return null;
+  try {
+    return new URL(url, baseUrl).toString();
+  } catch {
+    return url;
+  }
 }
 
 function extractPriceFromText(text) {
@@ -180,21 +203,12 @@ function scoreProduct({ price, discount_percent, name, source_name }) {
   return Math.round((discountScore + lowPriceBoost + midPriceBoost + keywordBoost + sourceBoost) * 100) / 100;
 }
 
-function normalizeUrl(url, baseUrl) {
-  if (!url) return null;
-  try {
-    return new URL(url, baseUrl).toString();
-  } catch {
-    return url;
-  }
-}
-
 async function fetchText(url) {
   try {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/9.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/10.0"
       }
     });
 
@@ -216,7 +230,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/9.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/10.0"
       }
     });
 
@@ -249,7 +263,7 @@ function extractAmazonLinksFromHtml(html) {
 
     const value = href.trim();
     if (
-      value.includes("amazon.com") ||
+      value.includes("amazon.") ||
       value.includes("amzn.to") ||
       value.includes("/dp/") ||
       value.includes("/gp/product/")
@@ -260,7 +274,7 @@ function extractAmazonLinksFromHtml(html) {
 
   const htmlMatches = html.match(/https?:\/\/[^\s"'<>]+/g) || [];
   for (const url of htmlMatches) {
-    if (url.includes("amazon.com") || url.includes("amzn.to")) {
+    if (url.includes("amazon.") || url.includes("amzn.to")) {
       results.add(url);
     }
   }
@@ -271,12 +285,12 @@ function extractAmazonLinksFromHtml(html) {
 function extractCategory(title, description) {
   const text = `${title} ${description}`.toLowerCase();
 
-  if (/coffee|kitchen|cookware|dish|pan|knife|food|appliance/.test(text)) return "Kitchen";
-  if (/toothbrush|beauty|skincare|soap|cleaner|makeup|hair/.test(text)) return "Beauty";
-  if (/fitbit|tracker|headphone|speaker|tablet|laptop|tech|electronic|monitor|keyboard|mouse|ssd|router|tv/.test(text)) return "Tech";
-  if (/toy|kid|baby|alphabet|lego|game/.test(text)) return "Kids";
-  if (/fitness|sport|exercise|health|workout/.test(text)) return "Fitness";
-  if (/home|furniture|decor|storage|bedding|vacuum/.test(text)) return "Home";
+  if (/coffee|kitchen|cookware|dish soap|dishwasher|pan|knife|food|appliance|mixer|grinder|cook|bake|utensil/.test(text)) return "Kitchen";
+  if (/toothbrush|beauty|skincare|soap refill|cleanser|makeup|hair|serum|lotion|shampoo|conditioner|grooming/.test(text)) return "Beauty";
+  if (/headphone|speaker|tablet|laptop|tech|electronic|monitor|keyboard|mouse|ssd|router|tv|smartphone|earbuds|charger|usb|gaming/.test(text)) return "Tech";
+  if (/toy|kid|baby|alphabet|lego|game|stroller|diaper/.test(text)) return "Kids";
+  if (/fitness|sport|exercise|health|workout|yoga|treadmill|weights/.test(text)) return "Fitness";
+  if (/home|furniture|decor|storage|bedding|vacuum|cleaning|organizer|lamp|closet|bathroom|travel bag|anti-theft bag|backpack|luggage/.test(text)) return "Home";
 
   return "All";
 }
@@ -307,6 +321,25 @@ function buildDescription(title, sourceDescription, price, discountPercent) {
   return `Trending Amazon deal found automatically. Tap to check the latest price and availability.`;
 }
 
+function chooseBestAmazonLink(links) {
+  if (!links?.length) return null;
+
+  const normalized = links.filter(Boolean);
+
+  const us = normalized.find(link => looksLikeUsAmazon(link) && extractAsinFromAmazonUrl(link));
+  if (us) return us;
+
+  const anyAmazon = normalized.find(link => isAmazonUrl(link) && extractAsinFromAmazonUrl(link));
+  if (anyAmazon) return anyAmazon;
+
+  return null;
+}
+
+function chooseImageUrl(metaImage, asin) {
+  if (metaImage && /^https?:\/\//i.test(metaImage)) return metaImage;
+  return buildPrimaryImage(asin);
+}
+
 async function extractDealFromArticle(item) {
   const sourceUrl = item.link;
   const sourceTitle = cleanText(item.title);
@@ -321,63 +354,69 @@ async function extractDealFromArticle(item) {
 
   const $ = cheerio.load(html);
   const metaImage = extractMetaImage($, sourceUrl);
-  const foundLinks = extractAmazonLinksFromHtml(html);
+  const foundLinks = extractAmazonLinksFromHtml(html)
+    .map(link => normalizeUrl(link, sourceUrl));
 
   if (!foundLinks.length) {
     console.log("No Amazon link found");
     return null;
   }
 
-  for (const rawLink of foundLinks) {
-    const normalized = normalizeUrl(rawLink, sourceUrl);
-    const finalUrl = await resolveFinalUrl(normalized);
-    const asin = extractAsinFromAmazonUrl(finalUrl) || extractAsinFromAmazonUrl(normalized);
-
-    if (!isValidAsin(asin)) continue;
-
-    const mergedText = `${sourceTitle} ${sourceDescription}`;
-    const price = extractPriceFromText(mergedText);
-    const discountPercent = extractDiscountPercent(mergedText);
-    const originalPrice = discountPercent ? estimateOriginalPrice(price, discountPercent) : null;
-    const sourceName = new URL(sourceUrl).hostname.replace(/^www\./, "");
-    const description = buildDescription(sourceTitle, sourceDescription, price, discountPercent);
-    const nowIso = new Date().toISOString();
-
-    const product = {
-      asin,
-      name: sourceTitle.slice(0, 180) || `Amazon Deal ${asin}`,
-      tagline: "Top Amazon deal",
-      description,
-      price: price ?? null,
-      original_price: originalPrice ?? null,
-      discount_percent: discountPercent ?? null,
-      image_url: metaImage || buildAmazonImage(asin),
-      affiliate_link: buildAffiliateLink(asin),
-      category: extractCategory(sourceTitle, sourceDescription),
-      likes: 0,
-      nopes: 0,
-      clicks: 0,
-      views: 0,
-      source_url: sourceUrl,
-      source_name: sourceName,
-      amazon_url: finalUrl,
-      is_active: true,
-      score: scoreProduct({
-        price,
-        discount_percent: discountPercent,
-        name: sourceTitle,
-        source_name: sourceName
-      }),
-      updated_at: nowIso,
-      created_at: nowIso
-    };
-
-    if (!isStrongEnoughProduct(product)) return null;
-    return product;
+  const bestRawAmazonLink = chooseBestAmazonLink(foundLinks);
+  if (!bestRawAmazonLink) {
+    console.log("No valid Amazon product link found");
+    return null;
   }
 
-  console.log("No valid ASIN found");
-  return null;
+  const finalUrl = await resolveFinalUrl(bestRawAmazonLink);
+  const asin =
+    extractAsinFromAmazonUrl(finalUrl) ||
+    extractAsinFromAmazonUrl(bestRawAmazonLink);
+
+  if (!isValidAsin(asin)) {
+    console.log("Invalid ASIN");
+    return null;
+  }
+
+  const mergedText = `${sourceTitle} ${sourceDescription}`;
+  const price = extractPriceFromText(mergedText);
+  const discountPercent = extractDiscountPercent(mergedText);
+  const originalPrice = discountPercent ? estimateOriginalPrice(price, discountPercent) : null;
+  const sourceName = new URL(sourceUrl).hostname.replace(/^www\./, "");
+  const description = buildDescription(sourceTitle, sourceDescription, price, discountPercent);
+  const nowIso = new Date().toISOString();
+
+  const product = {
+    asin,
+    name: sourceTitle.slice(0, 180) || `Amazon Deal ${asin}`,
+    tagline: "Top Amazon deal",
+    description,
+    price: price ?? null,
+    original_price: originalPrice ?? null,
+    discount_percent: discountPercent ?? null,
+    image_url: chooseImageUrl(metaImage, asin),
+    affiliate_link: buildAffiliateLink(asin),
+    raw_amazon_url: finalUrl || bestRawAmazonLink,
+    category: extractCategory(sourceTitle, sourceDescription),
+    likes: 0,
+    nopes: 0,
+    clicks: 0,
+    views: 0,
+    source_url: sourceUrl,
+    source_name: sourceName,
+    is_active: true,
+    score: scoreProduct({
+      price,
+      discount_percent: discountPercent,
+      name: sourceTitle,
+      source_name: sourceName
+    }),
+    updated_at: nowIso,
+    created_at: nowIso
+  };
+
+  if (!isStrongEnoughProduct(product)) return null;
+  return product;
 }
 
 async function fetchFeedItems(feedUrl) {
@@ -526,7 +565,7 @@ function fallbackImage(name, label = "TrendPulse Deal") {
 function renderCardGrid(items, label) {
   return items.map(p => `
     <article class="card">
-      <img src="${escapeHtml(p.image_url || fallbackImage(p.name, label))}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(fallbackImage(p.name, label))}';">
+      <img src="${escapeHtml(p.image_url || buildAmazonFallbackImage(p.asin) || fallbackImage(p.name, label))}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(buildAmazonFallbackImage(p.asin) || fallbackImage(p.name, label))}';">
       <div class="content">
         <div class="kicker">${escapeHtml(label)} · Score ${Math.round(Number(p.score || 0))}</div>
         <h2 class="title">${escapeHtml(p.name)}</h2>
@@ -755,7 +794,7 @@ function simpleCategoryPageTemplate({ title, description, canonicalPath, items, 
 function staticDealPageTemplate(product) {
   const slug = slugify(product.name);
   const canonicalUrl = `${SITE_URL}/deal/${product.asin}/${slug}/`;
-  const image = product.image_url || buildAmazonImage(product.asin) || fallbackImage(product.name, "TrendPulse");
+  const image = product.image_url || buildAmazonFallbackImage(product.asin) || fallbackImage(product.name, "TrendPulse");
   const description = product.description || "Trending Amazon deal updated from our live feed.";
   const discount = Number(product.discount_percent || 0);
   const score = Math.round(Number(product.score || 0));
@@ -840,7 +879,7 @@ function staticDealPageTemplate(product) {
       <article class="card">
         <div class="hero">
           <div class="hero-image">
-            <img src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src='${escapeHtml(fallbackImage(product.name, "TrendPulse"))}';">
+            <img src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src='${escapeHtml(buildAmazonFallbackImage(product.asin) || fallbackImage(product.name, "TrendPulse"))}';">
           </div>
 
           <div class="content">
@@ -857,7 +896,7 @@ function staticDealPageTemplate(product) {
             ${product.original_price ? `<div class="old-price">${escapeHtml(formatPriceForHtml(product.original_price))}</div>` : ""}
             <div class="price">${escapeHtml(formatPriceForHtml(product.price))}</div>
 
-            <a href="${escapeHtml(product.affiliate_link || "#")}" target="_blank" rel="nofollow sponsored noopener noreferrer" class="cta">
+            <a href="${escapeHtml(product.affiliate_link || buildAffiliateLink(product.asin))}" target="_blank" rel="nofollow sponsored noopener noreferrer" class="cta">
               🔥 Get Deal on Amazon
             </a>
           </div>
@@ -1069,7 +1108,6 @@ async function generateSitemap() {
     .from("products")
     .select("asin, name, updated_at")
     .eq("is_active", true)
-    .order("score", { ascending: false })
     .limit(MAX_ACTIVE_DEALS);
 
   if (error) throw error;
@@ -1116,7 +1154,7 @@ ${allUrls.map(url => `  <url>
 }
 
 async function main() {
-  console.log("Starting sync V2.7");
+  console.log("Starting sync V3");
 
   const activeCountBefore = await getActiveDealsCount();
   console.log(`Active deals before sync: ${activeCountBefore}`);
