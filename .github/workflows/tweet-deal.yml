@@ -1,9 +1,9 @@
 name: Post Random Deal to X
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -26,20 +24,20 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Write X session file
+        run: printf '%s' '${{ secrets.X_SESSION_JSON }}' > x-session.json
+
       - name: Run tweet automation
+        run: node post-random-deal.js
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SITE_URL: https://trend-pulse.shop
-          X_USERNAME: ${{ secrets.X_USERNAME }}
-          X_PASSWORD: ${{ secrets.X_PASSWORD }}
-          X_EMAIL: ${{ secrets.X_EMAIL }}
-        run: node post-random-deal.js
 
-      - name: Commit tweet state and session
+      - name: Commit tweet state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tweet-state.json x-session.json
-          git diff --cached --quiet || git commit -m "Update X session and tweet state"
+          git add tweet-state.json
+          git diff --cached --quiet || git commit -m "Update tweet state"
           git push
