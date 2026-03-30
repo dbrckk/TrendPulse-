@@ -1,73 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-<title>Amazon Deal | TrendPulse</title>
+  <title>Amazon Deal | TrendPulse</title>
+  <meta name="description" content="Trending Amazon product deal on TrendPulse." />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="theme-color" content="#050505" />
 
-<meta name="robots" content="index, follow">
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link rel="manifest" href="/manifest.json" />
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <meta property="og:type" content="product" />
+  <meta property="og:title" content="Amazon Deal | TrendPulse" />
+  <meta property="og:description" content="Trending Amazon product deal on TrendPulse." />
+  <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg" />
+  <meta property="og:url" content="https://trend-pulse.shop/deal.html" />
 
-<style>
-body { background:#050505; color:white; font-family:Inter,sans-serif; margin:0; }
-.wrap { max-width:700px; margin:auto; padding:20px; }
-img { width:100%; border-radius:20px; background:white; }
-h1 { font-size:28px; font-weight:900; }
-.price { font-size:32px; font-weight:900; }
-.cta { display:block; background:#2563eb; padding:15px; text-align:center; border-radius:12px; margin-top:20px; }
-</style>
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Amazon Deal | TrendPulse" />
+  <meta name="twitter:description" content="Trending Amazon product deal on TrendPulse." />
+  <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg" />
+
+  <link rel="preconnect" href="https://hyrofyfhmabhlqbucjdp.supabase.co" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    body {
+      margin: 0;
+      background: #050505;
+      color: white;
+      font-family: Inter, sans-serif;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .nav a {
+      padding: 10px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #e4e4e7;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, #111722 0%, #090b11 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,.35);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .hero-image {
+      background: white;
+      min-height: 420px;
+    }
+
+    .hero-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .content {
+      padding: 26px;
+    }
+
+    .kicker {
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: .98;
+      font-weight: 900;
+      letter-spacing: -.05em;
+      font-style: italic;
+    }
+
+    .desc {
+      color: #c4c4cc;
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .pill {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #e4e4e7;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .old-price {
+      color: #71717a;
+      font-size: 15px;
+      text-decoration: line-through;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .price {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -.05em;
+      margin-bottom: 18px;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 16px 18px;
+      border-radius: 18px;
+      text-decoration: none;
+      background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
+      color: white;
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      box-shadow: 0 16px 30px rgba(37,99,235,.28);
+    }
+
+    .section {
+      margin-top: 28px;
+      background: linear-gradient(180deg, #111722 0%, #090b11 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 24px;
+      padding: 22px;
+    }
+
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+    }
+
+    .section p {
+      margin: 0;
+      color: #c4c4cc;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .loading, .error {
+      padding: 40px 20px;
+      text-align: center;
+      color: #a1a1aa;
+    }
+
+    @media (max-width: 820px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-image {
+        min-height: 320px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-<div class="wrap">
+  <div class="wrap">
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/deals.html">All Deals</a>
+      <a href="/tech.html">Tech</a>
+      <a href="/kitchen.html">Kitchen</a>
+      <a href="/beauty.html">Beauty</a>
+      <a href="/home.html">Home</a>
+    </nav>
 
-<img id="img">
+    <main id="app">
+      <div class="loading">Loading deal...</div>
+    </main>
+  </div>
 
-<h1 id="title"></h1>
+  <script>
+    const SITE_URL = 'https://trend-pulse.shop';
+    const SB_URL = 'https://hyrofyfhmabhlqbucjdp.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs';
+    const sb = supabase.createClient(SB_URL, SB_KEY);
 
-<div class="price" id="price"></div>
+    function slugify(text) {
+      return String(text || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(0, 80);
+    }
 
-<p id="desc"></p>
+    function formatPrice(value) {
+      if (value === null || value === undefined || value === '') return 'Check price';
+      const n = Number(value);
+      if (Number.isNaN(n)) return 'Check price';
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: n % 1 === 0 ? 0 : 2
+      }).format(n);
+    }
 
-<a id="link" class="cta" target="_blank">🔥 Get Deal on Amazon</a>
+    function fallbackImage(name) {
+      const safe = String(name || 'Trending Deal').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `data:image/svg+xml;utf8,
+      <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900">
+        <rect width="100%" height="100%" fill="%23070a11"/>
+        <text x="50%" y="42%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="56" font-family="Arial" font-weight="800">TrendPulse</text>
+        <text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" fill="%23cbd5e1" font-size="34" font-family="Arial">${safe}</text>
+      </svg>`;
+    }
 
-</div>
+    function setMeta({ title, description, image, url, price, currency = 'USD' }) {
+      document.title = title;
 
-<script>
-const urlParams = new URLSearchParams(window.location.search);
-const id = urlParams.get('id');
+      const ensureMeta = (selector, attrs) => {
+        let el = document.querySelector(selector);
+        if (!el) {
+          el = document.createElement('meta');
+          Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+          document.head.appendChild(el);
+        }
+        return el;
+      };
 
-const sb = supabase.createClient(
-'https://hyrofyfhmabhlqbucjdp.supabase.co',
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-);
+      ensureMeta('meta[name="description"]', { name: 'description' }).setAttribute('content', description);
+      ensureMeta('meta[property="og:title"]', { property: 'og:title' }).setAttribute('content', title);
+      ensureMeta('meta[property="og:description"]', { property: 'og:description' }).setAttribute('content', description);
+      ensureMeta('meta[property="og:image"]', { property: 'og:image' }).setAttribute('content', image);
+      ensureMeta('meta[property="og:url"]', { property: 'og:url' }).setAttribute('content', url);
+      ensureMeta('meta[name="twitter:title"]', { name: 'twitter:title' }).setAttribute('content', title);
+      ensureMeta('meta[name="twitter:description"]', { name: 'twitter:description' }).setAttribute('content', description);
+      ensureMeta('meta[name="twitter:image"]', { name: 'twitter:image' }).setAttribute('content', image);
 
-async function load(){
-const { data } = await sb
-.from('products')
-.select('*')
-.eq('id', id)
-.single();
+      let canonical = document.querySelector('link[rel="canonical"]');
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonical);
+      }
+      canonical.setAttribute('href', url);
 
-if(!data) return;
+      const existingJsonLd = document.getElementById('product-jsonld');
+      if (existingJsonLd) existingJsonLd.remove();
 
-document.getElementById('title').innerText = data.name;
-document.getElementById('price').innerText = "$"+data.price;
-document.getElementById('desc').innerText = data.description;
+      const jsonLd = document.createElement('script');
+      jsonLd.type = 'application/ld+json';
+      jsonLd.id = 'product-jsonld';
+      jsonLd.textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": title,
+        "description": description,
+        "image": image ? [image] : [],
+        "offers": {
+          "@type": "Offer",
+          "priceCurrency": currency,
+          "price": price ?? '',
+          "url": url,
+          "availability": "https://schema.org/InStock"
+        }
+      });
+      document.head.appendChild(jsonLd);
+    }
 
-document.getElementById('img').src =
-data.image_url || `https://images.amazon.com/images/P/${data.asin}.01._SX500_.jpg`;
+    async function loadDeal() {
+      const params = new URLSearchParams(window.location.search);
+      const asin = params.get('asin');
+      const app = document.getElementById('app');
 
-document.getElementById('link').href = data.affiliate_link;
+      if (!asin) {
+        app.innerHTML = '<div class="error">Missing deal identifier.</div>';
+        return;
+      }
 
-document.title = data.name + " | TrendPulse";
-}
+      const { data, error } = await sb
+        .from('products')
+        .select('*')
+        .eq('asin', asin)
+        .single();
 
-load();
-</script>
+      if (error || !data) {
+        app.innerHTML = '<div class="error">Deal not found.</div>';
+        return;
+      }
 
+      const slug = slugify(data.name);
+      const prettyUrl = `${SITE_URL}/deal/${data.asin}/${slug}`;
+      const currentPrettyPath = `/deal/${data.asin}/${slug}`;
+
+      if (window.location.pathname !== currentPrettyPath) {
+        history.replaceState({}, '', currentPrettyPath);
+      }
+
+      const image = data.image_url || `https://images.amazon.com/images/P/${data.asin}.01._SX500_.jpg` || fallbackImage(data.name);
+      const description = data.description || 'Trending Amazon deal updated from our live feed.';
+      const discount = Number(data.discount_percent || 0);
+      const score = Math.round(Number(data.score || 0));
+
+      setMeta({
+        title: `${data.name} | TrendPulse`,
+        description,
+        image,
+        url: prettyUrl,
+        price: data.price
+      });
+
+      app.innerHTML = `
+        <article class="card">
+          <div class="hero">
+            <div class="hero-image">
+              <img src="${image}" alt="${data.name}" onerror="this.onerror=null;this.src='${fallbackImage(data.name)}';">
+            </div>
+
+            <div class="content">
+              <div class="kicker">${data.category || 'All'} · Amazon Deal</div>
+              <h1>${data.name}</h1>
+              <p class="desc">${description}</p>
+
+              <div class="meta-row">
+                ${discount > 0 ? `<span class="pill">${discount}% off</span>` : ''}
+                <span class="pill">Score ${score}</span>
+                ${data.source_name ? `<span class="pill">${data.source_name}</span>` : ''}
+              </div>
+
+              ${data.original_price ? `<div class="old-price">${formatPrice(data.original_price)}</div>` : ''}
+              <div class="price">${formatPrice(data.price)}</div>
+
+              <a href="${data.affiliate_link || '#'}" target="_blank" rel="nofollow sponsored noopener noreferrer" class="cta">
+                🔥 Get Deal on Amazon
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <section class="section">
+          <h2>Why this deal stands out</h2>
+          <p>
+            We surface trending Amazon bargains based on current deal signals, discount strength, and popularity indicators from our live feed.
+            This helps highlight products that are more likely to be worth checking before the price changes or stock runs out.
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>Looking for more Amazon deals?</h2>
+          <p>
+            Browse our <a href="/deals.html" style="color:#60a5fa;">latest Amazon deals</a>, or explore categories like
+            <a href="/tech.html" style="color:#60a5fa;">Tech</a>,
+            <a href="/kitchen.html" style="color:#60a5fa;">Kitchen</a>,
+            <a href="/beauty.html" style="color:#60a5fa;">Beauty</a>, and
+            <a href="/home.html" style="color:#60a5fa;">Home</a>.
+          </p>
+        </section>
+      `;
+    }
+
+    loadDeal();
+  </script>
 </body>
-</html>
+      </html>
