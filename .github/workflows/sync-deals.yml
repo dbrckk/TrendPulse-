@@ -1,43 +1,31 @@
-name: Sync TrendPulse Deals
+name: Sync Deals + Score
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 */6 * * *'
-
-permissions:
-  contents: write
+    - cron: "0 */2 * * *" # toutes les 2h
+  workflow_dispatch:
 
 jobs:
-  sync:
+  run:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: true
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
 
-      - name: Install dependencies
+      - name: Install deps
         run: npm install
 
-      - name: Run sync script
+      - name: Sync deals
+        run: node sync-deals.js
+
+      - name: Update scores
+        run: node update-score.js
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
-          SITE_URL: https://trend-pulse.shop
-        run: node sync-deals.js
-
-      - name: Commit generated files
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add sitemap.xml deals.html tech.html kitchen.html beauty.html home.html best-amazon-deals.html best-tech-deals-under-50.html best-kitchen-deals-this-week.html best-beauty-deals-on-amazon.html best-home-deals-this-week.html deal
-          git diff --cached --quiet || git commit -m "Update generated SEO pages, static deal pages, and sitemap"
-          git push
