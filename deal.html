@@ -37,12 +37,6 @@
       -webkit-box-orient:vertical;
       overflow:hidden;
     }
-    .line-clamp-3 {
-      display:-webkit-box;
-      -webkit-line-clamp:3;
-      -webkit-box-orient:vertical;
-      overflow:hidden;
-    }
   </style>
 </head>
 
@@ -69,6 +63,7 @@
 
   <script>
     const SITE_URL = "https://trend-pulse.shop";
+    const AMAZON_TAG = "Drackk-20";
     const SB_URL = "https://hyrofyfhmabhlqbucjdp.supabase.co";
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
     const sb = supabase.createClient(SB_URL, SB_KEY);
@@ -93,14 +88,43 @@
       return `$${n.toFixed(n % 1 === 0 ? 0 : 2)}`;
     }
 
-    function fallbackImage(name) {
-      const safe = String(name || "Trending Deal").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    function fallbackSvg(name, label = "TrendPulse") {
+      const safe = String(name || "Trending Deal")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
       return `data:image/svg+xml;utf8,
       <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900">
         <rect width="100%" height="100%" fill="%23070a11"/>
-        <text x="50%" y="42%" text-anchor="middle" fill="white" font-size="56" font-family="Arial" font-weight="800">TrendPulse</text>
-        <text x="50%" y="58%" text-anchor="middle" fill="%23cbd5e1" font-size="32" font-family="Arial">${safe}</text>
+        <text x="50%" y="42%" text-anchor="middle" fill="white" font-size="56" font-family="Arial" font-weight="800">${label}</text>
+        <text x="50%" y="58%" text-anchor="middle" fill="%23cbd5e1" font-size="30" font-family="Arial">${safe}</text>
       </svg>`;
+    }
+
+    function getAmazonImageCandidates(asin) {
+      return [
+        `https://m.media-amazon.com/images/I/${asin}.jpg`,
+        `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`,
+        `https://images.amazon.com/images/P/${asin}.01._SX500_.jpg`,
+        `https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&MarketPlace=US&Operation=GetImage&ASIN=${asin}&Service=Amazon&TemplateId=LargeImage`
+      ];
+    }
+
+    function getBestImageList(product) {
+      const list = [];
+
+      if (product?.image_url) list.push(product.image_url);
+
+      for (const img of getAmazonImageCandidates(product?.asin || "")) {
+        if (img && !list.includes(img)) list.push(img);
+      }
+
+      list.push(fallbackSvg(product?.name || "Trending Deal"));
+      return list;
+    }
+
+    function buildAffiliateLink(asin) {
+      return `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}&linkCode=ogi&th=1&psc=1`;
     }
 
     function trackOnce(key) {
@@ -156,6 +180,33 @@
       document.getElementById("twitter-image").setAttribute("content", img);
     }
 
+    function buildSafeImageTag(images, alt, className) {
+      const safeAlt = String(alt || "").replace(/"/g, "&quot;");
+      const json = JSON.stringify(images).replace(/"/g, "&quot;");
+      return `
+        <img
+          src="${images[0]}"
+          data-images="${json}"
+          data-index="0"
+          alt="${safeAlt}"
+          class="${className}"
+          onerror="rotateImageFallback(this)"
+        >
+      `;
+    }
+
+    window.rotateImageFallback = function(imgEl) {
+      try {
+        const images = JSON.parse(imgEl.dataset.images || "[]");
+        let index = Number(imgEl.dataset.index || 0) + 1;
+
+        if (index >= images.length) return;
+
+        imgEl.dataset.index = String(index);
+        imgEl.src = images[index];
+      } catch {}
+    };
+
     async function loadProduct() {
       if (!asin) {
         document.getElementById("product").innerHTML = `
@@ -189,9 +240,10 @@
 
       const dealSlug = slug(data.name);
       const canonicalUrl = `${SITE_URL}/deal/${data.asin}/${dealSlug}/`;
-      const img = data.image_url || `https://images.amazon.com/images/P/${data.asin}.01._SX500_.jpg`;
+      const imageList = getBestImageList(data);
+      const amazonLink = buildAffiliateLink(data.asin);
 
-      setSeo(data, img, canonicalUrl);
+      setSeo(data, imageList[0], canonicalUrl);
 
       const badges = getBadges(data);
 
@@ -199,10 +251,11 @@
         <article class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 md:p-7">
           <div class="grid md:grid-cols-2 gap-8 items-start">
             <div>
-              <img src="${img}"
-                   alt="${data.name}"
-                   class="w-full h-80 md:h-[420px] object-contain bg-white rounded-2xl"
-                   onerror="this.onerror=null;this.src='${fallbackImage(data.name)}';">
+              ${buildSafeImageTag(
+                imageList,
+                data.name,
+                "w-full h-80 md:h-[420px] object-contain bg-white rounded-2xl"
+              )}
             </div>
 
             <div>
@@ -227,7 +280,7 @@
                 ${data.description || "Trending Amazon deal worth checking right now. Prices can change quickly, so it may be worth looking before the offer expires."}
               </div>
 
-              <a href="${data.affiliate_link}"
+              <a href="${amazonLink}"
                  target="_blank"
                  rel="nofollow sponsored noopener noreferrer"
                  onclick="trackEvent('${data.asin}', 'click')"
@@ -271,17 +324,18 @@
       container.innerHTML = "";
 
       (data || []).forEach(p => {
-        const img = p.image_url || `https://images.amazon.com/images/P/${p.asin}.01._SX300_.jpg`;
+        const imageList = getBestImageList(p);
 
         const card = document.createElement("a");
         card.href = `/deal/${p.asin}/${slug(p.name)}/`;
         card.className = "bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden block";
 
         card.innerHTML = `
-          <img src="${img}"
-               class="w-full h-36 object-cover bg-white"
-               alt="${p.name}"
-               onerror="this.onerror=null;this.src='${fallbackImage(p.name)}';">
+          ${buildSafeImageTag(
+            imageList,
+            p.name,
+            "w-full h-36 object-cover bg-white"
+          )}
           <div class="p-3">
             <div class="text-red-400 font-black text-xs mb-1">
               ${p.discount_percent ? `-${Math.round(p.discount_percent)}%` : "Deal"}
@@ -298,4 +352,4 @@
     loadProduct();
   </script>
 </body>
-  </html>
+    </html>
