@@ -40,9 +40,25 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    .sticky-buy {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      padding: 12px;
+      background: rgba(5,5,5,.92);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    @media (min-width: 768px) {
+      .sticky-buy {
+        display: none;
+      }
+    }
   </style>
 </head>
-<body class="max-w-5xl mx-auto px-4 py-6">
+<body class="max-w-5xl mx-auto px-4 py-6 pb-28 md:pb-6">
 
   <header class="flex justify-between items-center mb-6">
     <a href="/" class="font-black italic text-2xl tracking-tight">TrendPulse</a>
@@ -63,12 +79,19 @@
     </section>
   </main>
 
+  <div id="mobile-buy-bar" class="sticky-buy hidden">
+    <button id="mobile-buy-btn" class="w-full bg-blue-600 hover:bg-blue-500 transition py-4 rounded-2xl font-black text-lg">
+      Buy on Amazon
+    </button>
+  </div>
+
   <script>
     const SITE_URL = "https://trend-pulse.shop";
     const AMAZON_TAG = "Drackk-20";
     const SB_URL = "https://hyrofyfhmabhlqbucjdp.supabase.co";
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6ImFub24iLCJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
     const sb = supabase.createClient(SB_URL, SB_KEY);
+    let CURRENT_PRODUCT = null;
 
     function getAsinFromUrl() {
       const qAsin = new URLSearchParams(window.location.search).get("asin");
@@ -179,8 +202,27 @@
     };
 
     async function handleBuyClick(product) {
+      if (!product) return;
       await trackEvent(product.asin, "click");
       window.open(normalizeAffiliateLink(product), "_blank", "noopener,noreferrer");
+    }
+
+    function bindBuyButtons() {
+      const mainBtn = document.getElementById("buy-btn");
+      const mobileWrap = document.getElementById("mobile-buy-bar");
+      const mobileBtn = document.getElementById("mobile-buy-btn");
+
+      if (mainBtn) {
+        mainBtn.addEventListener("click", () => handleBuyClick(CURRENT_PRODUCT));
+      }
+
+      if (mobileBtn) {
+        mobileBtn.addEventListener("click", () => handleBuyClick(CURRENT_PRODUCT));
+      }
+
+      if (CURRENT_PRODUCT) {
+        mobileWrap.classList.remove("hidden");
+      }
     }
 
     async function loadProduct() {
@@ -210,6 +252,7 @@
         return;
       }
 
+      CURRENT_PRODUCT = data;
       await trackEvent(data.asin, "view");
 
       const canonicalUrl = `${SITE_URL}/deal.html?asin=${encodeURIComponent(data.asin)}`;
@@ -220,19 +263,19 @@
         <article class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
           <div class="grid md:grid-cols-2">
             <div class="bg-white p-4 md:p-6">
-              ${buildSafeImageTag(imageList, data.name, "w-full h-80 md:h-[480px] object-contain")}
+              ${buildSafeImageTag(imageList, data.name, "w-full h-80 md:h-[500px] object-contain")}
             </div>
 
             <div class="p-5 md:p-7 flex flex-col justify-center">
               <div class="text-red-400 font-black text-sm mb-2">
-                ${data.discount_percent ? `-${Math.round(data.discount_percent)}% OFF` : "Live Deal"}
+                ${data.discount_percent ? `-${Math.round(data.discount_percent)}% OFF` : "LIVE DEAL"}
               </div>
 
               <h1 class="text-3xl md:text-4xl font-black tracking-tight leading-tight mb-4">
                 ${data.name}
               </h1>
 
-              <div class="flex items-end gap-3 mb-6 flex-wrap">
+              <div class="flex items-end gap-3 mb-5 flex-wrap">
                 <div class="text-4xl md:text-5xl font-black">${formatPrice(data.price)}</div>
                 ${data.original_price ? `<div class="text-zinc-500 line-through text-xl">${formatPrice(data.original_price)}</div>` : ""}
               </div>
@@ -242,14 +285,14 @@
               </button>
 
               <div class="mt-4 text-sm text-zinc-400">
-                Price may change quickly.
+                Opens Amazon in a new tab • Price may change quickly
               </div>
             </div>
           </div>
         </article>
       `;
 
-      document.getElementById("buy-btn").addEventListener("click", () => handleBuyClick(data));
+      bindBuyButtons();
       loadRelated(data.category, data.asin);
     }
 
@@ -270,13 +313,13 @@
         const imageList = getBestImageList(p);
         const card = document.createElement("a");
         card.href = `/deal.html?asin=${encodeURIComponent(p.asin)}`;
-        card.className = "deal-card bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden block";
+        card.className = "bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden block";
 
         card.innerHTML = `
           ${buildSafeImageTag(imageList, p.name, "w-full h-36 object-cover bg-white")}
           <div class="p-3">
             <div class="text-red-400 font-black text-xs mb-1">
-              ${p.discount_percent ? `-${Math.round(p.discount_percent)}%` : "Deal"}
+              ${p.discount_percent ? `-${Math.round(p.discount_percent)}% OFF` : "LIVE DEAL"}
             </div>
             <div class="text-sm font-black line-clamp-2 mb-2">${p.name}</div>
             <div class="text-lg font-black">${formatPrice(p.price)}</div>
@@ -290,4 +333,4 @@
     loadProduct();
   </script>
 </body>
-  </html>
+</html>
