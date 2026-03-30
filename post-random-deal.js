@@ -181,7 +181,7 @@ function priorityScore(item) {
 async function fetchCandidateDeals() {
   const { data, error } = await sb
     .from("products")
-    .select("asin, name, price, original_price, discount_percent, category, score, likes, nopes, is_active, image_url")
+    .select("asin, name, price, original_price, discount_percent, category, score, likes, nopes, is_active, image_url, clicks")
     .eq("is_active", true)
     .not("asin", "is", null)
     .order("score", { ascending: false })
@@ -655,4 +655,415 @@ function buildBrandedCardHtml(deal, imageUrl, styleVariant) {
         .overlay {
           position:absolute; left:0; right:0; bottom:0;
           padding:26px;
-          bac
+          background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.88) 100%);
+        }
+        .category {
+          color:#93c5fd;
+          font-size:18px;
+          font-weight:900;
+          letter-spacing:.14em;
+          text-transform:uppercase;
+          margin-bottom:10px;
+        }
+        .title {
+          font-size:46px;
+          line-height:.98;
+          font-weight:900;
+          letter-spacing:-.05em;
+          font-style:italic;
+          display:-webkit-box;
+          -webkit-line-clamp:4;
+          -webkit-box-orient:vertical;
+          overflow:hidden;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="wrap">
+        <div class="card">
+          <div class="left">
+            <div>
+              <div class="brand">TrendPulse</div>
+              <div style="height:14px"></div>
+              <div class="badge">${safeBadge}</div>
+            </div>
+            <div class="pricebox">
+              ${originalPrice ? `<div class="old">${escapeHtml(originalPrice)}</div>` : ""}
+              <div class="price">${escapeHtml(price)}</div>
+              <div class="cta">Get Deal</div>
+            </div>
+          </div>
+          <div class="right">
+            <img src="${safeImage}" alt="">
+            <div class="overlay">
+              <div class="category">${safeCategory}</div>
+              <div class="title">${safeName}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>`;
+  }
+
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 675px;
+        font-family: Arial, sans-serif;
+        background:
+          radial-gradient(circle at top right, rgba(37,99,235,.35), transparent 28%),
+          linear-gradient(180deg, ${bg1} 0%, ${bg2} 100%);
+        color: white;
+      }
+      .frame {
+        width: 1200px;
+        height: 675px;
+        padding: 28px;
+      }
+      .card {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        background: linear-gradient(180deg, #111722 0%, #090b11 100%);
+        border: 1px solid rgba(255,255,255,.09);
+        border-radius: 34px;
+        overflow: hidden;
+        box-shadow: 0 30px 70px rgba(0,0,0,.35);
+      }
+      .left {
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 34px;
+        position: relative;
+      }
+      .left img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .right {
+        padding: 34px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+      }
+      .brand {
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #93c5fd;
+        margin-bottom: 10px;
+      }
+      .badge {
+        display: inline-block;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ff4d4d, #ff7a18);
+        font-weight: 900;
+        font-size: 18px;
+        letter-spacing: .05em;
+        align-self: flex-start;
+        margin-bottom: 18px;
+      }
+      .category {
+        color: #93c5fd;
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .title {
+        font-size: 54px;
+        line-height: .98;
+        font-weight: 900;
+        letter-spacing: -.05em;
+        font-style: italic;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .pricebox {
+        margin-top: 24px;
+      }
+      .old {
+        color: #71717a;
+        font-size: 24px;
+        text-decoration: line-through;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .price {
+        font-size: 68px;
+        line-height: 1;
+        font-weight: 900;
+        letter-spacing: -.05em;
+      }
+      .footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 24px;
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px 22px;
+        border-radius: 20px;
+        background: linear-gradient(180deg, #3275ff 0%, #1d4ed8 100%);
+        font-weight: 900;
+        font-size: 22px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .site {
+        color: #c4c4cc;
+        font-size: 18px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="card">
+        <div class="left">
+          <img src="${safeImage}" alt="">
+        </div>
+        <div class="right">
+          <div>
+            <div class="brand">TrendPulse</div>
+            <div class="badge">${safeBadge}</div>
+            <div class="category">${safeCategory}</div>
+            <div class="title">${safeName}</div>
+          </div>
+
+          <div>
+            <div class="pricebox">
+              ${originalPrice ? `<div class="old">${escapeHtml(originalPrice)}</div>` : ""}
+              <div class="price">${escapeHtml(price)}</div>
+            </div>
+            <div class="footer">
+              <div class="cta">Get Deal</div>
+              <div class="site">trend-pulse.shop</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>`;
+}
+
+async function generateBrandedImage(deal, localImagePath) {
+  const outputPath = path.join(os.tmpdir(), `trendpulse-card-${deal.asin}.png`);
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage"
+    ]
+  });
+
+  const styleVariant = [1, 2, 3][Math.floor(Math.random() * 3)];
+
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 675, deviceScaleFactor: 1 });
+
+    const imageUrl = localImagePath
+      ? `file://${localImagePath}`
+      : `https://images.amazon.com/images/P/${deal.asin}.01._SX500_.jpg`;
+
+    const html = buildBrandedCardHtml(deal, imageUrl, styleVariant);
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
+    await page.screenshot({
+      path: outputPath,
+      type: "png"
+    });
+
+    return outputPath;
+  } finally {
+    await browser.close();
+  }
+}
+
+async function attachImageIfPossible(page, imagePath) {
+  if (!imagePath || !fs.existsSync(imagePath)) {
+    console.log("No image file available for upload");
+    return false;
+  }
+
+  const inputSelectors = [
+    'input[data-testid="fileInput"]',
+    'input[type="file"]'
+  ];
+
+  for (const selector of inputSelectors) {
+    try {
+      const input = await page.waitForSelector(selector, { timeout: 10000 });
+      await input.uploadFile(imagePath);
+      await page.waitForTimeout(5000);
+      console.log("Image uploaded to composer");
+      return true;
+    } catch {}
+  }
+
+  console.log("Could not find image upload input on X");
+  return false;
+}
+
+async function publishTweet(page, text, imagePath = null) {
+  await page.goto("https://x.com/compose/post", {
+    waitUntil: "domcontentloaded",
+    timeout: 60000
+  });
+
+  await page.waitForTimeout(5000);
+
+  const editorSelectors = [
+    'div[data-testid="tweetTextarea_0"]',
+    'div[role="textbox"]',
+    'div[contenteditable="true"]'
+  ];
+
+  let editorFound = false;
+  for (const selector of editorSelectors) {
+    try {
+      await page.waitForSelector(selector, { timeout: 10000 });
+      await page.click(selector);
+      await page.keyboard.type(text, { delay: 18 });
+      editorFound = true;
+      break;
+    } catch {}
+  }
+
+  if (!editorFound) {
+    throw new Error("Could not find tweet editor");
+  }
+
+  await page.waitForTimeout(1500);
+
+  if (imagePath) {
+    await attachImageIfPossible(page, imagePath);
+  }
+
+  await page.waitForTimeout(2000);
+
+  const posted = await clickButtonByText(page, ["post", "tweet", "publier"]);
+  if (!posted) {
+    throw new Error("Could not find post button");
+  }
+
+  await page.waitForTimeout(6000);
+  await saveCookies(page);
+}
+
+async function postDealToX(deal, text) {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage"
+    ]
+  });
+
+  let sourceImagePath = null;
+  let brandedImagePath = null;
+
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1366, height: 900 });
+    await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
+
+    await ensureLoggedIn(page);
+
+    sourceImagePath = await downloadImageToTemp(
+      deal.image_url || `https://images.amazon.com/images/P/${deal.asin}.01._SX500_.jpg`,
+      deal.asin
+    );
+
+    brandedImagePath = await generateBrandedImage(deal, sourceImagePath);
+
+    await publishTweet(page, text, brandedImagePath);
+  } finally {
+    for (const file of [sourceImagePath, brandedImagePath]) {
+      if (file && fs.existsSync(file)) {
+        try {
+          fs.unlinkSync(file);
+        } catch {}
+      }
+    }
+    await browser.close();
+  }
+}
+
+function updateRecentAsins(state, asin) {
+  const list = Array.isArray(state.recent_asins) ? state.recent_asins : [];
+  return [asin, ...list.filter(x => x !== asin)].slice(0, MAX_RECENT_ASINS);
+}
+
+async function main() {
+  const state = loadState();
+
+  if (!shouldPost(state)) {
+    console.log(`Not time yet. Next post at ${state.next_post_at}`);
+    return;
+  }
+
+  const candidates = await fetchCandidateDeals();
+
+  if (!candidates.length) {
+    console.log("No active deals available for posting");
+    state.next_post_at = isoAfterMinutes(randomDelayMinutes());
+    saveState(state);
+    return;
+  }
+
+  const deal = pickDeal(candidates, state);
+
+  if (!deal) {
+    console.log("No eligible deal found");
+    state.next_post_at = isoAfterMinutes(randomDelayMinutes());
+    saveState(state);
+    return;
+  }
+
+  const tweetText = buildTweetText(deal);
+  console.log(`Posting deal: ${deal.asin} - ${deal.name}`);
+  console.log(tweetText);
+
+  await postDealToX(deal, tweetText);
+
+  state.last_posted_asin = deal.asin;
+  state.last_posted_at = new Date().toISOString();
+  state.last_posted_category = deal.category || "All";
+  state.recent_asins = updateRecentAsins(state, deal.asin);
+  state.next_post_at = isoAfterMinutes(randomDelayMinutes());
+
+  saveState(state);
+  console.log(`Next post scheduled around ${state.next_post_at}`);
+}
+
+main().catch(err => {
+  console.error("Fatal error:", err);
+  process.exit(1);
+});
