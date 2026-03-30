@@ -1,4 +1,6 @@
 import fs from "fs";
+import os from "os";
+import path from "path";
 import puppeteer from "puppeteer";
 import { createClient } from "@supabase/supabase-js";
 
@@ -94,6 +96,13 @@ function buildDealUrl(deal) {
   return `${SITE_URL}/deal/${deal.asin}/${slugify(deal.name)}/`;
 }
 
+function formatPrice(price) {
+  if (price === null || price === undefined || price === "") return null;
+  const n = Number(price);
+  if (Number.isNaN(n)) return null;
+  return `$${n.toFixed(n % 1 === 0 ? 0 : 2)}`;
+}
+
 function truncateForTweet(text, maxLen = 280) {
   if (text.length <= maxLen) return text;
   return text.slice(0, Math.max(0, maxLen - 1)).trimEnd() + "…";
@@ -101,24 +110,35 @@ function truncateForTweet(text, maxLen = 280) {
 
 function buildTweetText(deal) {
   const url = buildDealUrl(deal);
-  const category = deal.category ? `${deal.category} deal` : "Amazon deal";
-  const price = deal.price
-    ? `$${Number(deal.price).toFixed(Number(deal.price) % 1 === 0 ? 0 : 2)}`
-    : "great price";
+  const price = formatPrice(deal.price);
   const discount = Number(deal.discount_percent || 0);
-  const discountPart = discount > 0 ? ` (-${Math.round(discount)}%)` : "";
+  const category = String(deal.category || "Amazon").trim();
 
-  const text = `🔥 ${deal.name}${discountPart}
-${category} now at ${price}
-${url}`;
+  const templates = [];
 
-  return truncateForTweet(text, 280);
+  if (price && discount > 0) {
+    templates.push(`🚨 DEAL ALERT: ${deal.name}\nNow ${price} (-${Math.round(discount)}%)\n${url}`);
+    templates.push(`🔥 This ${category.toLowerCase()} deal looks crazy:\n${deal.name}\nOnly ${price} today\n${url}`);
+    templates.push(`💥 Price drop on Amazon\n${deal.name}\nNow ${price} with ${Math.round(discount)}% off\n${url}`);
+    templates.push(`👀 If you were waiting on this deal:\n${deal.name}\nIt just dropped to ${price}\n${url}`);
+  }
+
+  if (price) {
+    templates.push(`🔥 Trending Amazon find:\n${deal.name}\nLive now for ${price}\n${url}`);
+    templates.push(`⚡ Spotted on TrendPulse:\n${deal.name}\nCurrent price: ${price}\n${url}`);
+  }
+
+  templates.push(`🔥 Amazon deal worth checking:\n${deal.name}\n${url}`);
+  templates.push(`🚀 Trending deal on TrendPulse:\n${deal.name}\n${url}`);
+
+  const chosen = templates[Math.floor(Math.random() * templates.length)];
+  return truncateForTweet(chosen, 280);
 }
 
 async function fetchCandidateDeals() {
   const { data, error } = await sb
     .from("products")
-    .select("asin, name, price, discount_percent, category, score, likes, nopes, is_active")
+    .select("asin, name, price, discount_percent, category, score, likes, nopes, is_active, image_url")
     .eq("is_active", true)
     .not("asin", "is", null)
     .order("score", { ascending: false })
@@ -340,7 +360,66 @@ async function ensureLoggedIn(page) {
   await loginToX(page);
 }
 
-async function publishTweet(page, text) {
+async function downloadImageToTemp(url, asin) {
+  if (!url) return null;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.4"
+      }
+    });
+
+    if (!response.ok) {
+      console.log(`Image download failed with status ${response.status}`);
+      return null;
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    let ext = ".jpg";
+
+    if (contentType.includes("png")) ext = ".png";
+    if (contentType.includes("webp")) ext = ".webp";
+    if (contentType.includes("jpeg")) ext = ".jpg";
+    if (contentType.includes("jpg")) ext = ".jpg";
+
+    const tempPath = path.join(os.tmpdir(), `trendpulse-${asin}${ext}`);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    fs.writeFileSync(tempPath, buffer);
+
+    return tempPath;
+  } catch (err) {
+    console.log("Could not download image:", err.message);
+    return null;
+  }
+}
+
+async function attachImageIfPossible(page, imagePath) {
+  if (!imagePath || !fs.existsSync(imagePath)) {
+    console.log("No image file available for upload");
+    return false;
+  }
+
+  const inputSelectors = [
+    'input[data-testid="fileInput"]',
+    'input[type="file"]'
+  ];
+
+  for (const selector of inputSelectors) {
+    try {
+      const input = await page.waitForSelector(selector, { timeout: 10000 });
+      await input.uploadFile(imagePath);
+      await page.waitForTimeout(5000);
+      console.log("Image uploaded to composer");
+      return true;
+    } catch {}
+  }
+
+  console.log("Could not find image upload input on X");
+  return false;
+}
+
+async function publishTweet(page, text, imagePath = null) {
   await page.goto("https://x.com/compose/post", {
     waitUntil: "domcontentloaded",
     timeout: 60000
@@ -369,6 +448,12 @@ async function publishTweet(page, text) {
     throw new Error("Could not find tweet editor");
   }
 
+  await page.waitForTimeout(1500);
+
+  if (imagePath) {
+    await attachImageIfPossible(page, imagePath);
+  }
+
   await page.waitForTimeout(2000);
 
   const posted = await clickButtonByText(page, ["post", "tweet", "publier"]);
@@ -376,11 +461,11 @@ async function publishTweet(page, text) {
     throw new Error("Could not find post button");
   }
 
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(6000);
   await saveCookies(page);
 }
 
-async function postDealToX(text) {
+async function postDealToX(deal, text) {
   const browser = await puppeteer.launch({
     headless: true,
     args: [
@@ -390,14 +475,27 @@ async function postDealToX(text) {
     ]
   });
 
+  let imagePath = null;
+
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 1366, height: 900 });
     await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
 
     await ensureLoggedIn(page);
-    await publishTweet(page, text);
+
+    imagePath = await downloadImageToTemp(
+      deal.image_url || `https://images.amazon.com/images/P/${deal.asin}.01._SX500_.jpg`,
+      deal.asin
+    );
+
+    await publishTweet(page, text, imagePath);
   } finally {
+    if (imagePath && fs.existsSync(imagePath)) {
+      try {
+        fs.unlinkSync(imagePath);
+      } catch {}
+    }
     await browser.close();
   }
 }
@@ -432,7 +530,7 @@ async function main() {
   console.log(`Posting deal: ${deal.asin} - ${deal.name}`);
   console.log(tweetText);
 
-  await postDealToX(tweetText);
+  await postDealToX(deal, tweetText);
 
   state.last_posted_asin = deal.asin;
   state.last_posted_at = new Date().toISOString();
