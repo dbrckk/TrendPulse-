@@ -128,8 +128,7 @@ function buildTweetText(deal) {
   const url = slugToUrl(deal);
   const price = formatPrice(deal.price);
   const discount = Number(deal.discount_percent || 0);
-  const category = String(deal.category || "Amazon").trim();
-  const hashtag = categoryHashtag(category);
+  const hashtag = categoryHashtag(String(deal.category || "All").trim());
 
   const templates = [];
 
@@ -145,11 +144,9 @@ function buildTweetText(deal) {
   }
 
   if (price) {
-    templates.push(`🔥 Trending ${category.toLowerCase()} deal\n${deal.name}\nCurrent price: ${price}\n${hashtag}\n${url}`);
-    templates.push(`🚀 Good Amazon find\n${deal.name}\nLive now for ${price}\n${hashtag}\n${url}`);
+    templates.push(`🔥 Amazon deal worth checking\n${deal.name}\nOnly ${price}\n${hashtag}\n${url}`);
   }
 
-  templates.push(`🔥 Amazon deal worth checking\n${deal.name}\n${hashtag}\n${url}`);
   templates.push(`👀 Spotted on TrendPulse\n${deal.name}\n${hashtag}\n${url}`);
 
   return truncateForTweet(
@@ -236,8 +233,8 @@ async function typeLikeHuman(page, selector, value) {
 
 async function clickButtonByText(page, textOptions) {
   const clicked = await page.evaluate((texts) => {
-    const candidates = Array.from(document.querySelectorAll('div[role="button"], button, a[role="button"]'));
-    for (const el of candidates) {
+    const nodes = Array.from(document.querySelectorAll('div[role="button"], button, a[role="button"], a'));
+    for (const el of nodes) {
       const txt = (el.innerText || el.textContent || "").trim().toLowerCase();
       if (texts.some(t => txt === t || txt.includes(t))) {
         el.click();
@@ -284,17 +281,47 @@ async function isLoggedIn(page) {
   const url = page.url().toLowerCase();
   if (url.includes("/home")) {
     const hasComposer = await page.evaluate(() => {
-      return !!document.querySelector('a[href="/compose/post"], div[data-testid="SideNav_NewTweet_Button"], div[data-testid="tweetTextarea_0"]');
+      return !!document.querySelector(
+        'a[href="/compose/post"], div[data-testid="SideNav_NewTweet_Button"], div[data-testid="tweetTextarea_0"], div[role="textbox"]'
+      );
     });
     if (hasComposer) return true;
   }
 
   const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
-  if (bodyText.includes("for you") || bodyText.includes("following") || bodyText.includes("what is happening")) {
+  if (
+    bodyText.includes("for you") ||
+    bodyText.includes("following") ||
+    bodyText.includes("what is happening") ||
+    bodyText.includes("home")
+  ) {
     return true;
   }
 
   return false;
+}
+
+async function waitForAnySelector(page, selectors, timeout = 15000) {
+  const started = Date.now();
+
+  while (Date.now() - started < timeout) {
+    for (const selector of selectors) {
+      const exists = await page.$(selector);
+      if (exists) return selector;
+    }
+    await sleep(400);
+  }
+
+  return null;
+}
+
+async function tryOpenRealLoginStep(page) {
+  await sleep(2500);
+
+  const clicked = await clickButtonByText(page, ["log in", "se connecter"]);
+  if (clicked) {
+    await sleep(3000);
+  }
 }
 
 async function loginToX(page) {
@@ -304,26 +331,38 @@ async function loginToX(page) {
   });
 
   await sleep(3000);
+  await tryOpenRealLoginStep(page);
 
   const userInputSelectors = [
     'input[autocomplete="username"]',
     'input[name="text"]',
+    'input[inputmode="text"]',
+    'input[dir="auto"]',
     'input'
   ];
 
-  let typedUser = false;
-  for (const selector of userInputSelectors) {
-    try {
-      await page.waitForSelector(selector, { timeout: 5000 });
-      await typeLikeHuman(page, selector, X_USERNAME);
-      typedUser = true;
-      break;
-    } catch {}
+  let userSelector = await waitForAnySelector(page, userInputSelectors, 12000);
+
+  if (!userSelector) {
+    await page.goto("https://x.com/login", {
+      waitUntil: "domcontentloaded",
+      timeout: 60000
+    });
+
+    await sleep(4000);
+    await tryOpenRealLoginStep(page);
+    userSelector = await waitForAnySelector(page, userInputSelectors, 12000);
   }
 
-  if (!typedUser) {
+  if (!userSelector) {
+    const currentUrl = page.url();
+    const preview = await page.evaluate(() => document.body.innerText.slice(0, 1200));
+    console.log("Login URL at failure:", currentUrl);
+    console.log("Login page preview:", preview);
     throw new Error("Could not find username input on X login page");
   }
+
+  await typeLikeHuman(page, userSelector, X_USERNAME);
 
   await sleep(1000);
   let nextClicked = await clickButtonByText(page, ["next", "suivant"]);
@@ -343,47 +382,42 @@ async function loginToX(page) {
     const challengeInputs = [
       'input[data-testid="ocfEnterTextTextInput"]',
       'input[name="text"]',
+      'input[inputmode="text"]',
       'input'
     ];
 
-    let typedEmail = false;
-    for (const selector of challengeInputs) {
-      try {
-        await page.waitForSelector(selector, { timeout: 5000 });
-        await typeLikeHuman(page, selector, X_EMAIL);
-        typedEmail = true;
-        break;
-      } catch {}
-    }
+    const challengeSelector = await waitForAnySelector(page, challengeInputs, 8000);
 
-    if (typedEmail) {
+    if (challengeSelector) {
+      await typeLikeHuman(page, challengeSelector, X_EMAIL);
       await sleep(1000);
+
       const challengeNext = await clickButtonByText(page, ["next", "suivant"]);
       if (!challengeNext) {
         await page.keyboard.press("Enter");
       }
+
       await sleep(3000);
     }
   }
 
   const passwordSelectors = [
     'input[name="password"]',
-    'input[autocomplete="current-password"]'
+    'input[autocomplete="current-password"]',
+    'input[type="password"]'
   ];
 
-  let typedPassword = false;
-  for (const selector of passwordSelectors) {
-    try {
-      await page.waitForSelector(selector, { timeout: 15000 });
-      await typeLikeHuman(page, selector, X_PASSWORD);
-      typedPassword = true;
-      break;
-    } catch {}
-  }
+  const passwordSelector = await waitForAnySelector(page, passwordSelectors, 15000);
 
-  if (!typedPassword) {
+  if (!passwordSelector) {
+    const currentUrl = page.url();
+    const preview = await page.evaluate(() => document.body.innerText.slice(0, 1200));
+    console.log("Password step URL at failure:", currentUrl);
+    console.log("Password page preview:", preview);
     throw new Error("Could not find password input on X login page");
   }
+
+  await typeLikeHuman(page, passwordSelector, X_PASSWORD);
 
   await sleep(1000);
   const loginClicked = await clickButtonByText(page, ["log in", "se connecter"]);
@@ -433,7 +467,7 @@ async function downloadImageToTemp(url, asin) {
   try {
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.7"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.8"
       }
     });
 
@@ -960,6 +994,10 @@ async function publishTweet(page, text, imagePath = null) {
   }
 
   if (!editorFound) {
+    const currentUrl = page.url();
+    const preview = await page.evaluate(() => document.body.innerText.slice(0, 1200));
+    console.log("Compose URL at failure:", currentUrl);
+    console.log("Compose page preview:", preview);
     throw new Error("Could not find tweet editor");
   }
 
