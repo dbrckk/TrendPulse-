@@ -29,6 +29,10 @@ if (!X_USERNAME || !X_PASSWORD) {
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function slugify(text) {
   return String(text || "")
     .toLowerCase()
@@ -275,7 +279,7 @@ async function isLoggedIn(page) {
     timeout: 60000
   });
 
-  await page.waitForTimeout(5000);
+  await sleep(5000);
 
   const url = page.url().toLowerCase();
   if (url.includes("/home")) {
@@ -299,7 +303,7 @@ async function loginToX(page) {
     timeout: 60000
   });
 
-  await page.waitForTimeout(3000);
+  await sleep(3000);
 
   const userInputSelectors = [
     'input[autocomplete="username"]',
@@ -321,13 +325,13 @@ async function loginToX(page) {
     throw new Error("Could not find username input on X login page");
   }
 
-  await page.waitForTimeout(1000);
+  await sleep(1000);
   let nextClicked = await clickButtonByText(page, ["next", "suivant"]);
   if (!nextClicked) {
     await page.keyboard.press("Enter");
   }
 
-  await page.waitForTimeout(3000);
+  await sleep(3000);
 
   const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
   const emailChallengeVisible =
@@ -353,12 +357,12 @@ async function loginToX(page) {
     }
 
     if (typedEmail) {
-      await page.waitForTimeout(1000);
+      await sleep(1000);
       const challengeNext = await clickButtonByText(page, ["next", "suivant"]);
       if (!challengeNext) {
         await page.keyboard.press("Enter");
       }
-      await page.waitForTimeout(3000);
+      await sleep(3000);
     }
   }
 
@@ -381,13 +385,13 @@ async function loginToX(page) {
     throw new Error("Could not find password input on X login page");
   }
 
-  await page.waitForTimeout(1000);
+  await sleep(1000);
   const loginClicked = await clickButtonByText(page, ["log in", "se connecter"]);
   if (!loginClicked) {
     await page.keyboard.press("Enter");
   }
 
-  await page.waitForTimeout(7000);
+  await sleep(7000);
 
   const loggedIn = await isLoggedIn(page);
   if (!loggedIn) {
@@ -920,7 +924,7 @@ async function attachImageIfPossible(page, imagePath) {
     try {
       const input = await page.waitForSelector(selector, { timeout: 10000 });
       await input.uploadFile(imagePath);
-      await page.waitForTimeout(5000);
+      await sleep(5000);
       console.log("Image uploaded to composer");
       return true;
     } catch {}
@@ -936,7 +940,7 @@ async function publishTweet(page, text, imagePath = null) {
     timeout: 60000
   });
 
-  await page.waitForTimeout(5000);
+  await sleep(5000);
 
   const editorSelectors = [
     'div[data-testid="tweetTextarea_0"]',
@@ -959,20 +963,20 @@ async function publishTweet(page, text, imagePath = null) {
     throw new Error("Could not find tweet editor");
   }
 
-  await page.waitForTimeout(1500);
+  await sleep(1500);
 
   if (imagePath) {
     await attachImageIfPossible(page, imagePath);
   }
 
-  await page.waitForTimeout(2000);
+  await sleep(2000);
 
   const posted = await clickButtonByText(page, ["post", "tweet", "publier"]);
   if (!posted) {
     throw new Error("Could not find post button");
   }
 
-  await page.waitForTimeout(6000);
+  await sleep(6000);
   await saveCookies(page);
 }
 
