@@ -1,8 +1,8 @@
-name: Sync Deals + Score
+name: Full Automation
 
 on:
   schedule:
-    - cron: "0 */2 * * *" # toutes les 2h
+    - cron: "0 */2 * * *"
   workflow_dispatch:
 
 jobs:
@@ -10,21 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install deps
-        run: npm install
+      - run: npm install
 
-      - name: Sync deals
+      - name: Sync Deals
         run: node sync-deals.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
-      - name: Update scores
+      - name: Update Score
         run: node update-score.js
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
