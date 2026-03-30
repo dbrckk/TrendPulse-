@@ -7,7 +7,7 @@ import path from "path";
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/8.0"
+    "User-Agent": "TrendPulseBot/9.0"
   }
 });
 
@@ -37,6 +37,9 @@ const MAX_ACTIVE_DEALS = 400;
 const ITEMS_PER_FEED = 120;
 const REQUEST_DELAY_MS = 900;
 const MAX_DESCRIPTION_LENGTH = 240;
+const MAX_DEAL_AGE_DAYS = 14;
+const MIN_KEEP_SCORE = 12;
+const MIN_KEEP_DISCOUNT = 8;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -191,7 +194,7 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/9.0"
       }
     });
 
@@ -213,7 +216,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/8.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/9.0"
       }
     });
 
@@ -338,6 +341,7 @@ async function extractDealFromArticle(item) {
     const originalPrice = discountPercent ? estimateOriginalPrice(price, discountPercent) : null;
     const sourceName = new URL(sourceUrl).hostname.replace(/^www\./, "");
     const description = buildDescription(sourceTitle, sourceDescription, price, discountPercent);
+    const nowIso = new Date().toISOString();
 
     const product = {
       asin,
@@ -352,6 +356,8 @@ async function extractDealFromArticle(item) {
       category: extractCategory(sourceTitle, sourceDescription),
       likes: 0,
       nopes: 0,
+      clicks: 0,
+      views: 0,
       source_url: sourceUrl,
       source_name: sourceName,
       amazon_url: finalUrl,
@@ -362,7 +368,8 @@ async function extractDealFromArticle(item) {
         name: sourceTitle,
         source_name: sourceName
       }),
-      updated_at: new Date().toISOString()
+      updated_at: nowIso,
+      created_at: nowIso
     };
 
     if (!isStrongEnoughProduct(product)) return null;
@@ -435,6 +442,70 @@ async function enforceMaxActiveDeals(maxDeals) {
   if (updateError) throw updateError;
 
   console.log(`${idsToDisable.length} extra deals disabled to keep max ${maxDeals}`);
+}
+
+async function expireOldDeals() {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - MAX_DEAL_AGE_DAYS);
+
+  const { error } = await sb
+    .from("products")
+    .update({
+      is_active: false
+    })
+    .lt("updated_at", cutoff.toISOString())
+    .eq("is_active", true);
+
+  if (error) throw error;
+
+  console.log(`Expired deals older than ${MAX_DEAL_AGE_DAYS} days`);
+}
+
+async function disableWeakDeals() {
+  const { data, error } = await sb
+    .from("products")
+    .select("id, asin, score, discount_percent, views, clicks, updated_at, is_active")
+    .eq("is_active", true);
+
+  if (error) throw error;
+
+  const now = Date.now();
+  const idsToDisable = [];
+
+  for (const item of data || []) {
+    const ageDays = item.updated_at ? (now - new Date(item.updated_at).getTime()) / 86400000 : 0;
+    const views = Number(item.views || 0);
+    const clicks = Number(item.clicks || 0);
+    const score = Number(item.score || 0);
+    const discount = Number(item.discount_percent || 0);
+
+    const lowQuality =
+      ageDays > 3 &&
+      views >= 10 &&
+      clicks === 0 &&
+      score < MIN_KEEP_SCORE &&
+      discount < MIN_KEEP_DISCOUNT;
+
+    if (lowQuality) {
+      idsToDisable.push(item.id);
+    }
+  }
+
+  if (!idsToDisable.length) {
+    console.log("No weak deals disabled");
+    return;
+  }
+
+  const { error: updateError } = await sb
+    .from("products")
+    .update({
+      is_active: false
+    })
+    .in("id", idsToDisable);
+
+  if (updateError) throw updateError;
+
+  console.log(`Disabled ${idsToDisable.length} weak deals`);
 }
 
 function formatPriceForHtml(v) {
@@ -694,28 +765,23 @@ function staticDealPageTemplate(product) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-
   <title>${escapeHtml(product.name)} | TrendPulse</title>
   <meta name="description" content="${escapeHtml(description)}" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="theme-color" content="#050505" />
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
-
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/icon-192.png" />
   <link rel="manifest" href="/manifest.json" />
-
   <meta property="og:type" content="product" />
   <meta property="og:title" content="${escapeHtml(product.name)} | TrendPulse" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:image" content="${escapeHtml(image)}" />
   <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
-
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${escapeHtml(product.name)} | TrendPulse" />
   <meta name="twitter:description" content="${escapeHtml(description)}" />
   <meta name="twitter:image" content="${escapeHtml(image)}" />
-
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -732,7 +798,6 @@ function staticDealPageTemplate(product) {
     }
   }
   </script>
-
   <style>
     body { margin: 0; background: #050505; color: white; font-family: Inter, sans-serif; }
     .wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
@@ -1051,7 +1116,7 @@ ${allUrls.map(url => `  <url>
 }
 
 async function main() {
-  console.log("Starting sync V8");
+  console.log("Starting sync V2.7");
 
   const activeCountBefore = await getActiveDealsCount();
   console.log(`Active deals before sync: ${activeCountBefore}`);
@@ -1114,10 +1179,12 @@ async function main() {
   console.log(`${results.length} valid products found`);
 
   await upsertProducts(results);
+  await expireOldDeals();
+  await disableWeakDeals();
   await enforceMaxActiveDeals(MAX_ACTIVE_DEALS);
 
   const activeCountAfter = await getActiveDealsCount();
-  console.log(`Active deals after sync: ${activeCountAfter}`);
+  console.log(`Active deals after cleanup: ${activeCountAfter}`);
 
   await generateEditorialPages();
   await generateStaticDealPages();
