@@ -1,174 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>🔥 Best Amazon Deals Today (Up to 70% OFF)</title>
+  <meta name="description" content="Discover the best Amazon deals updated daily. Save up to 70% on tech, fashion, home, and more.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Best Amazon Deals Today | TrendPulse</title>
-  <meta name="description" content="Live Amazon deals, best sellers, crazy discounts, and category-based shopping pages for tech, fashion, jewelry, home, beauty, and more." />
-  <meta name="robots" content="index, follow, max-image-preview:large" />
-  <link rel="canonical" href="https://trend-pulse.shop/" />
-  <meta name="theme-color" content="#050505" />
-
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Best Amazon Deals Today | TrendPulse" />
-  <meta property="og:description" content="Live Amazon deals, best sellers, and category pages that make shopping easier." />
-  <meta property="og:url" content="https://trend-pulse.shop/" />
-  <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Best Amazon Deals Today | TrendPulse" />
-  <meta name="twitter:description" content="Live Amazon deals, best sellers, and category pages that make shopping easier." />
-  <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg" />
-
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/icon-192.png" />
-  <link rel="manifest" href="/manifest.json" />
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- SEO -->
+  <meta property="og:title" content="Best Amazon Deals Today">
+  <meta property="og:description" content="Up to 70% OFF Amazon deals updated daily">
+  <meta property="og:type" content="website">
 
   <style>
     body {
-      background: #050505;
+      font-family: Arial;
+      margin: 0;
+      background: #f7f7f7;
+    }
+
+    .hero {
+      background: black;
       color: white;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-align: center;
+      padding: 30px 15px;
     }
-    .line-clamp-2 {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+
+    .hero h1 {
+      margin: 0;
+      font-size: 26px;
     }
-    .deal-card {
-      transition: transform .18s ease, box-shadow .18s ease;
+
+    .hero p {
+      margin: 10px 0;
+      opacity: 0.8;
     }
-    .deal-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 16px 40px rgba(0,0,0,.28);
+
+    .cta {
+      background: #ff9900;
+      padding: 12px 20px;
+      border-radius: 6px;
+      color: black;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 12px;
+      padding: 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .card img {
+      width: 100%;
+      height: 140px;
+      object-fit: contain;
+    }
+
+    .price {
+      font-weight: bold;
+      color: green;
+    }
+
+    .buy {
+      display: block;
+      margin-top: 8px;
+      background: #ff9900;
+      padding: 8px;
+      border-radius: 6px;
+      text-decoration: none;
+      color: black;
+      font-weight: bold;
     }
   </style>
 </head>
-<body class="max-w-6xl mx-auto px-4 py-4 md:py-6 pb-10">
 
-  <header class="flex justify-between items-center mb-4">
-    <a href="/" class="text-2xl font-black italic tracking-tight">TrendPulse</a>
-    <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white font-semibold">All Deals</a>
-  </header>
+<body>
 
-  <section class="mb-5">
-    <div class="grid md:grid-cols-[1fr_1fr] gap-4">
-      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 md:p-6 flex flex-col justify-center">
-        <div class="flex flex-wrap gap-2 mb-3 text-xs font-black">
-          <span class="bg-red-500 text-white px-3 py-1 rounded-full">🔥 Live Deals</span>
-          <span class="bg-blue-500 text-white px-3 py-1 rounded-full">⭐ Best Sellers</span>
-          <span class="bg-yellow-400 text-black px-3 py-1 rounded-full">⚠ Crazy Deals</span>
-        </div>
+<!-- HERO -->
+<div class="hero">
+  <h1>🔥 Best Amazon Deals Today</h1>
+  <p>Up to 70% OFF • Updated daily</p>
+  <a href="#deals" class="cta">Shop Now</a>
+</div>
 
-        <h1 class="text-4xl md:text-5xl font-black italic leading-[0.95] tracking-tight mb-3">
-          Deals, Best Sellers,<br>and Amazon Finds<br>That Actually Matter
-        </h1>
+<!-- DEALS -->
+<div id="deals" class="grid" id="deals-container">
+  <!-- inject via JS -->
+</div>
 
-        <p class="text-zinc-400 text-base md:text-lg leading-7 mb-4">
-          Shop live discounts, popular products, and category pages built for faster browsing and better SEO.
-        </p>
+<script>
+fetch('/deals.json')
+  .then(res => res.json())
+  .then(data => {
+    const container = document.getElementById('deals');
 
-        <div class="flex flex-wrap gap-3">
-          <a href="/best-sellers.html" class="bg-white text-black px-5 py-3 rounded-xl font-black">
-            Explore Best Sellers
-          </a>
-          <a href="/crazy-deals.html" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
-            View Crazy Deals
-          </a>
-        </div>
-      </div>
+    data.slice(0, 50).forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'card';
 
-      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 md:p-6">
-        <h2 class="text-2xl font-black tracking-tight mb-3">Top categories</h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-          <a href="/tech.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Tech</a>
-          <a href="/fashion.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Fashion</a>
-          <a href="/jewelry.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Jewelry</a>
-          <a href="/shoes.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Shoes</a>
-          <a href="/home.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Home</a>
-          <a href="/kitchen.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Kitchen</a>
-          <a href="/beauty.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Beauty</a>
-          <a href="/sports.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Sports</a>
-          <a href="/gaming.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Gaming</a>
-          <a href="/health.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Health</a>
-          <a href="/baby.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Baby</a>
-          <a href="/pets.html" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 font-bold">Pets</a>
-        </div>
-      </div>
-    </div>
-  </section>
+      el.innerHTML = `
+        <img src="${p.image}">
+        <h4>${p.title}</h4>
+        <div class="price">$${p.price}</div>
+        <a href="${p.affiliate_link}" target="_blank" class="buy">Buy on Amazon</a>
+      `;
 
-  <section class="mb-8">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-        <div class="text-zinc-500 text-sm mb-1">Live Deals</div>
-        <div id="stat-total" class="text-2xl font-black">—</div>
-      </div>
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-        <div class="text-zinc-500 text-sm mb-1">Best Sellers</div>
-        <div id="stat-bestsellers" class="text-2xl font-black">—</div>
-      </div>
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-        <div class="text-zinc-500 text-sm mb-1">Crazy Deals</div>
-        <div id="stat-crazy" class="text-2xl font-black">—</div>
-      </div>
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-        <div class="text-zinc-500 text-sm mb-1">Categories</div>
-        <div class="text-2xl font-black">14+</div>
-      </div>
-    </div>
-  </section>
+      container.appendChild(el);
+    });
+  });
+</script>
 
-  <section class="mb-10">
-    <div class="grid md:grid-cols-3 gap-4">
-      <a href="/best-sellers.html" class="deal-card block bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-        <div class="text-blue-400 font-black text-xs mb-2">BEST SELLERS</div>
-        <h2 class="text-2xl font-black tracking-tight mb-2">Most Popular Amazon Products</h2>
-        <p class="text-zinc-400 text-sm leading-7">For visitors who want products people already love, even without huge discounts.</p>
-      </a>
-
-      <a href="/crazy-deals.html" class="deal-card block bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-        <div class="text-yellow-400 font-black text-xs mb-2">CRAZY DEALS</div>
-        <h2 class="text-2xl font-black tracking-tight mb-2">Deep Discounts & Price Drops</h2>
-        <p class="text-zinc-400 text-sm leading-7">A home for suspiciously strong discounts and unusually sharp price drops.</p>
-      </a>
-
-      <a href="/best-amazon-deals.html" class="deal-card block bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-        <div class="text-red-400 font-black text-xs mb-2">EDITORIAL</div>
-        <h2 class="text-2xl font-black tracking-tight mb-2">SEO-Friendly Deal Guides</h2>
-        <p class="text-zinc-400 text-sm leading-7">Category pages and evergreen shopping guides built to bring in long-term traffic.</p>
-      </a>
-    </div>
-  </section>
-
-  <footer class="text-center text-zinc-500 text-sm mt-10 pb-6">
-    © 2026 TrendPulse — Amazon Deals Tracker
-  </footer>
-
-  <script>
-    const SB_URL = "https://hyrofyfhmabhlqbucjdp.supabase.co";
-    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6ImFub24iLCJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
-    const sb = supabase.createClient(SB_URL, SB_KEY);
-
-    async function loadStats() {
-      const { data } = await sb
-        .from("products")
-        .select("is_best_seller,is_crazy_deal")
-        .eq("is_active", true)
-        .limit(400);
-
-      const rows = data || [];
-      document.getElementById("stat-total").textContent = rows.length;
-      document.getElementById("stat-bestsellers").textContent = rows.filter(x => x.is_best_seller).length;
-      document.getElementById("stat-crazy").textContent = rows.filter(x => x.is_crazy_deal).length;
-    }
-
-    loadStats();
-  </script>
 </body>
-            </html>
+</html>
