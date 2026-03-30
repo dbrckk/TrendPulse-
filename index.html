@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Best Amazon Deals Today | TrendPulse</title>
-  <meta name="description" content="Live Amazon deals worth checking right now. Discover trending discounts, best-value picks, and hot offers in seconds." />
+  <meta name="description" content="Live Amazon deals worth checking right now. Fast, simple, and focused on the best offers." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://trend-pulse.shop/" />
   <meta name="theme-color" content="#050505" />
@@ -28,44 +28,32 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"WebSite",
-    "name":"TrendPulse",
-    "url":"https://trend-pulse.shop/",
-    "description":"Live Amazon deals worth checking right now."
-  }
-  </script>
-
   <style>
-    body { background:#050505; color:white; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    .card { transition:transform .18s ease, box-shadow .18s ease; }
-    .card:hover { transform:translateY(-2px); box-shadow:0 16px 40px rgba(0,0,0,.28); }
-    .line-clamp-2 {
-      display:-webkit-box;
-      -webkit-line-clamp:2;
-      -webkit-box-orient:vertical;
-      overflow:hidden;
+    body {
+      background: #050505;
+      color: white;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .line-clamp-3 {
-      display:-webkit-box;
-      -webkit-line-clamp:3;
-      -webkit-box-orient:vertical;
-      overflow:hidden;
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .deal-card {
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .deal-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.28);
     }
     .badge {
-      font-size:11px;
-      padding:5px 10px;
-      border-radius:999px;
-      font-weight:800;
-      letter-spacing:.02em;
-      white-space:nowrap;
-    }
-    .glass {
-      background:linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.03) 100%);
-      border:1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(6px);
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-weight: 800;
+      letter-spacing: .02em;
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -87,36 +75,25 @@
           </div>
 
           <h1 class="text-4xl md:text-6xl font-black italic leading-[0.93] tracking-tight mb-4">
-            Best Amazon Deals<br>Worth Checking<br>Right Now
+            Best Amazon Deals<br>Right Now
           </h1>
 
           <p class="text-zinc-400 text-base md:text-lg max-w-xl leading-7 mb-5">
-            Skip the clutter. TrendPulse highlights live Amazon deals with stronger discounts, better prices, and real click potential.
+            The fastest way to find strong Amazon deals without the clutter.
           </p>
 
-          <div class="grid grid-cols-2 gap-3 mb-5">
-            <div class="glass rounded-2xl p-3">
-              <div class="text-white font-black text-sm mb-1">Updated automatically</div>
-              <div class="text-zinc-400 text-xs">Fresh deals pulled and ranked continuously.</div>
-            </div>
-            <div class="glass rounded-2xl p-3">
-              <div class="text-white font-black text-sm mb-1">Real Amazon offers</div>
-              <div class="text-zinc-400 text-xs">Focused on live US Amazon product deals.</div>
-            </div>
+          <div class="flex flex-wrap gap-3">
+            <a href="#hero-deal" class="bg-white text-black px-5 py-3 rounded-xl font-black">
+              View Top Deal
+            </a>
+            <a href="#trending" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
+              Browse Deals
+            </a>
           </div>
-        </div>
-
-        <div class="flex flex-wrap gap-3">
-          <a href="#hero-deal" class="bg-white text-black px-5 py-3 rounded-xl font-black">
-            View Top Deal
-          </a>
-          <a href="#trending" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
-            Browse Trending
-          </a>
         </div>
       </div>
 
-      <div id="hero-deal" class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden min-h-[440px]"></div>
+      <div id="hero-deal" class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden min-h-[430px]"></div>
     </div>
   </section>
 
@@ -141,21 +118,11 @@
     </div>
   </section>
 
-  <section class="mb-8">
-    <div class="flex gap-3 overflow-x-auto pb-1">
-      <a href="/tech.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Tech</a>
-      <a href="/home.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Home</a>
-      <a href="/kitchen.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Kitchen</a>
-      <a href="/beauty.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Beauty</a>
-      <a href="/best-amazon-deals.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Editorial Picks</a>
-    </div>
-  </section>
-
   <section id="trending" class="mb-10">
     <div class="flex items-end justify-between mb-4 gap-4">
       <div>
         <h2 class="text-2xl font-black tracking-tight">🔥 Trending Now</h2>
-        <p class="text-zinc-400 text-sm mt-1">Top live deals with the strongest momentum.</p>
+        <p class="text-zinc-400 text-sm mt-1">Strong live deals worth checking first.</p>
       </div>
       <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white">See all</a>
     </div>
@@ -165,8 +132,8 @@
   <section class="mb-10">
     <div class="flex items-end justify-between mb-4 gap-4">
       <div>
-        <h2 class="text-2xl font-black tracking-tight">💰 Best Value Picks</h2>
-        <p class="text-zinc-400 text-sm mt-1">Good prices, strong upside, easier buying decisions.</p>
+        <h2 class="text-2xl font-black tracking-tight">💰 Best Value</h2>
+        <p class="text-zinc-400 text-sm mt-1">Lower prices with strong upside.</p>
       </div>
     </div>
     <div id="best-value-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
@@ -176,45 +143,10 @@
     <div class="flex items-end justify-between mb-4 gap-4">
       <div>
         <h2 class="text-2xl font-black tracking-tight">⚡ Under $25</h2>
-        <p class="text-zinc-400 text-sm mt-1">Low-friction deals people can grab fast.</p>
+        <p class="text-zinc-400 text-sm mt-1">Easy-buy deals at lower prices.</p>
       </div>
     </div>
     <div id="under-25-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-  </section>
-
-  <section class="mb-10">
-    <div class="flex items-end justify-between mb-4 gap-4">
-      <div>
-        <h2 class="text-2xl font-black tracking-tight">🚨 Big Discounts</h2>
-        <p class="text-zinc-400 text-sm mt-1">High-discount deals worth checking first.</p>
-      </div>
-    </div>
-    <div id="big-discounts-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-  </section>
-
-  <section class="mb-10">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8">
-      <div class="grid md:grid-cols-3 gap-5">
-        <div>
-          <h3 class="text-white font-black mb-2">Why TrendPulse?</h3>
-          <p class="text-zinc-400 text-sm leading-7">
-            We surface live Amazon deals based on price, discount strength, and current deal quality — not just random product listings.
-          </p>
-        </div>
-        <div>
-          <h3 class="text-white font-black mb-2">Why these deals?</h3>
-          <p class="text-zinc-400 text-sm leading-7">
-            Deals shown first are ranked to favor stronger value, lower prices, and higher click appeal.
-          </p>
-        </div>
-        <div>
-          <h3 class="text-white font-black mb-2">Why act now?</h3>
-          <p class="text-zinc-400 text-sm leading-7">
-            Amazon pricing can change quickly. Stronger deals often lose visibility fast once inventory or pricing shifts.
-          </p>
-        </div>
-      </div>
-    </div>
   </section>
 
   <footer class="text-center text-zinc-500 text-sm mt-10 pb-6">
@@ -268,21 +200,6 @@
       return list;
     }
 
-    function getBadges(p) {
-      const badges = [];
-      const score = Number(p.score || 0);
-      const discount = Number(p.discount_percent || 0);
-      const price = Number(p.price || 0);
-      const clicks = Number(p.clicks || 0);
-
-      if (score > 80) badges.push({ text: "🔥 Trending", cls: "bg-red-500 text-white" });
-      if (discount > 40) badges.push({ text: "⚡ Hot Deal", cls: "bg-yellow-400 text-black" });
-      if (price > 0 && price < 25) badges.push({ text: "💰 Best Value", cls: "bg-green-500 text-black" });
-      if (clicks > 20) badges.push({ text: "👀 Popular", cls: "bg-blue-500 text-white" });
-
-      return badges.slice(0, 2);
-    }
-
     function buildSafeImageTag(images, alt, className) {
       const safeAlt = String(alt || "").replace(/"/g, "&quot;");
       const json = JSON.stringify(images).replace(/"/g, "&quot;");
@@ -309,71 +226,53 @@
       } catch {}
     };
 
-    function renderCard(p) {
+    function renderSimpleCard(p) {
       const imageList = getBestImageList(p);
-      const badges = getBadges(p);
-      const oldPrice = p.original_price ? `<div class="text-zinc-500 line-through text-sm">${formatPrice(p.original_price)}</div>` : "";
 
       return `
-        <a href="${dealUrl(p)}" class="card block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-          ${buildSafeImageTag(imageList, p.name, "w-full h-40 md:h-48 object-cover bg-white")}
+        <div class="deal-card bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+          <a href="${dealUrl(p)}" class="block">
+            ${buildSafeImageTag(imageList, p.name, "w-full h-40 md:h-48 object-cover bg-white")}
+          </a>
           <div class="p-3 md:p-4">
-            <div class="flex gap-2 flex-wrap mb-2">
-              ${badges.map(b => `<span class="badge ${b.cls}">${b.text}</span>`).join("")}
+            <div class="text-red-400 font-black text-xs mb-1">
+              ${p.discount_percent ? `-${Math.round(p.discount_percent)}%` : "Live Deal"}
             </div>
-            <div class="text-red-400 font-black text-xs md:text-sm mb-1">
-              ${p.discount_percent ? `-${Math.round(p.discount_percent)}%` : "Deal"}
-            </div>
-            <div class="text-sm md:text-base font-black line-clamp-2 mb-2 min-h-[40px]">${p.name}</div>
-            <div class="mb-2">
-              ${oldPrice}
+            <a href="${dealUrl(p)}" class="block text-sm md:text-base font-black line-clamp-2 mb-3 min-h-[40px]">
+              ${p.name}
+            </a>
+            <div class="flex items-end gap-2 mb-3 flex-wrap">
               <div class="text-xl md:text-2xl font-black">${formatPrice(p.price)}</div>
+              ${p.original_price ? `<div class="text-zinc-500 line-through text-sm">${formatPrice(p.original_price)}</div>` : ""}
             </div>
-            <div class="inline-flex mt-1 bg-blue-600 px-3 py-2 rounded-lg text-xs font-black">
+            <a href="${dealUrl(p)}" class="block text-center bg-blue-600 hover:bg-blue-500 transition px-4 py-3 rounded-xl font-black text-sm">
               View Deal
-            </div>
+            </a>
           </div>
-        </a>
+        </div>
       `;
     }
 
     function renderHeroDeal(p) {
       const imageList = getBestImageList(p);
-      const badges = getBadges(p);
 
       return `
         <a href="${dealUrl(p)}" class="block h-full">
-          <div class="h-full grid grid-rows-[220px_auto] md:grid-rows-[240px_auto]">
+          <div class="h-full grid grid-rows-[230px_auto] md:grid-rows-[240px_auto]">
             <div class="bg-white">
               ${buildSafeImageTag(imageList, p.name, "w-full h-full object-contain")}
             </div>
             <div class="p-5">
-              <div class="flex gap-2 flex-wrap mb-3">
-                ${badges.map(b => `<span class="badge ${b.cls}">${b.text}</span>`).join("")}
-              </div>
-
               <div class="text-red-400 font-black text-xs mb-2">
                 ${p.discount_percent ? `🔥 ${Math.round(p.discount_percent)}% OFF` : "🔥 Live Deal"}
               </div>
-
               <h2 class="text-2xl md:text-3xl font-black tracking-tight leading-tight mb-3 line-clamp-3">${p.name}</h2>
-
-              <div class="flex items-end gap-3 mb-3 flex-wrap">
+              <div class="flex items-end gap-3 mb-4 flex-wrap">
                 <div class="text-3xl font-black">${formatPrice(p.price)}</div>
                 ${p.original_price ? `<div class="text-zinc-500 line-through text-lg">${formatPrice(p.original_price)}</div>` : ""}
               </div>
-
-              <p class="text-zinc-400 text-sm line-clamp-3 mb-4">
-                ${p.description || "Trending Amazon deal worth checking right now."}
-              </p>
-
-              <div class="flex items-center justify-between gap-3">
-                <div class="text-xs text-zinc-400">
-                  Price can change quickly
-                </div>
-                <div class="inline-flex bg-blue-600 hover:bg-blue-500 transition px-5 py-3 rounded-xl font-black">
-                  Grab This Deal
-                </div>
+              <div class="inline-flex bg-blue-600 hover:bg-blue-500 transition px-5 py-3 rounded-xl font-black">
+                View Top Deal
               </div>
             </div>
           </div>
@@ -383,7 +282,7 @@
 
     function fillGrid(id, items) {
       const el = document.getElementById(id);
-      el.innerHTML = (items || []).map(renderCard).join("");
+      el.innerHTML = (items || []).map(renderSimpleCard).join("");
     }
 
     async function loadDeals() {
@@ -404,17 +303,15 @@
       const trending = [...deals].sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 8);
       const bestValue = [...deals].filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 35).sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 8);
       const under25 = [...deals].filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) < 25).sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 8);
-      const bigDiscounts = [...deals].filter(p => Number(p.discount_percent || 0) >= 35).sort((a, b) => Number(b.discount_percent || 0) - Number(a.discount_percent || 0)).slice(0, 8);
 
       fillGrid("trending-grid", trending);
       fillGrid("best-value-grid", bestValue);
       fillGrid("under-25-grid", under25);
-      fillGrid("big-discounts-grid", bigDiscounts);
 
       document.getElementById("stat-total").textContent = deals.length;
       document.getElementById("stat-trending").textContent = trending.length;
       document.getElementById("stat-under25").textContent = under25.length;
-      document.getElementById("stat-discounts").textContent = bigDiscounts.length;
+      document.getElementById("stat-discounts").textContent = deals.filter(p => Number(p.discount_percent || 0) >= 35).length;
 
       const hero = trending[0] || deals[0];
       if (hero) {
