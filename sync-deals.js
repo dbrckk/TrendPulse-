@@ -6,7 +6,7 @@ import fs from "fs";
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/11.0"
+    "User-Agent": "TrendPulseBot/12.0"
   }
 });
 
@@ -30,7 +30,7 @@ const FEEDS = [
   "https://www.dealnews.com/f1682/Staff-Pick/?rss=1"
 ];
 
-const INITIAL_TARGET_ON_EMPTY = 140;
+const INITIAL_TARGET_ON_EMPTY = 160;
 const MIN_ACTIVE_DEALS = 80;
 const MAX_ACTIVE_DEALS = 400;
 const ITEMS_PER_FEED = 120;
@@ -101,8 +101,8 @@ function buildFallbackImage(asin) {
   return `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`;
 }
 
-function dealUrl(product) {
-  return `${SITE_URL}/deal.html?asin=${encodeURIComponent(product.asin)}`;
+function productLink(product) {
+  return `/deal.html?asin=${encodeURIComponent(product.asin)}`;
 }
 
 function extractAsinFromAmazonUrl(url) {
@@ -202,12 +202,30 @@ function scoreProduct({ price, discount_percent, name, source_name }) {
   return Math.round((discountScore + lowPriceBoost + midPriceBoost + keywordBoost + sourceBoost) * 100) / 100;
 }
 
+function inferBestSeller(product) {
+  const score = Number(product.score || 0);
+  const clicks = Number(product.clicks || 0);
+  const price = Number(product.price || 0);
+
+  if (clicks >= 20) return true;
+  if (score >= 85) return true;
+  if (score >= 70 && price > 0 && price < 60) return true;
+
+  return false;
+}
+
+function inferCrazyDeal(product) {
+  const discount = Number(product.discount_percent || 0);
+  const price = Number(product.price || 0);
+  return discount >= 70 && price > 0 && price <= 60;
+}
+
 async function fetchText(url) {
   try {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/11.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/12.0"
       }
     });
 
@@ -224,7 +242,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/11.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/12.0"
       }
     });
 
@@ -273,12 +291,20 @@ function extractAmazonLinksFromHtml(html) {
 function extractCategory(title, description) {
   const text = `${title} ${description}`.toLowerCase();
 
-  if (/coffee|kitchen|cookware|dish soap|dishwasher|pan|knife|food|appliance|mixer|grinder|cook|bake|utensil/.test(text)) return "Kitchen";
-  if (/toothbrush|beauty|skincare|soap refill|cleanser|makeup|hair|serum|lotion|shampoo|conditioner|grooming/.test(text)) return "Beauty";
-  if (/headphone|speaker|tablet|laptop|tech|electronic|monitor|keyboard|mouse|ssd|router|tv|smartphone|earbuds|charger|usb|gaming/.test(text)) return "Tech";
-  if (/toy|kid|baby|alphabet|lego|game|stroller|diaper/.test(text)) return "Kids";
-  if (/fitness|sport|exercise|health|workout|yoga|treadmill|weights/.test(text)) return "Fitness";
-  if (/home|furniture|decor|storage|bedding|vacuum|cleaning|organizer|lamp|closet|bathroom|travel bag|anti-theft bag|backpack|luggage/.test(text)) return "Home";
+  if (/coffee|kitchen|cookware|dish soap|dishwasher|pan|knife|food|appliance|mixer|grinder|cook|bake|utensil|air fryer|blender|toaster|microwave/.test(text)) return "Kitchen";
+  if (/toothbrush|beauty|skincare|soap refill|cleanser|makeup|hair|serum|lotion|shampoo|conditioner|grooming|cosmetic|face cream|lipstick|mascara/.test(text)) return "Beauty";
+  if (/headphone|speaker|tablet|laptop|tech|electronic|monitor|keyboard|mouse|ssd|router|tv|smartphone|earbuds|charger|usb|gaming|webcam|printer|bluetooth|ipad/.test(text)) return "Tech";
+  if (/ring|necklace|bracelet|earring|jewelry|watch|pendant|gemstone/.test(text)) return "Jewelry";
+  if (/shoe|sneaker|boot|heel|slipper|running shoe|loafer|sandals/.test(text)) return "Shoes";
+  if (/dress|shirt|hoodie|jacket|coat|jeans|pants|leggings|bra|fashion|clothing|sweater|sock|underwear|top|skirt/.test(text)) return "Fashion";
+  if (/toy|kid|baby|alphabet|lego|game|stroller|diaper|pacifier|nursery|bottle warmer|baby monitor/.test(text)) return "Baby";
+  if (/dog|cat|pet|litter|pet bed|leash|pet food|pet toy|aquarium/.test(text)) return "Pets";
+  if (/fitness|sport|exercise|health|workout|yoga|treadmill|weights|dumbbell|resistance band|protein|running/.test(text)) return "Sports";
+  if (/vitamin|supplement|health|blood pressure|thermometer|massager|pain relief|humidifier|air purifier/.test(text)) return "Health";
+  if (/desk|office|notebook|planner|pen|chair|filing|paper shredder|whiteboard|stapler/.test(text)) return "Office";
+  if (/xbox|playstation|nintendo|gaming|controller|gaming chair|pc gaming|gaming headset/.test(text)) return "Gaming";
+  if (/camping|outdoor|tent|backpack|hiking|grill|patio|garden|lantern|bike/.test(text)) return "Outdoor";
+  if (/home|furniture|decor|storage|bedding|vacuum|cleaning|organizer|lamp|closet|bathroom|travel bag|anti-theft bag|luggage/.test(text)) return "Home";
 
   return "All";
 }
@@ -396,6 +422,9 @@ async function extractDealFromArticle(item) {
     updated_at: nowIso,
     created_at: nowIso
   };
+
+  product.is_best_seller = inferBestSeller(product);
+  product.is_crazy_deal = inferCrazyDeal(product);
 
   if (!isStrongEnoughProduct(product)) return null;
   return product;
@@ -533,10 +562,6 @@ function fallbackImage(name, label = "TrendPulse Deal") {
   return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900"><rect width="100%" height="100%" fill="%23070a11"/><text x="50%" y="42%" text-anchor="middle" fill="white" font-size="52" font-family="Arial" font-weight="800">${escapeHtml(label)}</text><text x="50%" y="58%" text-anchor="middle" fill="%23cbd5e1" font-size="30" font-family="Arial">${escapeHtml(name || "Deal")}</text></svg>`;
 }
 
-function productLink(product) {
-  return `/deal.html?asin=${encodeURIComponent(product.asin)}`;
-}
-
 function renderCardGrid(items, label) {
   return items.map(p => `
     <article class="card">
@@ -604,10 +629,11 @@ function editorialTemplate({ title, description, canonicalPath, intro, section1T
     <nav class="nav">
       <a href="/">Home</a>
       <a href="/deals.html">All Deals</a>
+      <a href="/best-sellers.html">Best Sellers</a>
+      <a href="/crazy-deals.html">Crazy Deals</a>
       <a href="/tech.html">Tech</a>
-      <a href="/kitchen.html">Kitchen</a>
-      <a href="/beauty.html">Beauty</a>
-      <a href="/home.html">Home</a>
+      <a href="/fashion.html">Fashion</a>
+      <a href="/jewelry.html">Jewelry</a>
       ${navExtra}
     </nav>
 
@@ -689,11 +715,11 @@ function dealsPageTemplate(items) {
       <nav class="nav" aria-label="Site navigation">
         <a href="/">Home</a>
         <a href="/best-amazon-deals.html">Editorial Deals</a>
-        <a href="/deals.html">All Deals</a>
+        <a href="/best-sellers.html">Best Sellers</a>
+        <a href="/crazy-deals.html">Crazy Deals</a>
         <a href="/tech.html">Tech</a>
-        <a href="/kitchen.html">Kitchen</a>
-        <a href="/beauty.html">Beauty</a>
-        <a href="/home.html">Home</a>
+        <a href="/fashion.html">Fashion</a>
+        <a href="/jewelry.html">Jewelry</a>
       </nav>
       <div class="stats">
         <div class="pill">${items.length} live deals</div>
@@ -752,11 +778,22 @@ function simpleCategoryPageTemplate({ title, description, canonicalPath, items, 
     <nav class="nav">
       <a href="/">Home</a>
       <a href="/deals.html">All Deals</a>
-      <a href="/best-amazon-deals.html">Editorial Deals</a>
+      <a href="/best-sellers.html">Best Sellers</a>
+      <a href="/crazy-deals.html">Crazy Deals</a>
       <a href="/tech.html">Tech</a>
+      <a href="/fashion.html">Fashion</a>
+      <a href="/jewelry.html">Jewelry</a>
+      <a href="/shoes.html">Shoes</a>
+      <a href="/sports.html">Sports</a>
+      <a href="/health.html">Health</a>
+      <a href="/baby.html">Baby</a>
+      <a href="/pets.html">Pets</a>
+      <a href="/office.html">Office</a>
+      <a href="/gaming.html">Gaming</a>
+      <a href="/outdoor.html">Outdoor</a>
+      <a href="/home.html">Home</a>
       <a href="/kitchen.html">Kitchen</a>
       <a href="/beauty.html">Beauty</a>
-      <a href="/home.html">Home</a>
     </nav>
     <div class="grid">
       ${renderCardGrid(items, label)}
@@ -769,7 +806,7 @@ function simpleCategoryPageTemplate({ title, description, canonicalPath, items, 
 async function generateEditorialPages() {
   const { data, error } = await sb
     .from("products")
-    .select("asin,name,description,price,original_price,image_url,affiliate_link,category,score,is_active,updated_at")
+    .select("asin,name,description,price,original_price,image_url,affiliate_link,category,score,is_active,updated_at,is_best_seller,is_crazy_deal")
     .eq("is_active", true)
     .order("score", { ascending: false })
     .order("updated_at", { ascending: false })
@@ -778,44 +815,72 @@ async function generateEditorialPages() {
   if (error) throw error;
 
   const items = data || [];
-  const tech = items.filter(p => p.category === "Tech");
-  const kitchen = items.filter(p => p.category === "Kitchen");
-  const beauty = items.filter(p => p.category === "Beauty");
-  const home = items.filter(p => p.category === "Home");
-  const techUnder50 = tech.filter(p => Number(p.price) > 0 && Number(p.price) <= 50);
+
+  const byCategory = category => items.filter(p => p.category === category);
+  const bestSellers = items.filter(p => p.is_best_seller).slice(0, 48);
+  const crazyDeals = items.filter(p => p.is_crazy_deal).slice(0, 48);
 
   fs.writeFileSync("deals.html", dealsPageTemplate(items.slice(0, 60)), "utf8");
 
-  fs.writeFileSync("tech.html", simpleCategoryPageTemplate({
-    title: "Best Amazon Tech Deals",
-    description: "Discover discounted tech, electronics, gadgets, laptop accessories, audio gear, and trending Amazon devices updated from our live deal feed.",
-    canonicalPath: "/tech.html",
-    items: tech.slice(0, 60),
-    label: "Tech"
+  const categoryPages = [
+    ["tech.html", "Best Amazon Tech Deals", "Discover discounted tech, electronics, gadgets, audio gear, and trending Amazon devices.", "Tech"],
+    ["home.html", "Best Amazon Home Deals", "Explore home bargains including decor, storage, bedding, vacuums, and household essentials.", "Home"],
+    ["kitchen.html", "Best Amazon Kitchen Deals", "Explore discounted coffee makers, cookware, kitchen tools, appliances, and useful kitchen buys.", "Kitchen"],
+    ["beauty.html", "Best Amazon Beauty Deals", "Browse discounted skincare, beauty, grooming, hair care, and personal care products.", "Beauty"],
+    ["fashion.html", "Best Amazon Fashion Deals", "Discover clothing, fashion basics, seasonal pieces, and trending Amazon apparel deals.", "Fashion"],
+    ["jewelry.html", "Best Amazon Jewelry Deals", "Explore rings, necklaces, bracelets, earrings, watches, and jewelry deals on Amazon.", "Jewelry"],
+    ["shoes.html", "Best Amazon Shoes Deals", "Browse sneakers, boots, sandals, slippers, and running shoe deals on Amazon.", "Shoes"],
+    ["sports.html", "Best Amazon Sports Deals", "Discover workout gear, fitness accessories, sports equipment, and active deals.", "Sports"],
+    ["health.html", "Best Amazon Health Deals", "Browse health essentials, wellness gear, thermometers, humidifiers, and home health items.", "Health"],
+    ["baby.html", "Best Amazon Baby Deals", "Find baby essentials, nursery products, feeding gear, and parent-friendly Amazon deals.", "Baby"],
+    ["pets.html", "Best Amazon Pet Deals", "Explore pet essentials, dog gear, cat supplies, litter products, and pet accessories.", "Pets"],
+    ["office.html", "Best Amazon Office Deals", "Browse desk tools, notebooks, organizers, planners, office furniture, and supplies.", "Office"],
+    ["gaming.html", "Best Amazon Gaming Deals", "Discover gaming headsets, controllers, accessories, and console-friendly Amazon deals.", "Gaming"],
+    ["outdoor.html", "Best Amazon Outdoor Deals", "Find camping gear, backpacks, patio items, hiking accessories, and outdoor essentials.", "Outdoor"]
+  ];
+
+  for (const [file, title, description, category] of categoryPages) {
+    fs.writeFileSync(file, simpleCategoryPageTemplate({
+      title,
+      description,
+      canonicalPath: `/${file}`,
+      items: byCategory(category).slice(0, 60),
+      label: category
+    }), "utf8");
+  }
+
+  fs.writeFileSync("best-sellers.html", editorialTemplate({
+    title: "Best Selling Amazon Products Right Now",
+    description: "Discover some of the most popular Amazon products people are already buying right now, including tech, home, beauty, fashion, and more.",
+    canonicalPath: "/best-sellers.html",
+    intro: [
+      "Not everyone visiting a deals site wants only discounted products. Some visitors simply want popular Amazon items that already have strong buying appeal.",
+      "This page highlights products that look strong from a popularity and demand perspective, so visitors can find items they may actually want even if they are not the deepest discount on the site."
+    ],
+    section1Title: "Why best sellers matter",
+    section1Text: "Best-selling products reduce friction because shoppers already know these kinds of items are in demand. That makes them useful for both conversions and user trust.",
+    section2Title: "How we use best sellers on TrendPulse",
+    section2Text: "We surface products that appear to have strong buyer appeal based on deal quality, score, and site interaction signals, creating a more rounded browsing experience beyond discounts alone.",
+    navExtra: `<a href="/best-sellers.html">Best Sellers</a><a href="/crazy-deals.html">Crazy Deals</a>`,
+    items: bestSellers,
+    label: "Best Seller"
   }), "utf8");
 
-  fs.writeFileSync("kitchen.html", simpleCategoryPageTemplate({
-    title: "Best Amazon Kitchen Deals",
-    description: "Explore discounted coffee makers, cookware, kitchen tools, appliances, and trending Amazon kitchen bargains updated from our deal feed.",
-    canonicalPath: "/kitchen.html",
-    items: kitchen.slice(0, 60),
-    label: "Kitchen"
-  }), "utf8");
-
-  fs.writeFileSync("beauty.html", simpleCategoryPageTemplate({
-    title: "Best Amazon Beauty Deals",
-    description: "Browse discounted skincare, beauty, grooming, hair care, and personal care products trending on Amazon right now.",
-    canonicalPath: "/beauty.html",
-    items: beauty.slice(0, 60),
-    label: "Beauty"
-  }), "utf8");
-
-  fs.writeFileSync("home.html", simpleCategoryPageTemplate({
-    title: "Best Amazon Home Deals",
-    description: "Explore home bargains including decor, storage, bedding, vacuums, and trending Amazon household deals updated from our live feed.",
-    canonicalPath: "/home.html",
-    items: home.slice(0, 60),
-    label: "Home"
+  fs.writeFileSync("crazy-deals.html", editorialTemplate({
+    title: "Crazy Amazon Deals and Possible Price Errors",
+    description: "Browse unusually deep Amazon discounts, major price drops, and possible crazy deals worth checking fast.",
+    canonicalPath: "/crazy-deals.html",
+    intro: [
+      "Some Amazon deals stand out because the discount looks unusually strong for the product type and price range.",
+      "This page gathers deeper discounts and suspiciously sharp price drops that may be worth checking before they disappear."
+    ],
+    section1Title: "What counts as a crazy deal",
+    section1Text: "On TrendPulse, crazy deals are products with much stronger-than-usual discount signals, especially when the price is still low enough to feel like an impulse buy.",
+    section2Title: "Why these deals move fast",
+    section2Text: "Very strong discounts can lose traction quickly as inventory shifts or pricing updates. That makes fast visibility especially important for this type of page.",
+    navExtra: `<a href="/crazy-deals.html">Crazy Deals</a><a href="/best-sellers.html">Best Sellers</a>`,
+    items: crazyDeals,
+    label: "Crazy Deal"
   }), "utf8");
 
   fs.writeFileSync("best-amazon-deals.html", editorialTemplate({
@@ -824,83 +889,15 @@ async function generateEditorialPages() {
     canonicalPath: "/best-amazon-deals.html",
     intro: [
       "Looking for the best Amazon deals right now? You’re in the right place. We track trending discounts, popular products, and price drops across Amazon to bring you the most relevant deals available today.",
-      "Our system automatically scans deal sources and highlights products with strong discounts, high demand, and great value."
+      "Our system automatically scans deal sources and highlights products with strong discounts, higher value, and better click potential."
     ],
     section1Title: "Why these Amazon deals matter",
     section1Text: "The most attractive deals are often the ones that combine useful products with meaningful discounts and current shopping momentum. Instead of showing random bargains, we focus on live deal signals and current relevance.",
     section2Title: "How to use this page",
-    section2Text: "Browse the featured products below, then open any item to view its dedicated deal page. You can also explore focused collections in Tech, Kitchen, Beauty, and Home to find more relevant offers faster.",
-    navExtra: `<a href="/best-tech-deals-under-50.html">Tech Under $50</a><a href="/best-kitchen-deals-this-week.html">Kitchen This Week</a><a href="/best-beauty-deals-on-amazon.html">Beauty Deals</a><a href="/best-home-deals-this-week.html">Home This Week</a>`,
+    section2Text: "Browse the featured products below, then open any item to view its dedicated deal page. You can also explore category collections like Tech, Fashion, Home, Kitchen, Beauty, and Best Sellers.",
+    navExtra: `<a href="/best-sellers.html">Best Sellers</a><a href="/crazy-deals.html">Crazy Deals</a>`,
     items: items.slice(0, 30),
     label: "All"
-  }), "utf8");
-
-  fs.writeFileSync("best-tech-deals-under-50.html", editorialTemplate({
-    title: "Best Tech Deals Under $50",
-    description: "Browse the best Amazon tech deals under $50. Find affordable gadgets, headphones, accessories, and trending electronics at low prices.",
-    canonicalPath: "/best-tech-deals-under-50.html",
-    intro: [
-      "Looking for affordable Amazon electronics that still feel worth buying? This page highlights cheap tech deals under $50, including headphones, small accessories, portable gadgets, and practical home-office items.",
-      "Budget-friendly deals tend to move fast because they combine low price with impulse-buy appeal."
-    ],
-    section1Title: "Why tech deals under $50 are worth watching",
-    section1Text: "Lower-priced tech products often outperform bigger-ticket items when it comes to shopping momentum. Accessories, chargers, earbuds, desk gear, and small smart devices can drop to highly attractive price points without requiring a major buying decision.",
-    section2Title: "How we choose these budget tech deals",
-    section2Text: "We surface products based on category fit, score, and recency. This helps show budget electronics that are more likely to be useful, popular, and worth checking right now.",
-    navExtra: `<a href="/best-tech-deals-under-50.html">Tech Under $50</a>`,
-    items: techUnder50.slice(0, 36),
-    label: "Tech"
-  }), "utf8");
-
-  fs.writeFileSync("best-kitchen-deals-this-week.html", editorialTemplate({
-    title: "Best Kitchen Deals This Week",
-    description: "Discover the best kitchen deals this week on Amazon, including cookware, coffee makers, small appliances, and useful kitchen tools.",
-    canonicalPath: "/best-kitchen-deals-this-week.html",
-    intro: [
-      "Kitchen deals are some of the most practical Amazon bargains to watch because they often combine everyday usefulness with meaningful discounts.",
-      "From coffee makers and cookware to utensils and countertop appliances, this page highlights some of the best live kitchen offers worth checking this week."
-    ],
-    section1Title: "Why kitchen bargains matter",
-    section1Text: "Kitchen products are some of the easiest deals to justify because they are used frequently and can improve everyday routines immediately.",
-    section2Title: "How to spot a good kitchen deal",
-    section2Text: "The best kitchen deals usually balance three things: usefulness, discount level, and product quality. That is why we sort for current relevance and live activity instead of showing random low-quality offers.",
-    navExtra: `<a href="/best-kitchen-deals-this-week.html">Kitchen This Week</a>`,
-    items: kitchen.slice(0, 36),
-    label: "Kitchen"
-  }), "utf8");
-
-  fs.writeFileSync("best-beauty-deals-on-amazon.html", editorialTemplate({
-    title: "Best Beauty Deals on Amazon",
-    description: "Discover the best beauty deals on Amazon including skincare, haircare, personal care, grooming, and trending beauty products.",
-    canonicalPath: "/best-beauty-deals-on-amazon.html",
-    intro: [
-      "Beauty deals on Amazon can be especially attractive because many products are replenishment purchases.",
-      "When skincare, personal care, haircare, or grooming items go on sale, shoppers often take advantage quickly because the products are already part of their routine."
-    ],
-    section1Title: "Why beauty deals perform well",
-    section1Text: "Beauty bargains tend to combine strong repeat demand with simple buying decisions. If someone already knows the kind of product they want, a discount can be enough to trigger a fast purchase.",
-    section2Title: "What to look for in a beauty discount",
-    section2Text: "The best beauty deals usually stand out when they lower the price of products people already use regularly. Discounts on skincare, haircare, and personal care essentials can create stronger value than one-time novelty products.",
-    navExtra: `<a href="/best-beauty-deals-on-amazon.html">Beauty Deals</a>`,
-    items: beauty.slice(0, 36),
-    label: "Beauty"
-  }), "utf8");
-
-  fs.writeFileSync("best-home-deals-this-week.html", editorialTemplate({
-    title: "Best Home Deals This Week",
-    description: "Find the best Amazon home deals this week including storage, decor, bedding, vacuums, furniture, and household essentials.",
-    canonicalPath: "/best-home-deals-this-week.html",
-    intro: [
-      "Home deals can be some of the most practical Amazon bargains because they apply to everyday life immediately.",
-      "This page focuses on discounted storage products, bedding, decor, vacuums, and useful household items from our live deal feed."
-    ],
-    section1Title: "What makes a strong home deal",
-    section1Text: "Home products tend to perform well when the value is obvious and the product solves a clear problem.",
-    section2Title: "Why check these deals regularly",
-    section2Text: "Home deals can change quickly because stock availability and promotional pricing are often temporary. If a product is both useful and discounted, it tends to get attention fast.",
-    navExtra: `<a href="/best-home-deals-this-week.html">Home This Week</a>`,
-    items: home.slice(0, 36),
-    label: "Home"
   }), "utf8");
 
   console.log("Editorial pages generated");
@@ -917,16 +914,24 @@ async function generateSitemap() {
 
   const staticUrls = [
     { loc: `${SITE_URL}/`, changefreq: "hourly", priority: "1.0" },
-    { loc: `${SITE_URL}/best-amazon-deals.html`, changefreq: "hourly", priority: "0.95" },
     { loc: `${SITE_URL}/deals.html`, changefreq: "hourly", priority: "0.9" },
+    { loc: `${SITE_URL}/best-amazon-deals.html`, changefreq: "daily", priority: "0.95" },
+    { loc: `${SITE_URL}/best-sellers.html`, changefreq: "daily", priority: "0.95" },
+    { loc: `${SITE_URL}/crazy-deals.html`, changefreq: "daily", priority: "0.9" },
     { loc: `${SITE_URL}/tech.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/kitchen.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/beauty.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/fashion.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/jewelry.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/shoes.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/sports.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/health.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/baby.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/pets.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/office.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/gaming.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/outdoor.html`, changefreq: "daily", priority: "0.8" },
     { loc: `${SITE_URL}/home.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/best-tech-deals-under-50.html`, changefreq: "daily", priority: "0.85" },
-    { loc: `${SITE_URL}/best-kitchen-deals-this-week.html`, changefreq: "daily", priority: "0.85" },
-    { loc: `${SITE_URL}/best-beauty-deals-on-amazon.html`, changefreq: "daily", priority: "0.85" },
-    { loc: `${SITE_URL}/best-home-deals-this-week.html`, changefreq: "daily", priority: "0.85" }
+    { loc: `${SITE_URL}/kitchen.html`, changefreq: "daily", priority: "0.8" },
+    { loc: `${SITE_URL}/beauty.html`, changefreq: "daily", priority: "0.8" }
   ];
 
   const dealUrls = (data || []).map(item => ({
@@ -954,7 +959,7 @@ ${allUrls.map(url => `  <url>
 }
 
 async function main() {
-  console.log("Starting sync V3 robust");
+  console.log("Starting sync V4");
 
   const activeCountBefore = await getActiveDealsCount();
   console.log(`Active deals before sync: ${activeCountBefore}`);
