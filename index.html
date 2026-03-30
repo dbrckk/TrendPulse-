@@ -70,13 +70,11 @@
 
 <body class="px-4 py-6 max-w-6xl mx-auto">
 
-  <!-- HEADER -->
   <header class="flex justify-between items-center mb-10">
     <a href="/" class="text-2xl font-black italic tracking-tight">TrendPulse</a>
     <div class="text-sm text-zinc-400">Live Amazon Deals</div>
   </header>
 
-  <!-- HERO -->
   <section class="mb-12">
     <div class="grid md:grid-cols-2 gap-8 items-center">
       <div>
@@ -127,7 +125,6 @@
     </div>
   </section>
 
-  <!-- CATEGORIES -->
   <section class="mb-12">
     <h2 class="text-2xl font-black section-title mb-4">Browse Categories</h2>
     <div class="flex gap-3 overflow-x-auto pb-1">
@@ -142,7 +139,6 @@
     </div>
   </section>
 
-  <!-- STATS -->
   <section class="mb-12">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
@@ -164,7 +160,6 @@
     </div>
   </section>
 
-  <!-- TRENDING -->
   <section id="trending" class="mb-14">
     <div class="flex items-end justify-between mb-5 gap-4">
       <div>
@@ -176,7 +171,6 @@
     <div id="trending-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
-  <!-- BEST VALUE -->
   <section class="mb-14">
     <div class="flex items-end justify-between mb-5 gap-4">
       <div>
@@ -187,7 +181,6 @@
     <div id="best-value-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
-  <!-- UNDER 25 -->
   <section class="mb-14">
     <div class="flex items-end justify-between mb-5 gap-4">
       <div>
@@ -198,7 +191,6 @@
     <div id="under-25-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
-  <!-- BIG DISCOUNTS -->
   <section class="mb-14">
     <div class="flex items-end justify-between mb-5 gap-4">
       <div>
@@ -209,7 +201,6 @@
     <div id="big-discounts-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
-  <!-- WHY -->
   <section class="mb-14">
     <h2 class="text-2xl font-black section-title mb-6">Why TrendPulse?</h2>
     <div class="grid md:grid-cols-3 gap-6 text-sm text-zinc-400">
@@ -228,7 +219,6 @@
     </div>
   </section>
 
-  <!-- SEO TEXT -->
   <section class="mb-14">
     <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8">
       <h2 class="text-2xl font-black section-title mb-4">Best Amazon Deals Updated Daily</h2>
@@ -243,7 +233,6 @@
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer class="text-center text-zinc-500 text-sm mt-14 pb-6">
     © 2026 TrendPulse — Amazon Deals Tracker
   </footer>
@@ -270,14 +259,40 @@
       return `$${n.toFixed(n % 1 === 0 ? 0 : 2)}`;
     }
 
-    function fallbackImage(name) {
-      const safe = String(name || "Trending Deal").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    function fallbackSvg(name) {
+      const safe = String(name || "Trending Deal")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
       return `data:image/svg+xml;utf8,
       <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900">
         <rect width="100%" height="100%" fill="%23070a11"/>
         <text x="50%" y="42%" text-anchor="middle" fill="white" font-size="52" font-family="Arial" font-weight="800">TrendPulse</text>
         <text x="50%" y="58%" text-anchor="middle" fill="%23cbd5e1" font-size="30" font-family="Arial">${safe}</text>
       </svg>`;
+    }
+
+    function getAmazonImageCandidates(asin) {
+      return [
+        `https://m.media-amazon.com/images/I/${asin}.jpg`,
+        `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`,
+        `https://images.amazon.com/images/P/${asin}.01._SX500_.jpg`,
+        `https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&MarketPlace=US&Operation=GetImage&ASIN=${asin}&Service=Amazon&TemplateId=LargeImage`
+      ];
+    }
+
+    function getBestImageList(product) {
+      const list = [];
+
+      if (product?.image_url) list.push(product.image_url);
+
+      for (const img of getAmazonImageCandidates(product?.asin || "")) {
+        if (img && !list.includes(img)) list.push(img);
+      }
+
+      list.push(fallbackSvg(product?.name || "Trending Deal"));
+      return list;
     }
 
     function getBadges(p) {
@@ -288,22 +303,54 @@
       const clicks = Number(p.clicks || 0);
 
       if (score > 80) badges.push({ text: "🔥 Trending", cls: "bg-red-500 text-white" });
-      if (discount > 40) badges.push({ text: "⚡ Hot Deal", cls: "bg-yellow-500 text-black" });
+      if (discount > 40) badges.push({ text: "⚡ Hot Deal", cls: "bg-yellow-400 text-black" });
       if (price > 0 && price < 25) badges.push({ text: "💰 Best Value", cls: "bg-green-500 text-black" });
       if (clicks > 20) badges.push({ text: "👀 Popular", cls: "bg-blue-500 text-white" });
 
       return badges.slice(0, 2);
     }
 
+    function buildSafeImageTag(images, alt, className) {
+      const safeAlt = String(alt || "").replace(/"/g, "&quot;");
+      const json = JSON.stringify(images).replace(/"/g, "&quot;");
+      return `
+        <img
+          src="${images[0]}"
+          data-images="${json}"
+          data-index="0"
+          alt="${safeAlt}"
+          class="${className}"
+          loading="lazy"
+          onerror="rotateImageFallback(this)"
+        >
+      `;
+    }
+
+    window.rotateImageFallback = function(imgEl) {
+      try {
+        const images = JSON.parse(imgEl.dataset.images || "[]");
+        let index = Number(imgEl.dataset.index || 0) + 1;
+
+        if (index >= images.length) return;
+
+        imgEl.dataset.index = String(index);
+        imgEl.src = images[index];
+      } catch {}
+    };
+
     function renderCard(p) {
-      const img = p.image_url || fallbackImage(p.name);
+      const imageList = getBestImageList(p);
       const badges = getBadges(p);
       const oldPrice = p.original_price ? `<div class="text-zinc-500 line-through text-sm">${formatPrice(p.original_price)}</div>` : "";
       const dealUrl = `/deal/${p.asin}/${slug(p.name)}/`;
 
       return `
         <a href="${dealUrl}" class="card block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-          <img src="${img}" class="w-full h-40 md:h-48 object-cover bg-white" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='${fallbackImage(p.name)}';">
+          ${buildSafeImageTag(
+            imageList,
+            p.name,
+            "w-full h-40 md:h-48 object-cover bg-white"
+          )}
           <div class="p-3 md:p-4">
             <div class="flex gap-2 flex-wrap mb-2">
               ${badges.map(b => `<span class="badge ${b.cls}">${b.text}</span>`).join("")}
