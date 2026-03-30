@@ -55,18 +55,6 @@ function cleanText(input) {
     .trim();
 }
 
-function slugify(text) {
-  return String(text || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80);
-}
-
 function escapeHtml(str) {
   return String(str || "")
     .replace(/&/g, "&amp;")
@@ -107,7 +95,6 @@ function productLink(product) {
 
 function extractAsinFromAmazonUrl(url) {
   if (!url) return null;
-
   const decoded = decodeURIComponent(url);
   const patterns = [
     /\/dp\/([A-Z0-9]{10})(?:[/?]|$)/i,
@@ -634,6 +621,7 @@ function editorialTemplate({ title, description, canonicalPath, intro, section1T
       <a href="/tech.html">Tech</a>
       <a href="/fashion.html">Fashion</a>
       <a href="/jewelry.html">Jewelry</a>
+      <a href="/shoes.html">Shoes</a>
       ${navExtra}
     </nav>
 
@@ -711,7 +699,7 @@ function dealsPageTemplate(items) {
     <header>
       <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px;">TrendPulse</p>
       <h1>Amazon Deals Today</h1>
-      <p class="lead">Explore live Amazon deals, trending product discounts, and popular bargain picks updated from our automated deal feed.</p>
+      <p class="lead">Explore live Amazon deals, trending discounts, and popular product picks updated from our automated deal feed.</p>
       <nav class="nav" aria-label="Site navigation">
         <a href="/">Home</a>
         <a href="/best-amazon-deals.html">Editorial Deals</a>
@@ -815,7 +803,6 @@ async function generateEditorialPages() {
   if (error) throw error;
 
   const items = data || [];
-
   const byCategory = category => items.filter(p => p.category === category);
   const bestSellers = items.filter(p => p.is_best_seller).slice(0, 48);
   const crazyDeals = items.filter(p => p.is_crazy_deal).slice(0, 48);
@@ -854,13 +841,13 @@ async function generateEditorialPages() {
     description: "Discover some of the most popular Amazon products people are already buying right now, including tech, home, beauty, fashion, and more.",
     canonicalPath: "/best-sellers.html",
     intro: [
-      "Not everyone visiting a deals site wants only discounted products. Some visitors simply want popular Amazon items that already have strong buying appeal.",
-      "This page highlights products that look strong from a popularity and demand perspective, so visitors can find items they may actually want even if they are not the deepest discount on the site."
+      "Not every visitor wants only discounted products. Some people simply want strong Amazon products that already have real buying appeal.",
+      "This page highlights products that look strong from a popularity and demand perspective, so visitors can find items they may actually want even when they are not the deepest discount on the site."
     ],
     section1Title: "Why best sellers matter",
-    section1Text: "Best-selling products reduce friction because shoppers already know these kinds of items are in demand. That makes them useful for both conversions and user trust.",
+    section1Text: "Best-selling products reduce friction because shoppers already trust that these kinds of products are in demand. That makes them useful for both conversions and user confidence.",
     section2Title: "How we use best sellers on TrendPulse",
-    section2Text: "We surface products that appear to have strong buyer appeal based on deal quality, score, and site interaction signals, creating a more rounded browsing experience beyond discounts alone.",
+    section2Text: "We surface products that appear to have strong buyer appeal based on score, value, and site interaction signals, creating a more rounded shopping experience beyond discounts alone.",
     navExtra: `<a href="/best-sellers.html">Best Sellers</a><a href="/crazy-deals.html">Crazy Deals</a>`,
     items: bestSellers,
     label: "Best Seller"
