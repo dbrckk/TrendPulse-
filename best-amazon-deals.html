@@ -24,9 +24,9 @@ p { color:#aaa; line-height:1.7; }
 .card { background:#111; border-radius:20px; overflow:hidden; border:1px solid #222; }
 .card img { width:100%; height:200px; object-fit:cover; background:white; }
 .content { padding:15px; }
-.title { font-weight:800; font-size:18px; }
+.title { font-weight:800; font-size:18px; min-height:48px; }
 .price { font-size:24px; font-weight:900; }
-.cta { background:#2563eb; padding:10px; border-radius:12px; text-align:center; display:block; margin-top:10px; }
+.cta { background:#2563eb; padding:10px; border-radius:12px; text-align:center; display:block; margin-top:10px; color:white; text-decoration:none; font-weight:800; }
 </style>
 </head>
 
@@ -36,7 +36,7 @@ p { color:#aaa; line-height:1.7; }
 <h1>Best Amazon Deals Today</h1>
 
 <p>
-Looking for the best Amazon deals right now? You’re in the right place.  
+Looking for the best Amazon deals right now? You’re in the right place.
 We track trending discounts, popular products, and price drops across Amazon to bring you the most relevant deals available today.
 </p>
 
@@ -51,32 +51,50 @@ Our system automatically scans deal sources and highlights products with strong 
 <script>
 const sb = supabase.createClient(
 'https://hyrofyfhmabhlqbucjdp.supabase.co',
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs'
 );
 
 function price(v){
-if(!v) return "Check price";
-return "$"+v;
+  if(v === null || v === undefined || v === '') return "Check price";
+  const n = Number(v);
+  if(Number.isNaN(n)) return "Check price";
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: n % 1 === 0 ? 0 : 2
+  }).format(n);
+}
+
+function slugify(text) {
+  return String(text || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80);
 }
 
 async function load(){
-const { data } = await sb
-.from('products')
-.select('*')
-.eq('is_active', true)
-.order('score', { ascending:false })
-.limit(30);
+  const { data } = await sb
+    .from('products')
+    .select('*')
+    .eq('is_active', true)
+    .order('score', { ascending:false })
+    .limit(30);
 
-document.getElementById('grid').innerHTML = data.map(p => `
-<div class="card">
-<img src="${p.image_url || `https://images.amazon.com/images/P/${p.asin}.01._SX500_.jpg`}">
-<div class="content">
-<div class="title">${p.name}</div>
-<div class="price">${price(p.price)}</div>
-<a class="cta" href="/deal.html?id=${p.id}">View Deal</a>
-</div>
-</div>
-`).join('');
+  document.getElementById('grid').innerHTML = (data || []).map(p => `
+    <div class="card">
+      <img src="${p.image_url || `https://images.amazon.com/images/P/${p.asin}.01._SX500_.jpg`}" alt="${p.name}">
+      <div class="content">
+        <div class="title">${p.name}</div>
+        <div class="price">${price(p.price)}</div>
+        <a class="cta" href="/deal/${p.asin}/${slugify(p.name)}">View Deal</a>
+      </div>
+    </div>
+  `).join('');
 }
 
 load();
