@@ -49,10 +49,25 @@
     const SB_URL = 'https://hyrofyfhmabhlqbucjdp.supabase.co';
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs';
     const sb = supabase.createClient(SB_URL, SB_KEY);
+
     function price(v){ if(v===null||v===undefined||v==='') return 'Check price'; const n=Number(v); if(Number.isNaN(n)) return 'Check price'; return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:n%1===0?0:2}).format(n); }
+
+    function slugify(text) {
+      return String(text || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(0, 80);
+    }
+
     function fallback(name){ return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900"><rect width="100%" height="100%" fill="%23070a11"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="56" font-family="Arial" font-weight="800">TrendPulse Home</text><text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" fill="%23cbd5e1" font-size="32" font-family="Arial">${String(name||'Home deal')}</text></svg>`; }
+
     async function load() {
-      const { data } = await sb.from('products').select('name, description, price, original_price, image_url, affiliate_link, score').eq('is_active', true).eq('category', 'Home').order('score', { ascending:false }).limit(60);
+      const { data } = await sb.from('products').select('asin, name, description, price, original_price, image_url, affiliate_link, score').eq('is_active', true).eq('category', 'Home').order('score', { ascending:false }).limit(60);
       const grid = document.getElementById('grid');
       grid.innerHTML = (data||[]).map(p => `
         <article class="card">
@@ -66,12 +81,13 @@
                 ${p.original_price ? `<div class="old">${price(p.original_price)}</div>` : ''}
                 <div class="price">${price(p.price)}</div>
               </div>
-              <a class="cta" href="${p.affiliate_link || '#'}" target="_blank" rel="nofollow sponsored noopener noreferrer">Shop Now</a>
+              <a class="cta" href="/deal/${p.asin}/${slugify(p.name)}">Shop Now</a>
             </div>
           </div>
         </article>
       `).join('');
     }
+
     load();
   </script>
 </body>
