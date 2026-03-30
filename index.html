@@ -28,6 +28,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"TrendPulse",
+    "url":"https://trend-pulse.shop/",
+    "description":"Live Amazon deals worth checking right now."
+  }
+  </script>
+
   <style>
     body { background:#050505; color:white; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     .card { transition:transform .18s ease, box-shadow .18s ease; }
@@ -52,47 +62,65 @@
       letter-spacing:.02em;
       white-space:nowrap;
     }
+    .glass {
+      background:linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.03) 100%);
+      border:1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(6px);
+    }
   </style>
 </head>
 <body class="max-w-6xl mx-auto px-4 py-5 md:py-6">
 
-  <header class="flex justify-between items-center mb-6">
+  <header class="flex justify-between items-center mb-5">
     <a href="/" class="text-2xl font-black italic tracking-tight">TrendPulse</a>
-    <div class="text-sm text-zinc-400">Live Amazon Deals</div>
+    <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white font-semibold">All Deals</a>
   </header>
 
-  <section class="mb-8">
-    <div class="grid md:grid-cols-[1.1fr_0.9fr] gap-5 items-stretch">
-      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 md:p-7">
-        <p class="text-sky-400 font-black uppercase tracking-[0.22em] text-[11px] mb-3">Live • Trending • Best Value</p>
-        <h1 class="text-4xl md:text-6xl font-black italic leading-[0.95] tracking-tight mb-4">
-          Best Amazon Deals<br>Right Now
-        </h1>
-        <p class="text-zinc-400 text-base md:text-lg max-w-xl leading-7 mb-5">
-          Skip the clutter. TrendPulse surfaces live Amazon deals that actually look worth checking — faster, cleaner, and easier on mobile.
-        </p>
+  <section class="mb-6">
+    <div class="grid md:grid-cols-[1.05fr_0.95fr] gap-4 items-stretch">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 md:p-7 flex flex-col justify-between">
+        <div>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="badge bg-red-500 text-white">🔥 Live Deals</span>
+            <span class="badge bg-blue-500 text-white">🇺🇸 US Amazon</span>
+            <span class="badge bg-green-500 text-black">💰 Best Value</span>
+          </div>
 
-        <div class="flex flex-wrap gap-3 mb-5">
+          <h1 class="text-4xl md:text-6xl font-black italic leading-[0.93] tracking-tight mb-4">
+            Best Amazon Deals<br>Worth Checking<br>Right Now
+          </h1>
+
+          <p class="text-zinc-400 text-base md:text-lg max-w-xl leading-7 mb-5">
+            Skip the clutter. TrendPulse highlights live Amazon deals with stronger discounts, better prices, and real click potential.
+          </p>
+
+          <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="glass rounded-2xl p-3">
+              <div class="text-white font-black text-sm mb-1">Updated automatically</div>
+              <div class="text-zinc-400 text-xs">Fresh deals pulled and ranked continuously.</div>
+            </div>
+            <div class="glass rounded-2xl p-3">
+              <div class="text-white font-black text-sm mb-1">Real Amazon offers</div>
+              <div class="text-zinc-400 text-xs">Focused on live US Amazon product deals.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
           <a href="#hero-deal" class="bg-white text-black px-5 py-3 rounded-xl font-black">
-            Shop the Top Deal
+            View Top Deal
           </a>
           <a href="#trending" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
             Browse Trending
           </a>
         </div>
-
-        <div class="flex flex-wrap gap-3 text-sm">
-          <span class="bg-zinc-950 border border-zinc-800 px-4 py-2 rounded-xl text-zinc-300">Updated automatically</span>
-          <span class="bg-zinc-950 border border-zinc-800 px-4 py-2 rounded-xl text-zinc-300">US-focused deals</span>
-          <span class="bg-zinc-950 border border-zinc-800 px-4 py-2 rounded-xl text-zinc-300">High-value first</span>
-        </div>
       </div>
 
-      <div id="hero-deal" class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden min-h-[420px]"></div>
+      <div id="hero-deal" class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden min-h-[440px]"></div>
     </div>
   </section>
 
-  <section class="mb-8">
+  <section class="mb-6">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
         <div class="text-zinc-500 text-sm mb-1">Live Deals</div>
@@ -113,73 +141,77 @@
     </div>
   </section>
 
-  <section class="mb-10">
+  <section class="mb-8">
     <div class="flex gap-3 overflow-x-auto pb-1">
       <a href="/tech.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Tech</a>
       <a href="/home.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Home</a>
       <a href="/kitchen.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Kitchen</a>
       <a href="/beauty.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Beauty</a>
-      <a href="/deals.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">All Deals</a>
       <a href="/best-amazon-deals.html" class="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl font-bold whitespace-nowrap">Editorial Picks</a>
     </div>
   </section>
 
-  <section id="trending" class="mb-12">
+  <section id="trending" class="mb-10">
     <div class="flex items-end justify-between mb-4 gap-4">
       <div>
         <h2 class="text-2xl font-black tracking-tight">🔥 Trending Now</h2>
-        <p class="text-zinc-400 text-sm mt-1">The strongest live deals right now.</p>
+        <p class="text-zinc-400 text-sm mt-1">Top live deals with the strongest momentum.</p>
       </div>
-      <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white">See all deals</a>
+      <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white">See all</a>
     </div>
     <div id="trending-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
-  <section class="mb-12">
+  <section class="mb-10">
     <div class="flex items-end justify-between mb-4 gap-4">
       <div>
-        <h2 class="text-2xl font-black tracking-tight">💰 Best Value</h2>
-        <p class="text-zinc-400 text-sm mt-1">Good prices with strong upside.</p>
+        <h2 class="text-2xl font-black tracking-tight">💰 Best Value Picks</h2>
+        <p class="text-zinc-400 text-sm mt-1">Good prices, strong upside, easier buying decisions.</p>
       </div>
     </div>
     <div id="best-value-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
-  <section class="mb-12">
+  <section class="mb-10">
     <div class="flex items-end justify-between mb-4 gap-4">
       <div>
         <h2 class="text-2xl font-black tracking-tight">⚡ Under $25</h2>
-        <p class="text-zinc-400 text-sm mt-1">Low-friction deals worth checking quickly.</p>
+        <p class="text-zinc-400 text-sm mt-1">Low-friction deals people can grab fast.</p>
       </div>
     </div>
     <div id="under-25-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
-  <section class="mb-12">
+  <section class="mb-10">
     <div class="flex items-end justify-between mb-4 gap-4">
       <div>
         <h2 class="text-2xl font-black tracking-tight">🚨 Big Discounts</h2>
-        <p class="text-zinc-400 text-sm mt-1">Higher discount offers worth checking first.</p>
+        <p class="text-zinc-400 text-sm mt-1">High-discount deals worth checking first.</p>
       </div>
     </div>
     <div id="big-discounts-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
-  <section class="mb-12">
+  <section class="mb-10">
     <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8">
-      <h2 class="text-2xl font-black tracking-tight mb-4">Why TrendPulse?</h2>
-      <div class="grid md:grid-cols-3 gap-5 text-sm text-zinc-400">
+      <div class="grid md:grid-cols-3 gap-5">
         <div>
-          <h3 class="text-white font-black mb-2">Faster discovery</h3>
-          <p>Find strong Amazon deals without scrolling through low-value clutter.</p>
+          <h3 class="text-white font-black mb-2">Why TrendPulse?</h3>
+          <p class="text-zinc-400 text-sm leading-7">
+            We surface live Amazon deals based on price, discount strength, and current deal quality — not just random product listings.
+          </p>
         </div>
         <div>
-          <h3 class="text-white font-black mb-2">Smarter ranking</h3>
-          <p>We don’t rely only on discount percentage. Value and momentum matter too.</p>
+          <h3 class="text-white font-black mb-2">Why these deals?</h3>
+          <p class="text-zinc-400 text-sm leading-7">
+            Deals shown first are ranked to favor stronger value, lower prices, and higher click appeal.
+          </p>
         </div>
         <div>
-          <h3 class="text-white font-black mb-2">Built for mobile</h3>
-          <p>Get to the deal quickly, open the product page, and move on in seconds.</p>
+          <h3 class="text-white font-black mb-2">Why act now?</h3>
+          <p class="text-zinc-400 text-sm leading-7">
+            Amazon pricing can change quickly. Stronger deals often lose visibility fast once inventory or pricing shifts.
+          </p>
         </div>
       </div>
     </div>
@@ -191,18 +223,8 @@
 
   <script>
     const SB_URL = "https://hyrofyfhmabhlqbucjdp.supabase.co";
-    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6ImFub24iLCJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
     const sb = supabase.createClient(SB_URL, SB_KEY);
-
-    function slug(t) {
-      return String(t || "")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .slice(0, 80);
-    }
 
     function dealUrl(p) {
       return `/deal.html?asin=${encodeURIComponent(p.asin)}`;
@@ -307,8 +329,8 @@
               ${oldPrice}
               <div class="text-xl md:text-2xl font-black">${formatPrice(p.price)}</div>
             </div>
-            <div class="text-xs text-zinc-400 line-clamp-2">
-              ${p.description || "Trending Amazon deal worth checking."}
+            <div class="inline-flex mt-1 bg-blue-600 px-3 py-2 rounded-lg text-xs font-black">
+              View Deal
             </div>
           </div>
         </a>
@@ -321,7 +343,7 @@
 
       return `
         <a href="${dealUrl(p)}" class="block h-full">
-          <div class="h-full grid grid-rows-[220px_auto] md:grid-rows-[230px_auto]">
+          <div class="h-full grid grid-rows-[220px_auto] md:grid-rows-[240px_auto]">
             <div class="bg-white">
               ${buildSafeImageTag(imageList, p.name, "w-full h-full object-contain")}
             </div>
@@ -329,19 +351,29 @@
               <div class="flex gap-2 flex-wrap mb-3">
                 ${badges.map(b => `<span class="badge ${b.cls}">${b.text}</span>`).join("")}
               </div>
+
               <div class="text-red-400 font-black text-xs mb-2">
                 ${p.discount_percent ? `🔥 ${Math.round(p.discount_percent)}% OFF` : "🔥 Live Deal"}
               </div>
+
               <h2 class="text-2xl md:text-3xl font-black tracking-tight leading-tight mb-3 line-clamp-3">${p.name}</h2>
+
               <div class="flex items-end gap-3 mb-3 flex-wrap">
                 <div class="text-3xl font-black">${formatPrice(p.price)}</div>
                 ${p.original_price ? `<div class="text-zinc-500 line-through text-lg">${formatPrice(p.original_price)}</div>` : ""}
               </div>
+
               <p class="text-zinc-400 text-sm line-clamp-3 mb-4">
                 ${p.description || "Trending Amazon deal worth checking right now."}
               </p>
-              <div class="inline-flex bg-blue-600 hover:bg-blue-500 transition px-5 py-3 rounded-xl font-black">
-                View Top Deal
+
+              <div class="flex items-center justify-between gap-3">
+                <div class="text-xs text-zinc-400">
+                  Price can change quickly
+                </div>
+                <div class="inline-flex bg-blue-600 hover:bg-blue-500 transition px-5 py-3 rounded-xl font-black">
+                  Grab This Deal
+                </div>
               </div>
             </div>
           </div>
@@ -395,4 +427,4 @@
     loadDeals();
   </script>
 </body>
-          </html>
+  </html>
