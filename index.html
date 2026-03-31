@@ -5,20 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Best Amazon Deals Today | TrendPulse</title>
-  <meta name="description" content="Live Amazon deals, best sellers, crazy discounts, and category-based shopping pages for tech, fashion, jewelry, home, beauty, and more." />
+  <meta name="description" content="Discover the best Amazon deals today, best sellers, crazy discounts, and trending product finds worth checking right now." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://trend-pulse.shop/" />
   <meta name="theme-color" content="#050505" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Best Amazon Deals Today | TrendPulse" />
-  <meta property="og:description" content="Live Amazon deals, best sellers, and category pages that make shopping easier." />
+  <meta property="og:description" content="Live Amazon deals, best sellers, and crazy discounts worth checking right now." />
   <meta property="og:url" content="https://trend-pulse.shop/" />
   <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Best Amazon Deals Today | TrendPulse" />
-  <meta name="twitter:description" content="Live Amazon deals, best sellers, and category pages that make shopping easier." />
+  <meta name="twitter:description" content="Live Amazon deals, best sellers, and crazy discounts worth checking right now." />
   <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg" />
 
   <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -34,7 +34,7 @@
     "@type":"WebSite",
     "name":"TrendPulse",
     "url":"https://trend-pulse.shop/",
-    "description":"Live Amazon deals, best sellers, and category pages that make shopping easier."
+    "description":"Discover the best Amazon deals today, best sellers, crazy discounts, and trending product finds."
   }
   </script>
 
@@ -50,12 +50,18 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
     .deal-card {
       transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
     }
     .deal-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 16px 40px rgba(0,0,0,.28);
+      box-shadow: 0 18px 42px rgba(0,0,0,.30);
       border-color: rgba(255,255,255,.16);
     }
     .chip {
@@ -81,9 +87,13 @@
       letter-spacing: .02em;
       white-space: nowrap;
     }
+    .soft-card {
+      background: linear-gradient(180deg, #111722 0%, #090b11 100%);
+      border: 1px solid rgba(255,255,255,.08);
+    }
   </style>
 </head>
-<body class="max-w-6xl mx-auto px-4 py-4 md:py-6 pb-10">
+<body class="max-w-6xl mx-auto px-4 py-4 md:py-6 pb-12">
 
   <header class="flex justify-between items-center mb-4">
     <a href="/" class="text-2xl font-black italic tracking-tight">TrendPulse</a>
@@ -94,53 +104,68 @@
   </header>
 
   <section class="mb-5">
-    <div class="grid md:grid-cols-[1fr_1fr] gap-4">
-      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 md:p-6 flex flex-col justify-center">
+    <div class="grid md:grid-cols-[1.05fr_0.95fr] gap-4">
+      <div class="soft-card rounded-3xl p-5 md:p-7 flex flex-col justify-center">
         <div class="flex flex-wrap gap-2 mb-3">
-          <span class="hero-badge bg-red-500 text-white">🔥 Live Deals</span>
+          <span class="hero-badge bg-red-500 text-white">🔥 Updated Often</span>
           <span class="hero-badge bg-blue-500 text-white">⭐ Best Sellers</span>
-          <span class="hero-badge bg-yellow-400 text-black">⚠ Crazy Deals</span>
+          <span class="hero-badge bg-yellow-400 text-black">⚠ Big Price Drops</span>
         </div>
 
-        <h1 class="text-4xl md:text-5xl font-black italic leading-[0.95] tracking-tight mb-3">
-          Deals, Best Sellers,<br>and Amazon Finds<br>That Actually Matter
+        <h1 class="text-4xl md:text-6xl font-black italic leading-[0.92] tracking-tight mb-3">
+          Best Amazon Deals<br>That Are Actually<br>Worth Clicking
         </h1>
 
-        <p class="text-zinc-400 text-base md:text-lg leading-7 mb-4">
-          Shop live discounts, popular products, and category pages built for faster browsing and better conversion.
+        <p class="text-zinc-400 text-base md:text-lg leading-7 mb-5 max-w-2xl">
+          Real price drops, popular products, and stronger Amazon picks without the clutter.
         </p>
 
-        <div class="flex flex-wrap gap-3">
-          <a href="/best-sellers.html" class="bg-white text-black px-5 py-3 rounded-xl font-black">
+        <div class="flex flex-wrap gap-3 mb-5">
+          <a href="#top-deals" class="bg-white text-black px-5 py-3 rounded-xl font-black">
+            Shop Top Deals
+          </a>
+          <a href="/best-sellers.html" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
             Explore Best Sellers
           </a>
-          <a href="/crazy-deals.html" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
-            View Crazy Deals
-          </a>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+          <div class="rounded-2xl p-3 bg-zinc-950 border border-zinc-800">
+            <div class="text-white font-black mb-1">Fast browsing</div>
+            <div class="text-zinc-400 text-xs">Image, price, discount, click.</div>
+          </div>
+          <div class="rounded-2xl p-3 bg-zinc-950 border border-zinc-800">
+            <div class="text-white font-black mb-1">Popular picks</div>
+            <div class="text-zinc-400 text-xs">Best sellers and trending items.</div>
+          </div>
+          <div class="rounded-2xl p-3 bg-zinc-950 border border-zinc-800 col-span-2 md:col-span-1">
+            <div class="text-white font-black mb-1">More categories</div>
+            <div class="text-zinc-400 text-xs">Tech, fashion, jewelry, home, and more.</div>
+          </div>
         </div>
       </div>
 
-      <div id="hero-deal" class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden min-h-[360px] md:min-h-[420px]"></div>
+      <div id="hero-deal" class="soft-card rounded-3xl overflow-hidden min-h-[370px] md:min-h-[450px]"></div>
     </div>
   </section>
 
   <section class="mb-5">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+      <div class="soft-card rounded-2xl p-4">
         <div class="text-zinc-500 text-sm mb-1">Live Deals</div>
         <div id="stat-total" class="text-2xl font-black">—</div>
       </div>
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+      <div class="soft-card rounded-2xl p-4">
         <div class="text-zinc-500 text-sm mb-1">Best Sellers</div>
         <div id="stat-bestsellers" class="text-2xl font-black">—</div>
       </div>
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+      <div class="soft-card rounded-2xl p-4">
         <div class="text-zinc-500 text-sm mb-1">Crazy Deals</div>
         <div id="stat-crazy" class="text-2xl font-black">—</div>
       </div>
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-        <div class="text-zinc-500 text-sm mb-1">Categories</div>
-        <div class="text-2xl font-black">14+</div>
+      <div class="soft-card rounded-2xl p-4">
+        <div class="text-zinc-500 text-sm mb-1">Under $25</div>
+        <div id="stat-under25" class="text-2xl font-black">—</div>
       </div>
     </div>
   </section>
@@ -169,24 +194,35 @@
     </div>
   </section>
 
+  <section id="top-deals" class="mb-8">
+    <div class="flex items-end justify-between mb-4 gap-4">
+      <div>
+        <h2 class="text-2xl font-black tracking-tight">Top Deals Right Now</h2>
+        <p class="text-zinc-400 text-sm mt-1">The strongest products to check first.</p>
+      </div>
+      <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white">See all</a>
+    </div>
+    <div id="featured-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+  </section>
+
   <section class="mb-8">
     <div class="grid md:grid-cols-3 gap-4">
-      <a href="/best-sellers.html" class="deal-card block bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+      <a href="/best-sellers.html" class="deal-card soft-card block rounded-3xl p-5">
         <div class="text-blue-400 font-black text-xs mb-2">BEST SELLERS</div>
-        <h2 class="text-2xl font-black tracking-tight mb-2">Most Popular Amazon Products</h2>
-        <p class="text-zinc-400 text-sm leading-7">For visitors who want products people already buy a lot, even without major discounts.</p>
+        <h2 class="text-2xl font-black tracking-tight mb-2">Popular Amazon Products</h2>
+        <p class="text-zinc-400 text-sm leading-7">For visitors who want strong products, even without extreme discounts.</p>
       </a>
 
-      <a href="/crazy-deals.html" class="deal-card block bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+      <a href="/crazy-deals.html" class="deal-card soft-card block rounded-3xl p-5">
         <div class="text-yellow-400 font-black text-xs mb-2">CRAZY DEALS</div>
-        <h2 class="text-2xl font-black tracking-tight mb-2">Deep Discounts & Price Drops</h2>
-        <p class="text-zinc-400 text-sm leading-7">A page for suspiciously strong discounts and unusually sharp Amazon price drops.</p>
+        <h2 class="text-2xl font-black tracking-tight mb-2">Deep Discounts & Fast Movers</h2>
+        <p class="text-zinc-400 text-sm leading-7">Products with unusually strong price drops worth checking fast.</p>
       </a>
 
-      <a href="/best-amazon-deals.html" class="deal-card block bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-        <div class="text-red-400 font-black text-xs mb-2">EDITORIAL</div>
-        <h2 class="text-2xl font-black tracking-tight mb-2">SEO-Friendly Shopping Guides</h2>
-        <p class="text-zinc-400 text-sm leading-7">Evergreen Amazon shopping pages built to attract long-term Google traffic.</p>
+      <a href="/best-amazon-deals.html" class="deal-card soft-card block rounded-3xl p-5">
+        <div class="text-red-400 font-black text-xs mb-2">GUIDES</div>
+        <h2 class="text-2xl font-black tracking-tight mb-2">SEO Shopping Pages</h2>
+        <p class="text-zinc-400 text-sm leading-7">Evergreen pages built for Google traffic and cleaner browsing.</p>
       </a>
     </div>
   </section>
@@ -280,20 +316,23 @@
       } catch {}
     };
 
+    function getBadgeText(p) {
+      if (p.is_crazy_deal) return "⚠ CRAZY DEAL";
+      if (p.discount_percent) return `-${Math.round(p.discount_percent)}% OFF`;
+      if (p.is_best_seller) return "⭐ BEST SELLER";
+      return "LIVE DEAL";
+    }
+
     function renderCard(p) {
       const imageList = getBestImageList(p);
       return `
-        <div class="deal-card bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+        <div class="deal-card soft-card rounded-2xl overflow-hidden">
           <a href="${dealUrl(p)}" class="block">
             ${buildSafeImageTag(imageList, p.name, "w-full h-40 md:h-48 object-cover bg-white")}
           </a>
           <div class="p-3">
-            <div class="text-red-400 font-black text-[11px] mb-1">
-              ${p.is_crazy_deal ? "⚠ CRAZY DEAL" : (p.discount_percent ? `-${Math.round(p.discount_percent)}% OFF` : (p.is_best_seller ? "⭐ BEST SELLER" : "LIVE DEAL"))}
-            </div>
-            <a href="${dealUrl(p)}" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">
-              ${p.name}
-            </a>
+            <div class="text-red-400 font-black text-[11px] mb-1">${getBadgeText(p)}</div>
+            <a href="${dealUrl(p)}" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">${p.name}</a>
             <div class="flex items-end gap-2 mb-3 flex-wrap">
               <div class="text-xl md:text-2xl font-black">${formatPrice(p.price)}</div>
               ${p.original_price ? `<div class="text-zinc-500 line-through text-xs">${formatPrice(p.original_price)}</div>` : ""}
@@ -310,18 +349,26 @@
       const imageList = getBestImageList(p);
       return `
         <a href="${dealUrl(p)}" class="block h-full">
-          <div class="h-full grid grid-rows-[220px_auto] md:grid-rows-[240px_auto]">
+          <div class="h-full grid grid-rows-[220px_auto] md:grid-rows-[250px_auto]">
             <div class="bg-white">
               ${buildSafeImageTag(imageList, p.name, "w-full h-full object-contain")}
             </div>
-            <div class="p-5">
-              <div class="text-red-400 font-black text-xs mb-2">
-                ${p.is_crazy_deal ? "⚠ POSSIBLE PRICE ERROR" : (p.discount_percent ? `🔥 ${Math.round(p.discount_percent)}% OFF` : (p.is_best_seller ? "⭐ BEST SELLER" : "🔥 LIVE DEAL"))}
-              </div>
+            <div class="p-5 md:p-6">
+              <div class="text-red-400 font-black text-xs mb-2">${getBadgeText(p)}</div>
               <h2 class="text-2xl md:text-3xl font-black tracking-tight leading-tight mb-3 line-clamp-3">${p.name}</h2>
               <div class="flex items-end gap-3 mb-4 flex-wrap">
-                <div class="text-3xl font-black">${formatPrice(p.price)}</div>
+                <div class="text-3xl md:text-4xl font-black">${formatPrice(p.price)}</div>
                 ${p.original_price ? `<div class="text-zinc-500 line-through text-lg">${formatPrice(p.original_price)}</div>` : ""}
+              </div>
+              <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+                <div class="rounded-2xl p-3 bg-zinc-950 border border-zinc-800">
+                  <div class="text-zinc-500 text-xs mb-1">Category</div>
+                  <div class="font-black">${p.category || "All"}</div>
+                </div>
+                <div class="rounded-2xl p-3 bg-zinc-950 border border-zinc-800">
+                  <div class="text-zinc-500 text-xs mb-1">Score</div>
+                  <div class="font-black">${Math.round(Number(p.score || 0))}</div>
+                </div>
               </div>
               <div class="inline-flex bg-blue-600 hover:bg-blue-500 transition px-5 py-3 rounded-xl font-black">
                 View Top Deal
@@ -415,8 +462,7 @@
     }
 
     function applyFilter(filter) {
-      const filtered = getFilteredDeals(filter);
-      fillGrid("dynamic-grid", filtered);
+      fillGrid("dynamic-grid", getFilteredDeals(filter));
       setActiveChip(filter);
       setFilterLabel(filter);
     }
@@ -431,18 +477,24 @@
 
       if (error || !data) {
         document.getElementById("dynamic-grid").innerHTML = `<div class="text-zinc-400">Unable to load deals right now.</div>`;
+        document.getElementById("featured-grid").innerHTML = `<div class="text-zinc-400">Unable to load deals right now.</div>`;
         document.getElementById("hero-deal").innerHTML = `<div class="p-6 text-zinc-400">Unable to load the top deal right now.</div>`;
         return;
       }
 
       DEALS = data || [];
-      const topPicks = [...DEALS].sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 12);
+
+      const topPicks = [...DEALS].sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 8);
       const bestSellers = DEALS.filter(p => p.is_best_seller);
       const crazyDeals = DEALS.filter(p => p.is_crazy_deal);
+      const under25 = DEALS.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) < 25);
 
       document.getElementById("stat-total").textContent = DEALS.length;
       document.getElementById("stat-bestsellers").textContent = bestSellers.length;
       document.getElementById("stat-crazy").textContent = crazyDeals.length;
+      document.getElementById("stat-under25").textContent = under25.length;
+
+      fillGrid("featured-grid", topPicks);
 
       const hero = topPicks[0] || DEALS[0];
       if (hero) {
@@ -459,4 +511,4 @@
     loadDeals();
   </script>
 </body>
-  </html>
+</html>
