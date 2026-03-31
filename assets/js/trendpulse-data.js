@@ -1,5 +1,12 @@
 // assets/js/trendpulse-data.js
 
+window.TRENDPULSE_CONFIG = {
+  siteUrl: "https://www.trend-pulse.shop",
+  affiliateTag: "Drackk-20",
+  contactEmail: "contact@trend-pulse.shop",
+  market: "US"
+};
+
 window.TRENDPULSE_DEALS = [
   {
     asin: "B0CY69ZBZY",
@@ -10,7 +17,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Trending Deal",
     category: "kitchen",
     tags: ["blender", "smoothie", "portable", "bottle", "kitchen"],
-    affiliate_link: "https://www.amazon.com/dp/B0CY69ZBZY?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0CY69ZBZY?tag=Drackk-20"
   },
   {
     asin: "B0F4Q9TRPG",
@@ -21,7 +28,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Popular Pick",
     category: "home",
     tags: ["cleaning", "bathroom", "kitchen", "brush", "home"],
-    affiliate_link: "https://www.amazon.com/dp/B0F4Q9TRPG?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0F4Q9TRPG?tag=Drackk-20"
   },
   {
     asin: "B0D4L1P2AB",
@@ -32,7 +39,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Strong Value",
     category: "tech",
     tags: ["desk", "lamp", "usb", "office", "tech"],
-    affiliate_link: "https://www.amazon.com/dp/B0D4L1P2AB?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0D4L1P2AB?tag=Drackk-20"
   },
   {
     asin: "B0C7VV8P6R",
@@ -43,7 +50,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Budget Find",
     category: "kitchen",
     tags: ["air fryer", "kitchen", "silicone", "liners", "cooking"],
-    affiliate_link: "https://www.amazon.com/dp/B0C7VV8P6R?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0C7VV8P6R?tag=Drackk-20"
   },
   {
     asin: "B0D8YJ1W2K",
@@ -54,7 +61,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Useful Tech",
     category: "auto",
     tags: ["car", "phone holder", "dashboard", "auto", "travel"],
-    affiliate_link: "https://www.amazon.com/dp/B0D8YJ1W2K?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0D8YJ1W2K?tag=Drackk-20"
   },
   {
     asin: "B0DJ8Q7R1W",
@@ -65,7 +72,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Giftable Pick",
     category: "gifts",
     tags: ["gift", "bottle", "water", "fitness", "everyday"],
-    affiliate_link: "https://www.amazon.com/dp/B0DJ8Q7R1W?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0DJ8Q7R1W?tag=Drackk-20"
   },
   {
     asin: "B0DPL5N7N3",
@@ -76,7 +83,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Cheap Tech",
     category: "tech",
     tags: ["desk", "cable", "organizer", "setup", "tech"],
-    affiliate_link: "https://www.amazon.com/dp/B0DPL5N7N3?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0DPL5N7N3?tag=Drackk-20"
   },
   {
     asin: "B0DMSR6R8V",
@@ -87,7 +94,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Home Find",
     category: "home",
     tags: ["blanket", "home", "gift", "cozy", "decor"],
-    affiliate_link: "https://www.amazon.com/dp/B0DMSR6R8V?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0DMSR6R8V?tag=Drackk-20"
   },
   {
     asin: "B0DP8P2H4W",
@@ -98,7 +105,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Best Gift",
     category: "gifts",
     tags: ["photo", "printer", "gift", "memory", "creative"],
-    affiliate_link: "https://www.amazon.com/dp/B0DP8P2H4W?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0DP8P2H4W?tag=Drackk-20"
   },
   {
     asin: "B0D6WQ2M9P",
@@ -109,7 +116,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Fun Gadget",
     category: "gifts",
     tags: ["sleep", "bluetooth", "travel", "gift", "headphones"],
-    affiliate_link: "https://www.amazon.com/dp/B0D6WQ2M9P?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0D6WQ2M9P?tag=Drackk-20"
   },
   {
     asin: "B0D8V7Q2KL",
@@ -120,7 +127,7 @@ window.TRENDPULSE_DEALS = [
     badge: "Creator Pick",
     category: "tech",
     tags: ["tripod", "phone", "creator", "camera", "remote"],
-    affiliate_link: "https://www.amazon.com/dp/B0D8V7Q2KL?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0D8V7Q2KL?tag=Drackk-20"
   },
   {
     asin: "B0D3K5Q4M8",
@@ -131,6 +138,6 @@ window.TRENDPULSE_DEALS = [
     badge: "Smart Utility",
     category: "home",
     tags: ["light", "motion sensor", "usb", "home", "night"],
-    affiliate_link: "https://www.amazon.com/dp/B0D3K5Q4M8?tag=YOURAFFILIATETAG-20"
+    affiliate_link: "https://www.amazon.com/dp/B0D3K5Q4M8?tag=Drackk-20"
   }
 ];
