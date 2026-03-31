@@ -4,26 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title id="page-title">Best Amazon Deal | TrendPulse</title>
-  <meta name="description" id="page-description" content="Best Amazon deal available now." />
-  <meta name="robots" content="index, follow, max-image-preview:large" />
-  <link rel="canonical" id="page-canonical" href="https://trend-pulse.shop/deal.html" />
-  <meta name="theme-color" content="#050505" />
-
-  <meta property="og:type" content="product" />
-  <meta property="og:title" id="og-title" content="Best Amazon Deal | TrendPulse" />
-  <meta property="og:description" id="og-description" content="Best Amazon deal available now." />
-  <meta property="og:image" id="og-image" content="https://trend-pulse.shop/og-image.jpg" />
-  <meta property="og:url" id="og-url" content="https://trend-pulse.shop/deal.html" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" id="twitter-title" content="Best Amazon Deal | TrendPulse" />
-  <meta name="twitter:description" id="twitter-description" content="Best Amazon deal available now." />
-  <meta name="twitter:image" id="twitter-image" content="https://trend-pulse.shop/og-image.jpg" />
+  <title>Amazon Deal | TrendPulse</title>
+  <meta name="description" content="Check this Amazon deal with discount, price, and availability. Limited time offer." />
+  <meta name="robots" content="index, follow" />
 
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/icon-192.png" />
-  <link rel="manifest" href="/manifest.json" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -32,322 +17,168 @@
     body {
       background: #050505;
       color: white;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, sans-serif;
     }
-    .line-clamp-2 {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .sticky-buy {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 50;
-      padding: 12px;
-      background: rgba(5,5,5,.92);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(255,255,255,.08);
-    }
-    @media (min-width: 768px) {
-      .sticky-buy {
-        display: none;
-      }
-    }
+
     .soft-card {
       background: linear-gradient(180deg, #111722 0%, #090b11 100%);
       border: 1px solid rgba(255,255,255,.08);
     }
+
+    .cta {
+      background: #ff9900;
+      color: black;
+      font-weight: 900;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      display: block;
+    }
+
+    .cta:hover {
+      background: #ffb84d;
+    }
+
+    .sticky-cta {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 50;
+    }
   </style>
 </head>
-<body class="max-w-5xl mx-auto px-4 py-6 pb-28 md:pb-6">
 
-  <header class="flex justify-between items-center mb-6">
-    <a href="/" class="font-black italic text-2xl tracking-tight">TrendPulse</a>
-    <div class="flex items-center gap-3">
-      <a href="/best-sellers.html" class="text-zinc-300 text-sm font-semibold">Best Sellers</a>
-      <a href="/deals.html" class="text-zinc-300 text-sm font-semibold">All Deals</a>
-    </div>
+<body class="max-w-4xl mx-auto px-4 py-6 pb-28">
+
+  <!-- HEADER -->
+  <header class="mb-6 flex justify-between items-center">
+    <a href="/" class="text-2xl font-black italic">TrendPulse</a>
+    <a href="/deals.html" class="text-sm text-zinc-400 hover:text-white">All Deals</a>
   </header>
 
-  <main>
-    <div id="product"></div>
-
-    <section class="mt-12">
-      <div class="flex items-end justify-between mb-4 gap-4">
-        <div>
-          <h2 class="text-2xl font-black tracking-tight">More Deals</h2>
-          <p class="text-zinc-400 text-sm mt-1">Similar live offers.</p>
-        </div>
-      </div>
-      <div id="related" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
-    </section>
+  <!-- CONTENT -->
+  <main id="content" class="soft-card rounded-3xl p-6">
+    Loading deal...
   </main>
 
-  <div id="mobile-buy-bar" class="sticky-buy hidden">
-    <button id="mobile-buy-btn" class="w-full bg-blue-600 hover:bg-blue-500 transition py-4 rounded-2xl font-black text-lg">
-      Buy on Amazon
-    </button>
+  <!-- STICKY CTA -->
+  <div id="sticky-cta" class="sticky-cta hidden">
+    <a id="sticky-link" href="#" class="cta text-lg">
+      🔥 Buy on Amazon
+    </a>
   </div>
 
   <script>
-    const SITE_URL = "https://trend-pulse.shop";
-    const AMAZON_TAG = "Drackk-20";
     const SB_URL = "https://hyrofyfhmabhlqbucjdp.supabase.co";
-    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6ImFub24iLCJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
     const sb = supabase.createClient(SB_URL, SB_KEY);
-    let CURRENT_PRODUCT = null;
 
-    function getAsinFromUrl() {
-      const qAsin = new URLSearchParams(window.location.search).get("asin");
-      if (qAsin) return qAsin;
-
-      const parts = window.location.pathname.split("/").filter(Boolean);
-      const idx = parts.indexOf("deal");
-      if (idx !== -1 && parts[idx + 1]) return parts[idx + 1];
-
-      return null;
-    }
-
-    const asin = getAsinFromUrl();
+    const params = new URLSearchParams(window.location.search);
+    const asin = params.get("asin");
 
     function formatPrice(v) {
-      if (v === null || v === undefined || v === "") return "Check price";
-      const n = Number(v);
-      if (Number.isNaN(n)) return "Check price";
-      return `$${n.toFixed(n % 1 === 0 ? 0 : 2)}`;
+      if (!v) return "Check price";
+      return "$" + Number(v).toFixed(2);
     }
 
-    function fallbackSvg(name, label = "TrendPulse") {
-      const safe = String(name || "Trending Deal")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-      return `data:image/svg+xml;utf8,
-      <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900">
-        <rect width="100%" height="100%" fill="%23070a11"/>
-        <text x="50%" y="42%" text-anchor="middle" fill="white" font-size="56" font-family="Arial" font-weight="800">${label}</text>
-        <text x="50%" y="58%" text-anchor="middle" fill="%23cbd5e1" font-size="30" font-family="Arial">${safe}</text>
-      </svg>`;
-    }
-
-    function getAmazonImageCandidates(asin) {
+    function getImages(asin, image) {
       return [
+        image,
         `https://m.media-amazon.com/images/I/${asin}.jpg`,
-        `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`,
-        `https://images.amazon.com/images/P/${asin}.01._SX500_.jpg`
+        `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`
       ];
     }
 
-    function getBestImageList(product) {
-      const list = [];
-      if (product?.image_url) list.push(product.image_url);
-      for (const img of getAmazonImageCandidates(product?.asin || "")) {
-        if (img && !list.includes(img)) list.push(img);
-      }
-      list.push(fallbackSvg(product?.name || "Trending Deal"));
-      return list;
-    }
-
-    function normalizeAffiliateLink(product) {
-      if (product?.affiliate_link && /^https:\/\/www\.amazon\.com\/dp\//i.test(product.affiliate_link)) {
-        return product.affiliate_link;
-      }
-      return `https://www.amazon.com/dp/${product.asin}?tag=${AMAZON_TAG}&linkCode=ogi&th=1&psc=1`;
-    }
-
-    async function trackEvent(asin, type) {
-      try {
-        await sb.from("analytics").insert({ asin, event: type });
-      } catch {}
-    }
-
-    function setSeo(data, img, canonicalUrl) {
-      const title = `${data.name} - ${formatPrice(data.price)} | TrendPulse`;
-      const description = `${data.name} now at ${formatPrice(data.price)}${data.discount_percent ? ` with ${Math.round(data.discount_percent)}% off` : ""}. Check this Amazon deal on TrendPulse.`;
-
-      document.title = title;
-      document.getElementById("page-title").textContent = title;
-      document.getElementById("page-description").setAttribute("content", description);
-      document.getElementById("page-canonical").setAttribute("href", canonicalUrl);
-
-      document.getElementById("og-title").setAttribute("content", title);
-      document.getElementById("og-description").setAttribute("content", description);
-      document.getElementById("og-image").setAttribute("content", img);
-      document.getElementById("og-url").setAttribute("content", canonicalUrl);
-
-      document.getElementById("twitter-title").setAttribute("content", title);
-      document.getElementById("twitter-description").setAttribute("content", description);
-      document.getElementById("twitter-image").setAttribute("content", img);
-    }
-
-    function buildSafeImageTag(images, alt, className) {
-      const safeAlt = String(alt || "").replace(/"/g, "&quot;");
-      const json = JSON.stringify(images).replace(/"/g, "&quot;");
+    function buildImage(images) {
+      const safe = JSON.stringify(images).replace(/"/g, "&quot;");
       return `
-        <img
-          src="${images[0]}"
-          data-images="${json}"
-          data-index="0"
-          alt="${safeAlt}"
-          class="${className}"
-          onerror="rotateImageFallback(this)"
-        >
+        <img src="${images[0]}"
+             data-images="${safe}"
+             data-index="0"
+             class="w-full h-72 object-contain bg-white rounded-2xl"
+             onerror="nextImg(this)">
       `;
     }
 
-    window.rotateImageFallback = function(imgEl) {
-      try {
-        const images = JSON.parse(imgEl.dataset.images || "[]");
-        let index = Number(imgEl.dataset.index || 0) + 1;
-        if (index >= images.length) return;
-        imgEl.dataset.index = String(index);
-        imgEl.src = images[index];
-      } catch {}
+    window.nextImg = function(img) {
+      const imgs = JSON.parse(img.dataset.images);
+      let i = Number(img.dataset.index) + 1;
+      if (i >= imgs.length) return;
+      img.dataset.index = i;
+      img.src = imgs[i];
     };
 
-    function getBadgeText(p) {
-      if (p.is_crazy_deal) return "⚠ POSSIBLE PRICE ERROR";
-      if (p.discount_percent) return `-${Math.round(p.discount_percent)}% OFF`;
-      if (p.is_best_seller) return "⭐ BEST SELLER";
+    function badge(p) {
+      if (p.is_crazy_deal) return "⚠ CRAZY DEAL";
+      if (p.discount_percent) return `🔥 ${Math.round(p.discount_percent)}% OFF`;
       return "LIVE DEAL";
     }
 
-    async function handleBuyClick(product) {
-      if (!product) return;
-      await trackEvent(product.asin, "click");
-      window.open(normalizeAffiliateLink(product), "_blank", "noopener,noreferrer");
+    function urgency(p) {
+      if (p.is_crazy_deal) return "⚡ May disappear fast";
+      if (p.discount_percent > 50) return "🔥 Big discount";
+      return "Limited time offer";
     }
 
-    function bindBuyButtons() {
-      const mainBtn = document.getElementById("buy-btn");
-      const mobileWrap = document.getElementById("mobile-buy-bar");
-      const mobileBtn = document.getElementById("mobile-buy-btn");
-
-      if (mainBtn) mainBtn.addEventListener("click", () => handleBuyClick(CURRENT_PRODUCT));
-      if (mobileBtn) mobileBtn.addEventListener("click", () => handleBuyClick(CURRENT_PRODUCT));
-
-      if (CURRENT_PRODUCT) {
-        mobileWrap.classList.remove("hidden");
-      }
-    }
-
-    async function loadProduct() {
+    async function load() {
       if (!asin) {
-        document.getElementById("product").innerHTML = `
-          <div class="soft-card rounded-2xl p-6">
-            <h1 class="text-2xl font-black mb-2">Deal not found</h1>
-            <p class="text-zinc-400">The product identifier is missing.</p>
-          </div>
-        `;
+        document.getElementById("content").innerHTML = "No product found.";
         return;
       }
 
-      const { data, error } = await sb
+      const { data } = await sb
         .from("products")
         .select("*")
         .eq("asin", asin)
         .single();
 
-      if (error || !data) {
-        document.getElementById("product").innerHTML = `
-          <div class="soft-card rounded-2xl p-6">
-            <h1 class="text-2xl font-black mb-2">Deal not found</h1>
-            <p class="text-zinc-400">This deal may have expired or been removed.</p>
-          </div>
-        `;
+      if (!data) {
+        document.getElementById("content").innerHTML = "Deal not found.";
         return;
       }
 
-      CURRENT_PRODUCT = data;
-      await trackEvent(data.asin, "view");
+      const images = getImages(data.asin, data.image_url);
 
-      const canonicalUrl = `${SITE_URL}/deal.html?asin=${encodeURIComponent(data.asin)}`;
-      const imageList = getBestImageList(data);
-      setSeo(data, imageList[0], canonicalUrl);
+      document.title = data.name + " | TrendPulse";
 
-      document.getElementById("product").innerHTML = `
-        <article class="soft-card rounded-3xl overflow-hidden">
-          <div class="grid md:grid-cols-2">
-            <div class="bg-white p-4 md:p-6">
-              ${buildSafeImageTag(imageList, data.name, "w-full h-80 md:h-[520px] object-contain")}
-            </div>
+      document.getElementById("content").innerHTML = `
+        <div class="mb-4 text-red-400 font-black text-sm">
+          ${badge(data)}
+        </div>
 
-            <div class="p-5 md:p-7 flex flex-col justify-center">
-              <div class="text-red-400 font-black text-sm mb-2">${getBadgeText(data)}</div>
+        ${buildImage(images)}
 
-              <h1 class="text-3xl md:text-4xl font-black tracking-tight leading-tight mb-4">
-                ${data.name}
-              </h1>
+        <h1 class="text-2xl md:text-3xl font-black mt-4 mb-2">
+          ${data.name}
+        </h1>
 
-              <div class="flex items-end gap-3 mb-5 flex-wrap">
-                <div class="text-4xl md:text-5xl font-black">${formatPrice(data.price)}</div>
-                ${data.original_price ? `<div class="text-zinc-500 line-through text-xl">${formatPrice(data.original_price)}</div>` : ""}
-              </div>
-
-              <div class="grid grid-cols-2 gap-3 mb-5 text-sm">
-                <div class="rounded-2xl p-4 bg-zinc-950 border border-zinc-800">
-                  <div class="text-zinc-500 mb-1">Category</div>
-                  <div class="font-black">${data.category || "All"}</div>
-                </div>
-                <div class="rounded-2xl p-4 bg-zinc-950 border border-zinc-800">
-                  <div class="text-zinc-500 mb-1">Score</div>
-                  <div class="font-black">${Math.round(Number(data.score || 0))}</div>
-                </div>
-              </div>
-
-              <button id="buy-btn" class="block w-full text-center bg-blue-600 hover:bg-blue-500 transition py-4 rounded-2xl font-black text-lg">
-                Buy on Amazon
-              </button>
-
-              <div class="mt-4 text-sm text-zinc-400">
-                Opens Amazon in a new tab • Price may change quickly
-              </div>
-            </div>
+        <div class="flex items-end gap-3 mb-3 flex-wrap">
+          <div class="text-3xl font-black">
+            ${formatPrice(data.price)}
           </div>
-        </article>
+          ${data.original_price ? `<div class="line-through text-zinc-500">${formatPrice(data.original_price)}</div>` : ""}
+        </div>
+
+        <div class="text-orange-400 font-bold mb-4">
+          ${urgency(data)}
+        </div>
+
+        <a href="${data.affiliate_link}" target="_blank" class="cta text-lg mb-4">
+          🔥 Buy on Amazon
+        </a>
+
+        <div class="text-sm text-zinc-400 leading-6">
+          ${data.description || "Check this trending Amazon deal."}
+        </div>
       `;
 
-      bindBuyButtons();
-      loadRelated(data.category, data.asin);
+      document.getElementById("sticky-link").href = data.affiliate_link;
+      document.getElementById("sticky-cta").classList.remove("hidden");
     }
 
-    async function loadRelated(category, currentAsin) {
-      const { data } = await sb
-        .from("products")
-        .select("*")
-        .eq("category", category)
-        .neq("asin", currentAsin)
-        .eq("is_active", true)
-        .order("score", { ascending: false })
-        .limit(6);
-
-      const container = document.getElementById("related");
-      container.innerHTML = "";
-
-      (data || []).forEach(p => {
-        const imageList = getBestImageList(p);
-
-        const card = document.createElement("a");
-        card.href = `/deal.html?asin=${encodeURIComponent(p.asin)}`;
-        card.className = "soft-card rounded-2xl overflow-hidden block";
-
-        card.innerHTML = `
-          ${buildSafeImageTag(imageList, p.name, "w-full h-36 object-cover bg-white")}
-          <div class="p-3">
-            <div class="text-red-400 font-black text-xs mb-1">${getBadgeText(p)}</div>
-            <div class="text-sm font-black line-clamp-2 mb-2">${p.name}</div>
-            <div class="text-lg font-black">${formatPrice(p.price)}</div>
-          </div>
-        `;
-
-        container.appendChild(card);
-      });
-    }
-
-    loadProduct();
+    load();
   </script>
+
 </body>
 </html>
