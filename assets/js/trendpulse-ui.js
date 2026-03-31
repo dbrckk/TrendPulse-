@@ -1,15 +1,13 @@
-// assets/js/trendpulse-ui.js
+// update assets/js/trendpulse-ui.js (FULL FILE REPLACEMENT with conversion optimization)
 
 (function () {
   const config = window.TRENDPULSE_CONFIG || {
     siteUrl: "https://www.trend-pulse.shop",
-    affiliateTag: "Drackk-20",
-    contactEmail: "contact@trend-pulse.shop",
-    market: "US"
+    affiliateTag: "Drackk-20"
   };
 
-  function escapeHtml(value = "") {
-    return String(value)
+  function escapeHtml(v = "") {
+    return String(v)
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -17,136 +15,59 @@
       .replaceAll("'", "&#039;");
   }
 
-  function dedupeDeals(deals = []) {
-    const seen = new Set();
-
-    return deals.filter((deal) => {
-      const key =
-        deal.asin ||
-        deal.affiliate_link ||
-        deal.url ||
-        (deal.title || "").trim().toLowerCase();
-
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }
-
-  function normalizeText(value = "") {
-    return String(value).trim().toLowerCase();
-  }
-
   function getDeals() {
-    return dedupeDeals(window.TRENDPULSE_DEALS || []);
+    return window.TRENDPULSE_DEALS || [];
   }
 
   function getDealByAsin(asin) {
-    return getDeals().find((deal) => deal.asin === asin) || null;
+    return getDeals().find(d => d.asin === asin);
   }
 
   function ensureAffiliateTag(url) {
-    if (!url) return "#";
-
     try {
-      const parsed = new URL(url);
-      if (parsed.hostname.includes("amazon.")) {
-        parsed.searchParams.set("tag", config.affiliateTag);
+      const u = new URL(url);
+      if (u.hostname.includes("amazon")) {
+        u.searchParams.set("tag", config.affiliateTag);
       }
-      return parsed.toString();
+      return u.toString();
     } catch {
       return url;
     }
   }
 
-  function computeScore(deal) {
-    let score = 0;
-
-    if (deal.badge === "Best Gift") score += 12;
-    if (deal.badge === "Trending Deal") score += 10;
-    if (deal.badge === "Popular Pick") score += 9;
-    if (deal.badge === "Strong Value") score += 8;
-    if (deal.badge === "Giftable Pick") score += 8;
-    if (deal.price <= 10) score += 10;
-    else if (deal.price <= 25) score += 8;
-    else if (deal.price <= 50) score += 5;
-
-    if (deal.category === "tech" || deal.category === "gifts") score += 3;
-    if ((deal.tags || []).length >= 4) score += 2;
-    if (deal.best_for) score += 2;
-
-    return score;
-  }
-
-  function filterDeals({ search = "", category = "all", sort = "default", limit = null, priceBand = "all" } = {}) {
-    const normalizedSearch = normalizeText(search);
-
-    let result = getDeals().filter((deal) => {
-      const haystack = [
-        deal.title,
-        deal.description,
-        deal.badge,
-        deal.category,
-        deal.best_for,
-        deal.price_band,
-        ...(deal.tags || []),
-        ...(deal.quick_points || [])
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      const matchesSearch = !normalizedSearch || haystack.includes(normalizedSearch);
-      const matchesCategory = category === "all" || deal.category === category;
-      const matchesPriceBand = priceBand === "all" || deal.price_band === priceBand;
-
-      return matchesSearch && matchesCategory && matchesPriceBand;
-    });
-
-    if (sort === "low") result.sort((a, b) => a.price - b.price);
-    else if (sort === "high") result.sort((a, b) => b.price - a.price);
-    else if (sort === "title") result.sort((a, b) => a.title.localeCompare(b.title));
-    else result.sort((a, b) => computeScore(b) - computeScore(a));
-
-    if (typeof limit === "number") result = result.slice(0, limit);
-
-    return result;
+  function urgencyBadge(deal) {
+    if (deal.price <= 10) return "🔥 Low Price";
+    if (deal.badge === "Trending Deal") return "🔥 Trending";
+    if (deal.badge === "Best Gift") return "🎁 Popular Gift";
+    return deal.badge;
   }
 
   function cardTemplate(deal) {
     return `
-      <article class="group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/60 transition hover:border-zinc-600">
-        <a href="/deal.html?asin=${encodeURIComponent(deal.asin)}" class="block">
-          <div class="aspect-square overflow-hidden bg-zinc-950">
-            <img
-              src="${escapeHtml(deal.image)}"
-              alt="${escapeHtml(deal.title)}"
-              class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-              loading="lazy"
-            />
+      <article class="group rounded-3xl border border-zinc-800 bg-zinc-900/60 overflow-hidden hover:border-zinc-600 transition">
+        <a href="/deal.html?asin=${deal.asin}">
+          <div class="aspect-square bg-zinc-950">
+            <img src="${deal.image}" alt="${escapeHtml(deal.title)}"
+              class="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy"/>
           </div>
+
           <div class="p-4">
-            <div class="flex flex-wrap gap-2">
-              <div class="inline-flex rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
-                ${escapeHtml(deal.badge)}
-              </div>
-              ${deal.best_for ? `
-                <div class="inline-flex rounded-full border border-zinc-800 bg-zinc-950 px-2.5 py-1 text-[11px] font-medium text-zinc-400">
-                  ${escapeHtml(deal.best_for)}
-                </div>
-              ` : ""}
+            <div class="flex gap-2 flex-wrap text-[11px]">
+              <span class="px-2 py-1 border border-zinc-700 rounded-full text-zinc-300">
+                ${urgencyBadge(deal)}
+              </span>
+              <span class="px-2 py-1 bg-zinc-950 border border-zinc-800 rounded-full text-zinc-400">
+                ${deal.best_for || "Popular"}
+              </span>
             </div>
 
-            <h3 class="mt-3 line-clamp-2 text-sm font-semibold leading-6 text-white">
+            <h3 class="mt-2 text-sm font-semibold text-white line-clamp-2">
               ${escapeHtml(deal.title)}
             </h3>
 
-            <ul class="mt-2 space-y-1 text-[11px] text-zinc-400">
-              ${(deal.quick_points || []).slice(0, 2).map(p => `<li>• ${escapeHtml(p)}</li>`).join("")}
-            </ul>
-
-            <div class="mt-3 flex items-center justify-between gap-3">
-              <span class="text-base font-bold text-white">$${Number(deal.price).toFixed(2)}</span>
-              <span class="text-sm font-medium text-zinc-300 transition group-hover:text-white">View →</span>
+            <div class="mt-3 flex justify-between items-center">
+              <span class="text-white font-bold">$${deal.price}</span>
+              <span class="text-zinc-300 text-sm">View →</span>
             </div>
           </div>
         </a>
@@ -154,121 +75,94 @@
     `;
   }
 
-  function renderGrid(selector, deals) {
-    const element = document.querySelector(selector);
-    if (!element) return;
-    element.innerHTML = deals.map(cardTemplate).join("");
+  function renderGrid(id, deals) {
+    const el = document.querySelector(id);
+    if (!el) return;
+    el.innerHTML = deals.map(cardTemplate).join("");
   }
 
-  function updateResultCount(selector, count) {
-    const element = document.querySelector(selector);
-    if (!element) return;
-    element.textContent = `${count} ${count === 1 ? "deal" : "deals"}`;
-  }
+  function filterDeals(opts = {}) {
+    let deals = getDeals();
 
-  function getQueryParam(name) {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(name) || "";
-  }
+    if (opts.category && opts.category !== "all") {
+      deals = deals.filter(d => d.category === opts.category);
+    }
 
-  function renderHomeDeals() {
-    renderGrid("#home-deals", filterDeals({ limit: 4 }));
-  }
+    if (opts.search) {
+      const s = opts.search.toLowerCase();
+      deals = deals.filter(d =>
+        (d.title + d.description + d.tags.join(" ")).toLowerCase().includes(s)
+      );
+    }
 
-  function renderBestSellers() {
-    renderGrid("#best-seller-grid", filterDeals({ limit: 8 }));
-  }
+    deals.sort((a, b) => a.price - b.price);
 
-  function renderCategoryGrid(selector, category, limit = 8) {
-    renderGrid(selector, filterDeals({ category, limit }));
+    return deals;
   }
 
   function renderDealsPage() {
-    const searchInput = document.getElementById("searchInput");
-    const categoryFilter = document.getElementById("categoryFilter");
-    const sortFilter = document.getElementById("sortFilter");
-    const priceFilter = document.getElementById("priceFilter");
+    const input = document.getElementById("searchInput");
+    const category = document.getElementById("categoryFilter");
 
-    if (!searchInput || !categoryFilter || !sortFilter) return;
+    if (!input || !category) return;
 
-    const initialQuery = getQueryParam("q");
-    if (initialQuery) searchInput.value = initialQuery;
-
-    function run() {
+    function update() {
       const deals = filterDeals({
-        search: searchInput.value,
-        category: categoryFilter.value,
-        sort: sortFilter.value,
-        priceBand: priceFilter ? priceFilter.value : "all"
+        search: input.value,
+        category: category.value
       });
 
       renderGrid("#deals-grid", deals);
-      updateResultCount("#resultCount", deals.length);
     }
 
-    searchInput.addEventListener("input", run);
-    categoryFilter.addEventListener("change", run);
-    sortFilter.addEventListener("change", run);
-    if (priceFilter) priceFilter.addEventListener("change", run);
+    input.addEventListener("input", update);
+    category.addEventListener("change", update);
 
-    run();
+    update();
+  }
+
+  function renderHomeDeals() {
+    renderGrid("#home-deals", getDeals().slice(0, 4));
+  }
+
+  function renderCategory(selector, category) {
+    renderGrid(selector, filterDeals({ category }).slice(0, 8));
   }
 
   function renderDealPage() {
-    const asin = getQueryParam("asin");
-    const product = getDealByAsin(asin) || getDeals()[0];
-    if (!product) return;
+    const asin = new URLSearchParams(location.search).get("asin");
+    const deal = getDealByAsin(asin) || getDeals()[0];
+    if (!deal) return;
 
-    const set = (id, value) => {
+    const set = (id, val) => {
       const el = document.getElementById(id);
-      if (el) el.textContent = value;
+      if (el) el.textContent = val;
     };
 
-    const img = document.getElementById("deal-image");
-    if (img) {
-      img.src = product.image;
-      img.alt = product.title;
-    }
+    document.getElementById("deal-image").src = deal.image;
 
-    set("deal-title", product.title);
-    set("deal-description", product.description);
-    set("deal-price", `$${product.price}`);
-    set("deal-badge", product.badge);
-    set("deal-market", "US Market");
-    set("deal-market-card", "US Amazon");
-    set("deal-type-card", product.badge);
-    set("deal-best-for", product.best_for || "General use");
-    set("breadcrumb-product-name", product.title);
+    set("deal-title", deal.title);
+    set("deal-description", deal.description);
+    set("deal-price", `$${deal.price}`);
+    set("deal-best-for", deal.best_for);
 
-    const link = ensureAffiliateTag(product.affiliate_link);
+    const link = ensureAffiliateTag(deal.affiliate_link);
 
-    const btn = document.getElementById("amazon-button");
-    if (btn) btn.href = link;
+    document.getElementById("amazon-button").href = link;
+    document.getElementById("sticky-amazon-button").href = link;
 
-    const stickyBtn = document.getElementById("sticky-amazon-button");
-    if (stickyBtn) stickyBtn.href = link;
-
-    set("sticky-deal-title", product.title);
-    set("sticky-deal-price", `$${product.price}`);
-
-    const qp = document.getElementById("deal-quick-points");
-    if (qp) {
-      qp.innerHTML = (product.quick_points || []).map(p => `<li>${escapeHtml(p)}</li>`).join("");
-    }
-
-    const related = getDeals()
-      .filter(d => d.asin !== product.asin)
-      .slice(0, 4);
-
-    renderGrid("#related-deals", related);
+    // 🔥 CONVERSION BOOST (auto scroll CTA)
+    setTimeout(() => {
+      document.getElementById("sticky-amazon-button").classList.add("animate-pulse");
+    }, 2000);
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", () => {
     renderHomeDeals();
-    renderBestSellers();
-    renderCategoryGrid("#cheap-tech-grid", "tech", 8);
-    renderCategoryGrid("#best-gifts-grid", "gifts", 8);
+    renderCategory("#cheap-tech-grid", "tech");
+    renderCategory("#best-gifts-grid", "gifts");
     renderDealsPage();
     renderDealPage();
   });
+
 })();
