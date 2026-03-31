@@ -6,17 +6,17 @@ import fs from "fs";
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/14.0"
+    "User-Agent": "TrendPulseBot/15.0"
   }
 });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AFFILIATE_TAG = process.env.AFFILIATE_TAG || "Drackk-20";
-const SITE_URL = process.env.SITE_URL || "https://trend-pulse.shop";
+const SITE_URL = (process.env.SITE_URL || "https://www.trend-pulse.shop").replace(/\/+$/, "");
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("Missing required env vars: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
 }
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -87,6 +87,10 @@ function buildPrimaryImage(asin) {
 
 function buildFallbackImage(asin) {
   return `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`;
+}
+
+function chooseImage(product) {
+  return product?.image_url || buildPrimaryImage(product.asin);
 }
 
 function productLink(product) {
@@ -198,7 +202,6 @@ function inferBestSeller(product) {
   if (clicks >= 20) return true;
   if (score >= 85) return true;
   if (score >= 70 && price > 0 && price < 60) return true;
-
   return false;
 }
 
@@ -238,7 +241,7 @@ async function fetchText(url) {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/14.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/15.0"
       }
     });
 
@@ -255,7 +258,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/14.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/15.0"
       }
     });
 
@@ -381,24 +384,15 @@ async function extractDealFromArticle(item) {
   const metaImage = extractMetaImage($, sourceUrl);
   const foundLinks = extractAmazonLinksFromHtml(html).map(link => normalizeUrl(link, sourceUrl));
 
-  if (!foundLinks.length) {
-    console.log("No Amazon link found");
-    return null;
-  }
+  if (!foundLinks.length) return null;
 
   const bestRawAmazonLink = chooseBestAmazonLink(foundLinks);
-  if (!bestRawAmazonLink) {
-    console.log("No valid Amazon product link found");
-    return null;
-  }
+  if (!bestRawAmazonLink) return null;
 
   const finalUrl = await resolveFinalUrl(bestRawAmazonLink);
   const asin = extractAsinFromAmazonUrl(finalUrl) || extractAsinFromAmazonUrl(bestRawAmazonLink);
 
-  if (!isValidAsin(asin)) {
-    console.log("Invalid ASIN");
-    return null;
-  }
+  if (!isValidAsin(asin)) return null;
 
   const mergedText = `${sourceTitle} ${sourceDescription}`;
   const price = extractPriceFromText(mergedText);
@@ -547,10 +541,7 @@ async function disableWeakDeals() {
     if (lowQuality) idsToDisable.push(item.id);
   }
 
-  if (!idsToDisable.length) {
-    console.log("No weak deals disabled");
-    return;
-  }
+  if (!idsToDisable.length) return;
 
   const { error: updateError } = await sb
     .from("products")
@@ -562,7 +553,7 @@ async function disableWeakDeals() {
   console.log(`Disabled ${idsToDisable.length} weak deals`);
 }
 
-function formatPriceForHtml(v) {
+function formatPrice(v) {
   if (v === null || v === undefined || v === "") return "Check price";
   const n = Number(v);
   if (Number.isNaN(n)) return "Check price";
@@ -573,242 +564,359 @@ function formatPriceForHtml(v) {
   }).format(n);
 }
 
-function fallbackImage(name, label = "TrendPulse Deal") {
-  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900"><rect width="100%" height="100%" fill="%23070a11"/><text x="50%" y="42%" text-anchor="middle" fill="white" font-size="52" font-family="Arial" font-weight="800">${escapeHtml(label)}</text><text x="50%" y="58%" text-anchor="middle" fill="%23cbd5e1" font-size="30" font-family="Arial">${escapeHtml(name || "Deal")}</text></svg>`;
+function getBadgeText(p) {
+  if (p.is_crazy_deal) return "⚠ CRAZY DEAL";
+  if (p.discount_percent) return `🔥 ${Math.round(p.discount_percent)}% OFF`;
+  if (p.is_best_seller) return "⭐ BEST SELLER";
+  return "LIVE DEAL";
 }
 
-function renderCardGrid(items, label) {
-  return items.map(p => `
-    <article class="card">
-      <img src="${escapeHtml(p.image_url || buildPrimaryImage(p.asin) || buildFallbackImage(p.asin) || fallbackImage(p.name, label))}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(buildFallbackImage(p.asin) || fallbackImage(p.name, label))}';">
-      <div class="content">
-        <div class="kicker">${escapeHtml(label)} · Score ${Math.round(Number(p.score || 0))}</div>
-        <h2 class="title">${escapeHtml(p.name)}</h2>
-        <div class="desc">${escapeHtml(p.description || "Trending deal from our live feed.")}</div>
-        <div class="row">
-          <div>
-            ${p.original_price ? `<div class="old">${escapeHtml(formatPriceForHtml(p.original_price))}</div>` : ""}
-            <div class="price">${escapeHtml(formatPriceForHtml(p.price))}</div>
-          </div>
-          <a class="cta" href="${escapeHtml(productLink(p))}">View Deal</a>
+function getUrgencyText(p) {
+  if (p.is_crazy_deal) return "⚡ Often disappears fast";
+  if (Number(p.discount_percent || 0) >= 50) return "🔥 Strong price drop";
+  if (p.is_best_seller) return "👀 Popular with shoppers";
+  return "⚡ Limited-time deal";
+}
+
+function renderCard(p) {
+  return `
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="${escapeHtml(productLink(p))}" class="block">
+        <img
+          src="${escapeHtml(chooseImage(p))}"
+          alt="${escapeHtml(p.name)}"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='${escapeHtml(buildFallbackImage(p.asin))}'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">${escapeHtml(getBadgeText(p))}</div>
+        <a href="${escapeHtml(productLink(p))}" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">${escapeHtml(p.name)}</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">${escapeHtml(formatPrice(p.price))}</div>
+          ${p.original_price ? `<div class="text-zinc-500 line-through text-xs">${escapeHtml(formatPrice(p.original_price))}</div>` : ""}
         </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">${escapeHtml(getUrgencyText(p))}</div>
+        <a href="${escapeHtml(productLink(p))}" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
       </div>
     </article>
-  `).join("");
+  `;
 }
 
-function editorialTemplate({ title, description, canonicalPath, intro, section1Title, section1Text, section2Title, section2Text, navExtra, items, label }) {
+function shellHead({ title, description, canonicalPath }) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${escapeHtml(title)} | TrendPulse</title>
-  <meta name="description" content="${escapeHtml(description)}" />
-  <meta name="robots" content="index, follow, max-image-preview:large" />
-  <link rel="canonical" href="${escapeHtml(SITE_URL + canonicalPath)}" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <meta property="og:type" content="article" />
-  <meta property="og:title" content="${escapeHtml(title)} | TrendPulse" />
-  <meta property="og:description" content="${escapeHtml(description)}" />
-  <meta property="og:url" content="${escapeHtml(SITE_URL + canonicalPath)}" />
-  <meta property="og:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${escapeHtml(title)} | TrendPulse" />
-  <meta name="twitter:description" content="${escapeHtml(description)}" />
-  <meta name="twitter:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeHtml(description)}">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="${escapeHtml(SITE_URL + canonicalPath)}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${escapeHtml(title)}">
+  <meta property="og:description" content="${escapeHtml(description)}">
+  <meta property="og:url" content="${escapeHtml(SITE_URL + canonicalPath)}">
+  <meta property="og:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:description" content="${escapeHtml(description)}">
+  <meta name="twitter:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}">
+  <link rel="icon" href="/favicon.ico" sizes="any">
   <style>
-    body { margin:0; background:#050505; color:white; font-family:Inter,sans-serif; }
-    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
-    .nav { display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 24px; }
-    .nav a { padding:10px 14px; border-radius:999px; text-decoration:none; color:#e4e4e7; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); font-weight:700; font-size:13px; }
-    h1 { font-size:clamp(34px,6vw,58px); line-height:.95; letter-spacing:-.05em; margin:0 0 14px; font-weight:900; font-style:italic; }
-    h2 { font-size:28px; margin:32px 0 12px; font-weight:900; letter-spacing:-.03em; }
-    p { color:#c4c4cc; line-height:1.75; font-size:15px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:20px; }
-    .card { background:linear-gradient(180deg,#111722 0%,#090b11 100%); border:1px solid rgba(255,255,255,.08); border-radius:24px; overflow:hidden; }
-    .card img { width:100%; height:220px; object-fit:cover; background:white; }
-    .content { padding:16px; }
-    .kicker { color:#93c5fd; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; }
-    .title { margin:8px 0; font-size:20px; line-height:1.15; font-weight:800; min-height:46px; }
-    .desc { color:#c4c4cc; font-size:14px; line-height:1.55; min-height:64px; }
-    .row { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-top:14px; }
-    .price { font-size:28px; font-weight:900; }
-    .old { color:#71717a; text-decoration:line-through; font-size:13px; font-weight:700; }
-    .cta { display:inline-flex; align-items:center; justify-content:center; padding:12px 14px; border-radius:16px; text-decoration:none; background:linear-gradient(180deg,#3275ff 0%,#1d4ed8 100%); color:white; font-size:12px; font-weight:900; text-transform:uppercase; }
-    .section { background:linear-gradient(180deg,#111722 0%,#090b11 100%); border:1px solid rgba(255,255,255,.08); border-radius:24px; padding:22px; margin-top:24px; }
+    body{background:#050505;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    .soft-card{background:linear-gradient(180deg,#111722 0%,#090b11 100%);border:1px solid rgba(255,255,255,.08)}
+    .deal-card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+    .deal-card:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(0,0,0,.30);border-color:rgba(255,255,255,.16)}
+    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .chip{font-size:12px;font-weight:800;border-radius:999px;padding:10px 14px;border:1px solid rgb(39 39 42);background:rgb(24 24 27);color:rgb(228 228 231);white-space:nowrap;text-decoration:none;display:inline-block}
+    a{text-decoration:none}
+    .navlink{color:#d4d4d8;font-size:14px;font-weight:600}
+    .navlink:hover{color:#fff}
+    .grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    @media(min-width:768px){.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <nav class="nav">
-      <a href="/">Home</a>
-      <a href="/deals.html">All Deals</a>
-      <a href="/best-sellers.html">Best Sellers</a>
-      <a href="/crazy-deals.html">Crazy Deals</a>
-      <a href="/under-10.html">Under $10</a>
-      <a href="/under-20.html">Under $20</a>
-      <a href="/under-50.html">Under $50</a>
-      ${navExtra}
-    </nav>
+<div class="wrap">`;
+}
 
-    <header>
-      <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px;">TrendPulse Editorial</p>
-      <h1>${escapeHtml(title)}</h1>
-      ${intro.map(p => `<p>${escapeHtml(p)}</p>`).join("")}
-    </header>
-
-    <section class="section">
-      <h2>${escapeHtml(section1Title)}</h2>
-      <p>${escapeHtml(section1Text)}</p>
-    </section>
-
-    <section>
-      <div class="grid">
-        ${renderCardGrid(items, label)}
-      </div>
-    </section>
-
-    <section class="section">
-      <h2>${escapeHtml(section2Title)}</h2>
-      <p>${escapeHtml(section2Text)}</p>
-    </section>
-  </div>
+function shellFoot() {
+  return `
+  <footer style="text-align:center;color:#71717a;font-size:14px;margin-top:40px;padding-bottom:24px">
+    © 2026 TrendPulse — Amazon Deals Tracker
+  </footer>
+</div>
 </body>
 </html>`;
 }
 
-function dealsPageTemplate(items) {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Amazon Deals Today | TrendPulse</title>
-  <meta name="description" content="Browse trending Amazon deals updated live. Discover hot discounts, top-rated products, and the best deals in the US." />
-  <meta name="robots" content="index, follow, max-image-preview:large" />
-  <link rel="canonical" href="${escapeHtml(SITE_URL + "/deals.html")}" />
-  <meta name="theme-color" content="#050505" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Amazon Deals Today | TrendPulse" />
-  <meta property="og:description" content="Browse trending Amazon deals updated live for shoppers in the US." />
-  <meta property="og:url" content="${escapeHtml(SITE_URL + "/deals.html")}" />
-  <meta property="og:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Amazon Deals Today | TrendPulse" />
-  <meta name="twitter:description" content="Browse trending Amazon deals updated live for shoppers in the US." />
-  <meta name="twitter:image" content="${escapeHtml(SITE_URL + "/og-image.jpg")}" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <style>
-    body { margin:0; font-family:Inter,sans-serif; background:#050505; color:white; }
-    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
-    .nav { display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 24px; }
-    .nav a { padding:10px 14px; border-radius:999px; text-decoration:none; color:#e4e4e7; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); font-weight:700; font-size:13px; }
-    h1 { font-size:clamp(34px,6vw,58px); line-height:.95; letter-spacing:-.05em; margin:0; font-weight:900; font-style:italic; }
-    p.lead { color:#a1a1aa; max-width:760px; line-height:1.7; font-size:15px; }
-    .stats { display:flex; gap:10px; flex-wrap:wrap; margin:16px 0 24px; }
-    .pill { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:999px; padding:10px 14px; font-size:12px; font-weight:800; color:#e4e4e7; text-transform:uppercase; letter-spacing:.12em; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; }
-    .card { background:linear-gradient(180deg,#111722 0%,#090b11 100%); border:1px solid rgba(255,255,255,.08); border-radius:26px; overflow:hidden; box-shadow:0 24px 50px rgba(0,0,0,.28); }
-    .card img { width:100%; height:230px; object-fit:cover; background:white; }
-    .content { padding:16px; }
-    .kicker { color:#93c5fd; font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
-    .title { margin:8px 0 10px; font-size:20px; line-height:1.15; font-weight:800; letter-spacing:-.03em; min-height:46px; }
-    .desc { color:#c4c4cc; font-size:14px; line-height:1.55; min-height:64px; }
-    .row { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-top:14px; }
-    .price { font-size:28px; font-weight:900; letter-spacing:-.04em; }
-    .old { color:#71717a; text-decoration:line-through; font-size:13px; font-weight:700; }
-    .cta { display:inline-flex; align-items:center; justify-content:center; padding:12px 14px; border-radius:16px; text-decoration:none; background:linear-gradient(180deg,#3275ff 0%,#1d4ed8 100%); color:white; font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px;">TrendPulse</p>
-      <h1>Amazon Deals Today</h1>
-      <p class="lead">Explore live Amazon deals, trending discounts, and popular product picks updated from our automated deal feed.</p>
-      <nav class="nav" aria-label="Site navigation">
-        <a href="/">Home</a>
-        <a href="/best-amazon-deals.html">Editorial Deals</a>
-        <a href="/best-sellers.html">Best Sellers</a>
-        <a href="/crazy-deals.html">Crazy Deals</a>
-        <a href="/under-10.html">Under $10</a>
-        <a href="/under-20.html">Under $20</a>
-        <a href="/under-50.html">Under $50</a>
-        <a href="/cheap-tech.html">Cheap Tech</a>
-        <a href="/best-gifts.html">Best Gifts</a>
-      </nav>
-      <div class="stats">
-        <div class="pill">${items.length} live deals</div>
-        <div class="pill">Updated live</div>
-        <div class="pill">US Amazon offers</div>
+function renderTopNav() {
+  return `
+    <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <a href="/" style="font-size:28px;font-weight:900;font-style:italic;color:#fff">TrendPulse</a>
+      <div style="display:flex;gap:12px;align-items:center">
+        <a href="/best-sellers.html" class="navlink">Best Sellers</a>
+        <a href="/deals.html" class="navlink">All Deals</a>
       </div>
     </header>
-    <main>
-      <section>
-        <div class="grid">
-          ${renderCardGrid(items, "All")}
+  `;
+}
+
+function renderHero(hero) {
+  if (!hero) {
+    return `<div class="soft-card" style="border-radius:24px;padding:24px">No top deal available.</div>`;
+  }
+
+  return `
+    <a href="${escapeHtml(productLink(hero))}" class="soft-card" style="border-radius:24px;overflow:hidden;display:block;min-height:420px">
+      <div style="display:grid;grid-template-rows:260px auto;height:100%">
+        <div style="background:#fff">
+          <img
+            src="${escapeHtml(chooseImage(hero))}"
+            alt="${escapeHtml(hero.name)}"
+            style="width:100%;height:100%;object-fit:contain"
+            onerror="this.onerror=null;this.src='${escapeHtml(buildFallbackImage(hero.asin))}'"
+          >
         </div>
-      </section>
-    </main>
-  </div>
-</body>
-</html>`;
+        <div style="padding:24px">
+          <div style="color:#f87171;font-size:12px;font-weight:900;margin-bottom:8px">${escapeHtml(getBadgeText(hero))}</div>
+          <h2 style="font-size:34px;line-height:1.05;font-weight:900;letter-spacing:-.03em;margin:0 0 12px">${escapeHtml(hero.name)}</h2>
+          <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px">
+            <div style="font-size:38px;font-weight:900">${escapeHtml(formatPrice(hero.price))}</div>
+            ${hero.original_price ? `<div style="color:#71717a;text-decoration:line-through;font-size:18px">${escapeHtml(formatPrice(hero.original_price))}</div>` : ""}
+          </div>
+          <div style="color:#fb923c;font-size:14px;font-weight:800;margin-bottom:16px">${escapeHtml(getUrgencyText(hero))}</div>
+          <div style="display:inline-flex;background:#ff9900;color:#000;padding:14px 18px;border-radius:14px;font-weight:900">
+            Buy on Amazon →
+          </div>
+        </div>
+      </div>
+    </a>
+  `;
 }
 
-function simpleCategoryPageTemplate({ title, description, canonicalPath, items, label }) {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${escapeHtml(title)} | TrendPulse</title>
-  <meta name="description" content="${escapeHtml(description)}" />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="${escapeHtml(SITE_URL + canonicalPath)}" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <style>
-    body { margin:0; font-family:Inter,sans-serif; background:#050505; color:white; }
-    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
-    .nav { display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 24px; }
-    .nav a { padding:10px 14px; border-radius:999px; text-decoration:none; color:#e4e4e7; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); font-weight:700; font-size:13px; }
-    h1 { font-size:clamp(34px,6vw,58px); line-height:.95; letter-spacing:-.05em; margin:0; font-weight:900; font-style:italic; }
-    .lead { color:#a1a1aa; max-width:760px; line-height:1.7; font-size:15px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:24px; }
-    .card { background:linear-gradient(180deg,#111722 0%,#090b11 100%); border:1px solid rgba(255,255,255,.08); border-radius:26px; overflow:hidden; }
-    .card img { width:100%; height:230px; object-fit:cover; background:white; }
-    .content { padding:16px; }
-    .kicker { color:#93c5fd; font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
-    .title { margin:8px 0; font-size:20px; line-height:1.15; font-weight:800; min-height:46px; }
-    .desc { color:#c4c4cc; font-size:14px; line-height:1.55; min-height:64px; }
-    .row { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-top:14px; }
-    .price { font-size:28px; font-weight:900; }
-    .old { color:#71717a; text-decoration:line-through; font-size:13px; font-weight:700; }
-    .cta { display:inline-flex; align-items:center; justify-content:center; padding:12px 14px; border-radius:16px; text-decoration:none; background:linear-gradient(180deg,#3275ff 0%,#1d4ed8 100%); color:white; font-size:12px; font-weight:900; text-transform:uppercase; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px;">TrendPulse</p>
-    <h1>${escapeHtml(title)}</h1>
-    <p class="lead">${escapeHtml(description)}</p>
-    <nav class="nav">
-      <a href="/">Home</a>
-      <a href="/deals.html">All Deals</a>
-      <a href="/best-sellers.html">Best Sellers</a>
-      <a href="/crazy-deals.html">Crazy Deals</a>
-      <a href="/under-10.html">Under $10</a>
-      <a href="/under-20.html">Under $20</a>
-      <a href="/under-50.html">Under $50</a>
-      <a href="/cheap-tech.html">Cheap Tech</a>
-      <a href="/best-gifts.html">Best Gifts</a>
-    </nav>
-    <div class="grid">
-      ${renderCardGrid(items, label)}
+function renderHomePage(items) {
+  const topPicks = items.slice(0, 8);
+  const hero = topPicks[0];
+  const bestSellers = items.filter(p => p.is_best_seller);
+  const crazyDeals = items.filter(p => p.is_crazy_deal);
+  const under25 = items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) < 25);
+
+  return `${shellHead({
+    title: "Best Amazon Deals Today (Up to 70% Off) | TrendPulse",
+    description: "Discover the best Amazon deals today. Huge discounts on tech, home, fashion, beauty, gifts, gadgets, and more.",
+    canonicalPath: "/"
+  })}
+  ${renderTopNav()}
+
+  <section style="margin-bottom:20px">
+    <div style="display:grid;gap:16px;grid-template-columns:1.05fr .95fr">
+      <div class="soft-card" style="border-radius:24px;padding:28px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <span style="font-size:11px;padding:5px 10px;border-radius:999px;font-weight:800;background:#ef4444;color:#fff">🔥 Updated Often</span>
+          <span style="font-size:11px;padding:5px 10px;border-radius:999px;font-weight:800;background:#3b82f6;color:#fff">⭐ Best Sellers</span>
+          <span style="font-size:11px;padding:5px 10px;border-radius:999px;font-weight:800;background:#facc15;color:#000">⚠ Big Price Drops</span>
+        </div>
+        <h1 style="font-size:64px;line-height:.92;font-weight:900;font-style:italic;letter-spacing:-.05em;margin:0 0 12px">
+          Best Amazon Deals<br>That Are Actually<br>Worth Clicking
+        </h1>
+        <p style="color:#a1a1aa;font-size:18px;line-height:1.7;margin:0 0 14px">
+          Hand-picked deals, strong discounts, popular products, and budget-friendly finds without the clutter.
+        </p>
+        <div style="color:#22c55e;font-weight:800;font-size:13px;line-height:1.7;margin-bottom:16px">
+          ✔ Trending deals updated often<br>
+          ✔ Limited-time discounts<br>
+          ✔ Popular products selling fast
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+          <a href="#top-deals" style="background:#fff;color:#000;padding:14px 18px;border-radius:12px;font-weight:900">View Top Deals</a>
+          <a href="/under-20.html" style="background:#09090b;color:#fff;border:1px solid #27272a;padding:14px 18px;border-radius:12px;font-weight:800">Shop Under $20</a>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+          <div style="background:#09090b;border:1px solid #27272a;border-radius:16px;padding:12px">
+            <div style="font-weight:900;margin-bottom:4px">Fast browsing</div>
+            <div style="font-size:12px;color:#a1a1aa">Image, price, discount, click.</div>
+          </div>
+          <div style="background:#09090b;border:1px solid #27272a;border-radius:16px;padding:12px">
+            <div style="font-weight:900;margin-bottom:4px">Popular picks</div>
+            <div style="font-size:12px;color:#a1a1aa">Best sellers and trending items.</div>
+          </div>
+          <div style="background:#09090b;border:1px solid #27272a;border-radius:16px;padding:12px">
+            <div style="font-weight:900;margin-bottom:4px">Budget pages</div>
+            <div style="font-size:12px;color:#a1a1aa">Under $10, $20, $50 and more.</div>
+          </div>
+        </div>
+      </div>
+      ${renderHero(hero)}
     </div>
-  </div>
-</body>
-</html>`;
+  </section>
+
+  <section style="margin-bottom:20px">
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+      <div class="soft-card" style="border-radius:16px;padding:16px"><div style="color:#71717a;font-size:14px;margin-bottom:4px">Live Deals</div><div style="font-size:32px;font-weight:900">${items.length}</div></div>
+      <div class="soft-card" style="border-radius:16px;padding:16px"><div style="color:#71717a;font-size:14px;margin-bottom:4px">Best Sellers</div><div style="font-size:32px;font-weight:900">${bestSellers.length}</div></div>
+      <div class="soft-card" style="border-radius:16px;padding:16px"><div style="color:#71717a;font-size:14px;margin-bottom:4px">Crazy Deals</div><div style="font-size:32px;font-weight:900">${crazyDeals.length}</div></div>
+      <div class="soft-card" style="border-radius:16px;padding:16px"><div style="color:#71717a;font-size:14px;margin-bottom:4px">Under $25</div><div style="font-size:32px;font-weight:900">${under25.length}</div></div>
+    </div>
+  </section>
+
+  <section style="margin-bottom:20px">
+    <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px">
+      ${[
+        ["Top Picks", "/deals.html"],
+        ["Best Sellers", "/best-sellers.html"],
+        ["Crazy Deals", "/crazy-deals.html"],
+        ["Under $10", "/under-10.html"],
+        ["Under $20", "/under-20.html"],
+        ["Under $50", "/under-50.html"],
+        ["Cheap Tech", "/cheap-tech.html"],
+        ["Best Gifts", "/best-gifts.html"]
+      ].map(([label, href]) => `<a class="chip" href="${href}">${label}</a>`).join("")}
+    </div>
+  </section>
+
+  <section id="top-deals" style="margin-bottom:28px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:16px">
+      <div>
+        <h2 style="font-size:32px;font-weight:900;letter-spacing:-.03em;margin:0 0 4px">Top Deals Right Now</h2>
+        <p style="color:#a1a1aa;font-size:14px;margin:0">The strongest products to check first.</p>
+      </div>
+      <a href="/deals.html" class="navlink">See all</a>
+    </div>
+    <div class="grid4">
+      ${topPicks.map(renderCard).join("")}
+    </div>
+  </section>
+
+  <section style="margin-bottom:28px">
+    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px">
+      ${[
+        ["BUDGET", "Deals Under $10", "Cheap Amazon finds with low buying friction.", "/under-10.html", "#4ade80"],
+        ["VALUE", "Deals Under $20", "Low-cost picks that still feel useful.", "/under-20.html", "#4ade80"],
+        ["TECH", "Cheap Tech", "Accessories, gadgets, chargers and more.", "/cheap-tech.html", "#60a5fa"],
+        ["GIFTS", "Best Gifts", "Giftable finds that are easy to like.", "/best-gifts.html", "#f472b6"],
+        ["POPULAR", "Best Sellers", "Strong products people already buy.", "/best-sellers.html", "#facc15"]
+      ].map(([tag, title, desc, href, color]) => `
+        <a href="${href}" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
+          <div style="color:${color};font-size:12px;font-weight:900;margin-bottom:8px">${tag}</div>
+          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">${title}</h3>
+          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">${desc}</p>
+        </a>
+      `).join("")}
+    </div>
+  </section>
+
+  <section style="margin-bottom:28px">
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+      ${[
+        ["GADGETS", "Amazon Gadgets", "Useful tech and impulse-friendly gadget picks.", "/best-amazon-gadgets.html", "#22d3ee"],
+        ["DECOR", "Home Decor Deals", "Decorative finds, candles, lamps, blankets and more.", "/amazon-home-decor-deals.html", "#fb923c"],
+        ["GIFTS", "Gifts for Women", "Beauty, jewelry, accessories and giftable finds.", "/best-amazon-gifts-for-women.html", "#e879f9"],
+        ["GIFTS", "Gifts for Men", "Gadgets, tools, gaming and practical gift ideas.", "/best-amazon-gifts-for-men.html", "#38bdf8"]
+      ].map(([tag, title, desc, href, color]) => `
+        <a href="${href}" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
+          <div style="color:${color};font-size:12px;font-weight:900;margin-bottom:8px">${tag}</div>
+          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">${title}</h3>
+          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">${desc}</p>
+        </a>
+      `).join("")}
+    </div>
+  </section>
+
+  <section class="soft-card" style="border-radius:24px;padding:28px;margin-bottom:24px">
+    <h2 style="font-size:32px;font-weight:900;letter-spacing:-.03em;margin:0 0 12px">Best Amazon Deals Today</h2>
+    <p style="color:#a1a1aa;line-height:1.8;font-size:15px;margin:0 0 12px">
+      Looking for the best Amazon deals today? TrendPulse helps you discover strong discounts, popular products, budget-friendly finds, and trending Amazon deals across categories like tech, home, fashion, jewelry, kitchen, beauty, gaming, pets, and more.
+    </p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:14px;font-weight:700">
+      <a href="/under-10.html" class="navlink">Deals Under $10</a>
+      <a href="/under-20.html" class="navlink">Deals Under $20</a>
+      <a href="/under-50.html" class="navlink">Deals Under $50</a>
+      <a href="/cheap-tech.html" class="navlink">Cheap Tech</a>
+      <a href="/best-gifts.html" class="navlink">Best Gifts</a>
+      <a href="/best-amazon-gadgets.html" class="navlink">Amazon Gadgets</a>
+      <a href="/amazon-home-decor-deals.html" class="navlink">Home Decor Deals</a>
+      <a href="/best-amazon-gifts-for-women.html" class="navlink">Gifts for Women</a>
+      <a href="/best-amazon-gifts-for-men.html" class="navlink">Gifts for Men</a>
+      <a href="/crazy-deals.html" class="navlink">Crazy Deals</a>
+    </div>
+  </section>
+
+  ${shellFoot()}`;
+}
+
+function renderDealsPage(items) {
+  return `${shellHead({
+    title: "Amazon Deals Today | TrendPulse",
+    description: "Browse trending Amazon deals updated live. Discover hot discounts, top-rated products, and the best deals in the US.",
+    canonicalPath: "/deals.html"
+  })}
+  ${renderTopNav()}
+  <section style="margin-bottom:20px">
+    <h1 style="font-size:56px;line-height:.95;font-weight:900;font-style:italic;letter-spacing:-.05em;margin:0 0 10px">Amazon Deals Today</h1>
+    <p style="color:#a1a1aa;max-width:760px;line-height:1.7;font-size:15px;margin:0 0 16px">
+      Explore live Amazon deals, trending discounts, and popular product picks updated from our automated deal feed.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+      <a class="chip" href="/">Home</a>
+      <a class="chip" href="/best-amazon-deals.html">Editorial Deals</a>
+      <a class="chip" href="/best-sellers.html">Best Sellers</a>
+      <a class="chip" href="/crazy-deals.html">Crazy Deals</a>
+      <a class="chip" href="/under-20.html">Under $20</a>
+      <a class="chip" href="/cheap-tech.html">Cheap Tech</a>
+      <a class="chip" href="/best-gifts.html">Best Gifts</a>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
+      <div class="chip">${items.length} live deals</div>
+      <div class="chip">Updated live</div>
+      <div class="chip">US Amazon offers</div>
+    </div>
+  </section>
+  <section>
+    <div class="grid4">
+      ${items.slice(0, 80).map(renderCard).join("")}
+    </div>
+  </section>
+  ${shellFoot()}`;
+}
+
+function renderEditorialPage({ title, description, canonicalPath, intro, section1Title, section1Text, section2Title, section2Text, navExtra, items, label }) {
+  return `${shellHead({ title: `${title} | TrendPulse`, description, canonicalPath })}
+  ${renderTopNav()}
+  <nav style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 24px">
+    <a class="chip" href="/">Home</a>
+    <a class="chip" href="/deals.html">All Deals</a>
+    <a class="chip" href="/best-sellers.html">Best Sellers</a>
+    <a class="chip" href="/crazy-deals.html">Crazy Deals</a>
+    <a class="chip" href="/under-10.html">Under $10</a>
+    <a class="chip" href="/under-20.html">Under $20</a>
+    <a class="chip" href="/under-50.html">Under $50</a>
+    ${navExtra}
+  </nav>
+  <header>
+    <p style="margin:0;color:#60a5fa;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:12px">TrendPulse Editorial</p>
+    <h1 style="font-size:58px;line-height:.95;letter-spacing:-.05em;margin:0 0 14px;font-weight:900;font-style:italic">${escapeHtml(title)}</h1>
+    ${intro.map(p => `<p style="color:#c4c4cc;line-height:1.75;font-size:15px">${escapeHtml(p)}</p>`).join("")}
+  </header>
+  <section class="soft-card" style="border-radius:24px;padding:22px;margin-top:24px">
+    <h2 style="font-size:28px;margin:0 0 12px;font-weight:900;letter-spacing:-.03em">${escapeHtml(section1Title)}</h2>
+    <p style="color:#c4c4cc;line-height:1.75;font-size:15px">${escapeHtml(section1Text)}</p>
+  </section>
+  <section style="margin-top:24px">
+    <div class="grid4">
+      ${items.map(renderCard).join("")}
+    </div>
+  </section>
+  <section class="soft-card" style="border-radius:24px;padding:22px;margin-top:24px">
+    <h2 style="font-size:28px;margin:0 0 12px;font-weight:900;letter-spacing:-.03em">${escapeHtml(section2Title)}</h2>
+    <p style="color:#c4c4cc;line-height:1.75;font-size:15px">${escapeHtml(section2Text)}</p>
+  </section>
+  ${shellFoot()}`;
 }
 
 function longTailConfig() {
@@ -825,7 +933,7 @@ function longTailConfig() {
       section1Text: "Low-priced products create less hesitation and often perform better for impulse-driven traffic, especially on mobile.",
       section2Title: "What kind of products appear here",
       section2Text: "You’ll usually find smaller accessories, beauty items, practical home products, and other low-friction purchases.",
-      navExtra: `<a href="/under-20.html">Under $20</a><a href="/under-50.html">Under $50</a>`,
+      navExtra: `<a class="chip" href="/under-20.html">Under $20</a><a class="chip" href="/under-50.html">Under $50</a>`,
       filter: items => items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 10).slice(0, 48),
       label: "Under $10"
     },
@@ -841,7 +949,7 @@ function longTailConfig() {
       section1Text: "Products under $20 are easier to test, easier to gift, and often more attractive to broad audiences looking for value.",
       section2Title: "How to use this page",
       section2Text: "Start with the top items, then open products that look useful, giftable, or unusually discounted.",
-      navExtra: `<a href="/under-10.html">Under $10</a><a href="/cheap-tech.html">Cheap Tech</a>`,
+      navExtra: `<a class="chip" href="/under-10.html">Under $10</a><a class="chip" href="/cheap-tech.html">Cheap Tech</a>`,
       filter: items => items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 20).slice(0, 48),
       label: "Under $20"
     },
@@ -857,7 +965,7 @@ function longTailConfig() {
       section1Text: "This price range includes a wider set of useful products while still feeling accessible for many buyers.",
       section2Title: "What to expect here",
       section2Text: "Expect more variety: tech accessories, home goods, fitness products, gifts, and practical everyday buys.",
-      navExtra: `<a href="/under-20.html">Under $20</a><a href="/best-gifts.html">Best Gifts</a>`,
+      navExtra: `<a class="chip" href="/under-20.html">Under $20</a><a class="chip" href="/best-gifts.html">Best Gifts</a>`,
       filter: items => items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 50).slice(0, 48),
       label: "Under $50"
     },
@@ -873,7 +981,7 @@ function longTailConfig() {
       section1Text: "Affordable tech products often feel practical, low-risk, and easy to buy quickly, especially when the price looks clean.",
       section2Title: "What appears on this page",
       section2Text: "You’ll usually see chargers, accessories, headphones, keyboards, adapters, and small electronics with stronger value signals.",
-      navExtra: `<a href="/tech.html">Tech</a><a href="/under-50.html">Under $50</a>`,
+      navExtra: `<a class="chip" href="/tech.html">Tech</a><a class="chip" href="/under-50.html">Under $50</a>`,
       filter: items => items.filter(p => p.category === "Tech" && Number(p.price || 0) > 0 && Number(p.price || 0) <= 50).slice(0, 48),
       label: "Cheap Tech"
     },
@@ -889,7 +997,7 @@ function longTailConfig() {
       section1Text: "Gift pages widen the audience beyond bargain hunters by helping visitors discover products they might buy for someone else.",
       section2Title: "What makes a product giftable",
       section2Text: "Products that are useful, visually appealing, personal, or easy to understand often work better in gift-focused browsing.",
-      navExtra: `<a href="/under-20.html">Under $20</a><a href="/best-sellers.html">Best Sellers</a>`,
+      navExtra: `<a class="chip" href="/under-20.html">Under $20</a><a class="chip" href="/best-sellers.html">Best Sellers</a>`,
       filter: items => items.filter(p => p.is_giftable || looksLikeGiftProduct(p.name, p.description, p.category)).slice(0, 48),
       label: "Best Gifts"
     },
@@ -905,7 +1013,7 @@ function longTailConfig() {
       section1Text: "People love browsing gadgets because they are easy to understand, easy to compare, and often impulse-friendly.",
       section2Title: "What appears here",
       section2Text: "Expect chargers, smart accessories, portable devices, headphones, stands, docks, and other useful tech finds.",
-      navExtra: `<a href="/cheap-tech.html">Cheap Tech</a><a href="/tech.html">Tech</a>`,
+      navExtra: `<a class="chip" href="/cheap-tech.html">Cheap Tech</a><a class="chip" href="/tech.html">Tech</a>`,
       filter: items => items.filter(p => looksLikeGadget(p.name, p.description, p.category)).slice(0, 48),
       label: "Gadgets"
     },
@@ -921,7 +1029,7 @@ function longTailConfig() {
       section1Text: "Decor items often perform well with broad audiences because they are easy to visualize and easy to gift.",
       section2Title: "What to expect",
       section2Text: "Expect candles, lamps, blankets, vases, mirrors, wall accents, and other home-style products.",
-      navExtra: `<a href="/home.html">Home</a><a href="/best-gifts.html">Best Gifts</a>`,
+      navExtra: `<a class="chip" href="/home.html">Home</a><a class="chip" href="/best-gifts.html">Best Gifts</a>`,
       filter: items => items.filter(p => looksLikeHomeDecor(p.name, p.description, p.category)).slice(0, 48),
       label: "Home Decor"
     },
@@ -937,7 +1045,7 @@ function longTailConfig() {
       section1Text: "Shoppers often search with a person in mind, not just a category. More specific gift pages can capture that intent.",
       section2Title: "What kinds of products appear here",
       section2Text: "Expect beauty products, jewelry, candles, accessories, decor, and other broadly giftable picks.",
-      navExtra: `<a href="/best-gifts.html">Best Gifts</a><a href="/fashion.html">Fashion</a>`,
+      navExtra: `<a class="chip" href="/best-gifts.html">Best Gifts</a><a class="chip" href="/fashion.html">Fashion</a>`,
       filter: items => items.filter(p => looksLikeWomenGift(p.name, p.description, p.category)).slice(0, 48),
       label: "Gifts for Women"
     },
@@ -953,14 +1061,14 @@ function longTailConfig() {
       section1Text: "A more specific page helps visitors browse with less friction when they already know who they are shopping for.",
       section2Title: "What products appear here",
       section2Text: "Expect gadgets, gaming items, tools, watches, accessories, outdoor products, and other practical gift picks.",
-      navExtra: `<a href="/best-gifts.html">Best Gifts</a><a href="/cheap-tech.html">Cheap Tech</a>`,
+      navExtra: `<a class="chip" href="/best-gifts.html">Best Gifts</a><a class="chip" href="/cheap-tech.html">Cheap Tech</a>`,
       filter: items => items.filter(p => looksLikeMenGift(p.name, p.description, p.category)).slice(0, 48),
       label: "Gifts for Men"
     }
   ];
 }
 
-async function generateEditorialPages() {
+async function generatePages() {
   const { data, error } = await sb
     .from("products")
     .select("asin,name,description,price,original_price,image_url,affiliate_link,category,score,is_active,updated_at,is_best_seller,is_crazy_deal,is_giftable")
@@ -976,7 +1084,8 @@ async function generateEditorialPages() {
   const bestSellers = items.filter(p => p.is_best_seller).slice(0, 48);
   const crazyDeals = items.filter(p => p.is_crazy_deal).slice(0, 48);
 
-  fs.writeFileSync("deals.html", dealsPageTemplate(items.slice(0, 60)), "utf8");
+  fs.writeFileSync("index.html", renderHomePage(items), "utf8");
+  fs.writeFileSync("deals.html", renderDealsPage(items), "utf8");
 
   const categoryPages = [
     ["tech.html", "Best Amazon Tech Deals", "Discover discounted tech, electronics, gadgets, audio gear, and trending Amazon devices.", "Tech"],
@@ -996,16 +1105,23 @@ async function generateEditorialPages() {
   ];
 
   for (const [file, title, description, category] of categoryPages) {
-    fs.writeFileSync(file, simpleCategoryPageTemplate({
+    const page = renderEditorialPage({
       title,
       description,
       canonicalPath: `/${file}`,
+      intro: [description],
+      section1Title: `${title} worth checking`,
+      section1Text: `TrendPulse groups stronger products in ${category.toLowerCase()} so visitors can browse faster and click with less friction.`,
+      section2Title: `Why these ${category.toLowerCase()} deals matter`,
+      section2Text: `These pages help surface products with better value, stronger discounts, and cleaner shopping intent.`,
+      navExtra: "",
       items: byCategory(category).slice(0, 60),
       label: category
-    }), "utf8");
+    });
+    fs.writeFileSync(file, page, "utf8");
   }
 
-  fs.writeFileSync("best-sellers.html", editorialTemplate({
+  fs.writeFileSync("best-sellers.html", renderEditorialPage({
     title: "Best Selling Amazon Products Right Now",
     description: "Discover some of the most popular Amazon products people are already buying right now, including tech, home, beauty, fashion, and more.",
     canonicalPath: "/best-sellers.html",
@@ -1017,12 +1133,12 @@ async function generateEditorialPages() {
     section1Text: "Best-selling products reduce friction because shoppers already know these kinds of items are in demand. That makes them useful for both conversions and user trust.",
     section2Title: "How we use best sellers on TrendPulse",
     section2Text: "We surface products that appear to have strong buyer appeal based on score, deal quality, and site interaction signals, creating a more rounded browsing experience beyond discounts alone.",
-    navExtra: `<a href="/cheap-tech.html">Cheap Tech</a><a href="/best-gifts.html">Best Gifts</a>`,
+    navExtra: `<a class="chip" href="/cheap-tech.html">Cheap Tech</a><a class="chip" href="/best-gifts.html">Best Gifts</a>`,
     items: bestSellers,
     label: "Best Seller"
   }), "utf8");
 
-  fs.writeFileSync("crazy-deals.html", editorialTemplate({
+  fs.writeFileSync("crazy-deals.html", renderEditorialPage({
     title: "Crazy Amazon Deals and Possible Price Errors",
     description: "Browse unusually deep Amazon discounts, major price drops, and possible crazy deals worth checking fast.",
     canonicalPath: "/crazy-deals.html",
@@ -1034,12 +1150,12 @@ async function generateEditorialPages() {
     section1Text: "On TrendPulse, crazy deals are products with much stronger-than-usual discount signals, especially when the price is still low enough to feel like an impulse buy.",
     section2Title: "Why these deals move fast",
     section2Text: "Very strong discounts can lose traction quickly as inventory shifts or pricing updates. That makes visibility especially important for this type of page.",
-    navExtra: `<a href="/under-10.html">Under $10</a><a href="/under-20.html">Under $20</a>`,
+    navExtra: `<a class="chip" href="/under-10.html">Under $10</a><a class="chip" href="/under-20.html">Under $20</a>`,
     items: crazyDeals,
     label: "Crazy Deal"
   }), "utf8");
 
-  fs.writeFileSync("best-amazon-deals.html", editorialTemplate({
+  fs.writeFileSync("best-amazon-deals.html", renderEditorialPage({
     title: "Best Amazon Deals Today",
     description: "Find the best Amazon deals today. Discover trending discounts, top-rated products, and daily updated deals in the US.",
     canonicalPath: "/best-amazon-deals.html",
@@ -1051,13 +1167,13 @@ async function generateEditorialPages() {
     section1Text: "The most attractive deals are often the ones that combine useful products with meaningful discounts and current shopping momentum. Instead of showing random bargains, TrendPulse focuses on live signals and stronger product relevance.",
     section2Title: "How to use this page",
     section2Text: "Browse the featured products below, then open any item to view its dedicated deal page. You can also explore category pages like Tech, Fashion, Jewelry, Home, Kitchen, Beauty, and Best Sellers.",
-    navExtra: `<a href="/under-50.html">Under $50</a><a href="/cheap-tech.html">Cheap Tech</a>`,
+    navExtra: `<a class="chip" href="/under-50.html">Under $50</a><a class="chip" href="/cheap-tech.html">Cheap Tech</a>`,
     items: items.slice(0, 30),
     label: "All"
   }), "utf8");
 
   for (const cfg of longTailConfig()) {
-    fs.writeFileSync(cfg.file, editorialTemplate({
+    fs.writeFileSync(cfg.file, renderEditorialPage({
       title: cfg.title,
       description: cfg.description,
       canonicalPath: `/${cfg.file}`,
@@ -1072,7 +1188,7 @@ async function generateEditorialPages() {
     }), "utf8");
   }
 
-  console.log("Editorial pages generated");
+  console.log("All static pages generated");
 }
 
 async function generateSitemap() {
@@ -1085,35 +1201,39 @@ async function generateSitemap() {
   if (error) throw error;
 
   const staticUrls = [
-    { loc: `${SITE_URL}/`, changefreq: "hourly", priority: "1.0" },
-    { loc: `${SITE_URL}/deals.html`, changefreq: "hourly", priority: "0.9" },
-    { loc: `${SITE_URL}/best-amazon-deals.html`, changefreq: "daily", priority: "0.95" },
-    { loc: `${SITE_URL}/best-sellers.html`, changefreq: "daily", priority: "0.95" },
-    { loc: `${SITE_URL}/crazy-deals.html`, changefreq: "daily", priority: "0.9" },
-    { loc: `${SITE_URL}/under-10.html`, changefreq: "daily", priority: "0.9" },
-    { loc: `${SITE_URL}/under-20.html`, changefreq: "daily", priority: "0.9" },
-    { loc: `${SITE_URL}/under-50.html`, changefreq: "daily", priority: "0.9" },
-    { loc: `${SITE_URL}/cheap-tech.html`, changefreq: "daily", priority: "0.85" },
-    { loc: `${SITE_URL}/best-gifts.html`, changefreq: "daily", priority: "0.85" },
-    { loc: `${SITE_URL}/best-amazon-gadgets.html`, changefreq: "daily", priority: "0.85" },
-    { loc: `${SITE_URL}/amazon-home-decor-deals.html`, changefreq: "daily", priority: "0.85" },
-    { loc: `${SITE_URL}/best-amazon-gifts-for-women.html`, changefreq: "daily", priority: "0.85" },
-    { loc: `${SITE_URL}/best-amazon-gifts-for-men.html`, changefreq: "daily", priority: "0.85" },
-    { loc: `${SITE_URL}/tech.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/fashion.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/jewelry.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/shoes.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/sports.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/health.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/baby.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/pets.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/office.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/gaming.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/outdoor.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/home.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/kitchen.html`, changefreq: "daily", priority: "0.8" },
-    { loc: `${SITE_URL}/beauty.html`, changefreq: "daily", priority: "0.8" }
-  ];
+    "/",
+    "/deals.html",
+    "/best-amazon-deals.html",
+    "/best-sellers.html",
+    "/crazy-deals.html",
+    "/under-10.html",
+    "/under-20.html",
+    "/under-50.html",
+    "/cheap-tech.html",
+    "/best-gifts.html",
+    "/best-amazon-gadgets.html",
+    "/amazon-home-decor-deals.html",
+    "/best-amazon-gifts-for-women.html",
+    "/best-amazon-gifts-for-men.html",
+    "/tech.html",
+    "/fashion.html",
+    "/jewelry.html",
+    "/shoes.html",
+    "/sports.html",
+    "/health.html",
+    "/baby.html",
+    "/pets.html",
+    "/office.html",
+    "/gaming.html",
+    "/outdoor.html",
+    "/home.html",
+    "/kitchen.html",
+    "/beauty.html"
+  ].map(path => ({
+    loc: `${SITE_URL}${path}`,
+    changefreq: "daily",
+    priority: path === "/" ? "1.0" : "0.8"
+  }));
 
   const dealUrls = (data || []).map(item => ({
     loc: `${SITE_URL}/deal.html?asin=${encodeURIComponent(item.asin)}`,
@@ -1122,11 +1242,9 @@ async function generateSitemap() {
     priority: "0.7"
   }));
 
-  const allUrls = [...staticUrls, ...dealUrls];
-
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
-${allUrls.map(url => `  <url>
+${[...staticUrls, ...dealUrls].map(url => `  <url>
     <loc>${escapeXml(url.loc)}</loc>
     ${url.lastmod ? `<lastmod>${escapeXml(url.lastmod)}</lastmod>` : ""}
     <changefreq>${url.changefreq}</changefreq>
@@ -1136,11 +1254,11 @@ ${allUrls.map(url => `  <url>
 `;
 
   fs.writeFileSync("sitemap.xml", xml, "utf8");
-  console.log(`sitemap.xml generated with ${allUrls.length} URLs`);
+  console.log("sitemap.xml generated");
 }
 
 async function main() {
-  console.log("Starting sync SEO extreme");
+  console.log("Starting sync");
 
   const activeCountBefore = await getActiveDealsCount();
   console.log(`Active deals before sync: ${activeCountBefore}`);
@@ -1149,9 +1267,6 @@ async function main() {
   if (activeCountBefore === 0) targetCount = INITIAL_TARGET_ON_EMPTY;
   else if (activeCountBefore < MIN_ACTIVE_DEALS) targetCount = MIN_ACTIVE_DEALS;
   else targetCount = Math.min(activeCountBefore + 40, MAX_ACTIVE_DEALS);
-
-  targetCount = Math.min(targetCount, MAX_ACTIVE_DEALS);
-  console.log(`Target count for this run: ${targetCount}`);
 
   const allItems = [];
   for (const feedUrl of FEEDS) {
@@ -1185,11 +1300,7 @@ async function main() {
       seenAsins.add(product.asin);
       results.push(product);
 
-      if (results.length >= targetCount) {
-        console.log(`Reached target of ${targetCount} valid products`);
-        break;
-      }
-
+      if (results.length >= targetCount) break;
       await sleep(REQUEST_DELAY_MS);
     } catch (error) {
       console.log(`Article error: ${error.message}`);
@@ -1202,7 +1313,7 @@ async function main() {
   await expireOldDeals();
   await disableWeakDeals();
   await enforceMaxActiveDeals(MAX_ACTIVE_DEALS);
-  await generateEditorialPages();
+  await generatePages();
   await generateSitemap();
 
   console.log("Sync complete");
