@@ -1,16 +1,18 @@
 {
   "name": "trendpulse",
-  "version": "4.0.0",
+  "version": "5.1.0",
   "private": true,
   "type": "module",
-  "description": "TrendPulse - Amazon deals, best sellers, crazy deals, and SEO pages",
+  "description": "TrendPulse - deals site and X automation",
   "scripts": {
     "sync": "node sync-deals.js",
-    "score": "node update-score.js"
+    "score": "node update-score.js",
+    "tweet": "node post-random-deal.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
     "cheerio": "^1.0.0",
+    "puppeteer": "^24.15.0",
     "rss-parser": "^3.13.0"
   }
 }
