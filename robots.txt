@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://trend-pulse.shop/sitemap.xml
+Sitemap: https://www.trend-pulse.shop/sitemap.xml
