@@ -1,15 +1,28 @@
+// vercel.json
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
     {
-      "source": "https://trend-pulse.shop/:path*",
-      "destination": "https://www.trend-pulse.shop/:path*",
+      "source": "/home",
+      "destination": "/",
       "permanent": true
     }
   ],
-  "rewrites": [
+  "headers": [
     {
-      "source": "/deal/:asin/:slug*",
-      "destination": "/deal.html?asin=:asin"
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     }
   ]
 }
