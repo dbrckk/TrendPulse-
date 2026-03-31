@@ -1,3 +1,4 @@
+// manifest.json
 {
   "name": "TrendPulse",
   "short_name": "TrendPulse",
@@ -5,7 +6,7 @@
   "display": "standalone",
   "background_color": "#09090b",
   "theme_color": "#09090b",
-  "description": "Mobile-first Amazon deal discovery focused on the US market.",
+  "description": "Trending Amazon deals, cheap tech, and gift ideas focused on the US market.",
   "icons": [
     {
       "src": "/icon-192.png",
