@@ -1,7 +1,12 @@
 // assets/js/trendpulse-ui.js
 
 (function () {
-  const SITE_URL = "https://www.trend-pulse.shop";
+  const config = window.TRENDPULSE_CONFIG || {
+    siteUrl: "https://www.trend-pulse.shop",
+    affiliateTag: "Drackk-20",
+    contactEmail: "contact@trend-pulse.shop",
+    market: "US"
+  };
 
   function escapeHtml(value = "") {
     return String(value)
@@ -38,6 +43,20 @@
 
   function getDealByAsin(asin) {
     return getDeals().find((deal) => deal.asin === asin) || null;
+  }
+
+  function ensureAffiliateTag(url) {
+    if (!url) return "#";
+
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname.includes("amazon.")) {
+        parsed.searchParams.set("tag", config.affiliateTag);
+      }
+      return parsed.toString();
+    } catch {
+      return url;
+    }
   }
 
   function filterDeals({ search = "", category = "all", sort = "default", limit = null } = {}) {
@@ -120,7 +139,7 @@
   function updateMeta(product) {
     if (!product) return;
 
-    const pageUrl = `${SITE_URL}/deal.html?asin=${encodeURIComponent(product.asin)}`;
+    const pageUrl = `${config.siteUrl}/deal.html?asin=${encodeURIComponent(product.asin)}`;
     const title = `${product.title} | TrendPulse`;
     const description = product.description || "Explore this Amazon deal on TrendPulse.";
 
@@ -162,7 +181,7 @@
         priceCurrency: "USD",
         price: String(product.price || ""),
         availability: "https://schema.org/InStock",
-        url: `${SITE_URL}/deal.html?asin=${encodeURIComponent(product.asin)}`
+        url: `${config.siteUrl}/deal.html?asin=${encodeURIComponent(product.asin)}`
       }
     });
   }
@@ -228,6 +247,7 @@
     const badge = document.getElementById("deal-badge");
     const image = document.getElementById("deal-image");
     const button = document.getElementById("amazon-button");
+    const market = document.getElementById("deal-market");
 
     if (title) title.textContent = product.title;
     if (description) description.textContent = product.description;
@@ -238,9 +258,12 @@
       image.alt = product.title;
     }
     if (button) {
-      button.href = product.affiliate_link;
+      button.href = ensureAffiliateTag(product.affiliate_link);
       button.setAttribute("rel", "nofollow sponsored noopener");
       button.setAttribute("target", "_blank");
+    }
+    if (market) {
+      market.textContent = `${config.market} Market`;
     }
 
     updateMeta(product);
