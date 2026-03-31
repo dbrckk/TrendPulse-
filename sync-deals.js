@@ -6,7 +6,7 @@ import fs from "fs";
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/13.0"
+    "User-Agent": "TrendPulseBot/14.0"
   }
 });
 
@@ -213,12 +213,32 @@ function looksLikeGiftProduct(title, description, category) {
   return /gift|christmas|present|birthday|mom|dad|wife|husband|kids|women|men|home decor|jewelry|beauty|candle|mug|blanket|accessory|gadget/.test(text);
 }
 
+function looksLikeGadget(title, description, category) {
+  const text = `${title} ${description} ${category}`.toLowerCase();
+  return /gadget|smart|portable|charger|headphone|earbuds|speaker|usb|keyboard|mouse|light|tech|device|bluetooth|adapter|camera|stand|dock/.test(text);
+}
+
+function looksLikeHomeDecor(title, description, category) {
+  const text = `${title} ${description} ${category}`.toLowerCase();
+  return /decor|home decor|lamp|wall|frame|candle|blanket|pillow|vase|mirror|rug|curtain|throw|art/.test(text);
+}
+
+function looksLikeWomenGift(title, description, category) {
+  const text = `${title} ${description} ${category}`.toLowerCase();
+  return /women|wife|girlfriend|mom|mother|beauty|jewelry|candle|self care|handbag|fashion/.test(text);
+}
+
+function looksLikeMenGift(title, description, category) {
+  const text = `${title} ${description} ${category}`.toLowerCase();
+  return /men|dad|father|husband|wallet|tech|gadget|gaming|tool|watch|outdoor/.test(text);
+}
+
 async function fetchText(url) {
   try {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/13.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/14.0"
       }
     });
 
@@ -235,7 +255,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/13.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/14.0"
       }
     });
 
@@ -715,6 +735,8 @@ function dealsPageTemplate(items) {
         <a href="/under-10.html">Under $10</a>
         <a href="/under-20.html">Under $20</a>
         <a href="/under-50.html">Under $50</a>
+        <a href="/cheap-tech.html">Cheap Tech</a>
+        <a href="/best-gifts.html">Best Gifts</a>
       </nav>
       <div class="stats">
         <div class="pill">${items.length} live deals</div>
@@ -789,6 +811,155 @@ function simpleCategoryPageTemplate({ title, description, canonicalPath, items, 
 </html>`;
 }
 
+function longTailConfig() {
+  return [
+    {
+      file: "under-10.html",
+      title: "Best Amazon Deals Under $10",
+      description: "Browse cheap Amazon deals under $10, including small gadgets, beauty items, home finds, and impulse buys worth checking.",
+      intro: [
+        "Cheap Amazon deals under $10 can convert surprisingly well because the buying decision feels easy and low-risk.",
+        "This page focuses on lower-priced products that still look useful, giftable, or interesting enough to click."
+      ],
+      section1Title: "Why under $10 deals work",
+      section1Text: "Low-priced products create less hesitation and often perform better for impulse-driven traffic, especially on mobile.",
+      section2Title: "What kind of products appear here",
+      section2Text: "You’ll usually find smaller accessories, beauty items, practical home products, and other low-friction purchases.",
+      navExtra: `<a href="/under-20.html">Under $20</a><a href="/under-50.html">Under $50</a>`,
+      filter: items => items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 10).slice(0, 48),
+      label: "Under $10"
+    },
+    {
+      file: "under-20.html",
+      title: "Best Amazon Deals Under $20",
+      description: "Discover useful Amazon deals under $20, including trending finds, practical gifts, beauty products, and budget-friendly tech.",
+      intro: [
+        "Amazon deals under $20 often sit in a sweet spot between affordability and usefulness.",
+        "This page helps shoppers find low-cost products that still feel worth buying."
+      ],
+      section1Title: "Why under $20 deals matter",
+      section1Text: "Products under $20 are easier to test, easier to gift, and often more attractive to broad audiences looking for value.",
+      section2Title: "How to use this page",
+      section2Text: "Start with the top items, then open products that look useful, giftable, or unusually discounted.",
+      navExtra: `<a href="/under-10.html">Under $10</a><a href="/cheap-tech.html">Cheap Tech</a>`,
+      filter: items => items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 20).slice(0, 48),
+      label: "Under $20"
+    },
+    {
+      file: "under-50.html",
+      title: "Best Amazon Deals Under $50",
+      description: "Explore Amazon deals under $50 across tech, home, kitchen, fashion, gifts, and more.",
+      intro: [
+        "Deals under $50 can capture a large part of Amazon shopping intent because they still feel affordable while offering more product variety.",
+        "This page groups stronger-value deals that remain in a manageable price range for many shoppers."
+      ],
+      section1Title: "Why under $50 pages perform well",
+      section1Text: "This price range includes a wider set of useful products while still feeling accessible for many buyers.",
+      section2Title: "What to expect here",
+      section2Text: "Expect more variety: tech accessories, home goods, fitness products, gifts, and practical everyday buys.",
+      navExtra: `<a href="/under-20.html">Under $20</a><a href="/best-gifts.html">Best Gifts</a>`,
+      filter: items => items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 50).slice(0, 48),
+      label: "Under $50"
+    },
+    {
+      file: "cheap-tech.html",
+      title: "Best Cheap Amazon Tech Deals",
+      description: "Browse affordable Amazon tech deals including chargers, headphones, keyboards, smart accessories, and budget gadgets.",
+      intro: [
+        "Cheap tech is one of the easiest categories to browse because visitors often know what they want and how much they want to spend.",
+        "This page focuses on lower-priced tech products that still look useful, giftable, or popular."
+      ],
+      section1Title: "Why cheap tech converts",
+      section1Text: "Affordable tech products often feel practical, low-risk, and easy to buy quickly, especially when the price looks clean.",
+      section2Title: "What appears on this page",
+      section2Text: "You’ll usually see chargers, accessories, headphones, keyboards, adapters, and small electronics with stronger value signals.",
+      navExtra: `<a href="/tech.html">Tech</a><a href="/under-50.html">Under $50</a>`,
+      filter: items => items.filter(p => p.category === "Tech" && Number(p.price || 0) > 0 && Number(p.price || 0) <= 50).slice(0, 48),
+      label: "Cheap Tech"
+    },
+    {
+      file: "best-gifts.html",
+      title: "Best Amazon Gift Ideas and Giftable Finds",
+      description: "Find Amazon gift ideas across beauty, jewelry, home, gadgets, and useful products that are easy to buy and easy to like.",
+      intro: [
+        "Gift-oriented pages work well because many shoppers are not just looking for deals, they are looking for ideas.",
+        "This page groups products that feel more giftable, more presentable, or more likely to appeal to a broad audience."
+      ],
+      section1Title: "Why gift pages matter",
+      section1Text: "Gift pages widen the audience beyond bargain hunters by helping visitors discover products they might buy for someone else.",
+      section2Title: "What makes a product giftable",
+      section2Text: "Products that are useful, visually appealing, personal, or easy to understand often work better in gift-focused browsing.",
+      navExtra: `<a href="/under-20.html">Under $20</a><a href="/best-sellers.html">Best Sellers</a>`,
+      filter: items => items.filter(p => p.is_giftable || looksLikeGiftProduct(p.name, p.description, p.category)).slice(0, 48),
+      label: "Best Gifts"
+    },
+    {
+      file: "best-amazon-gadgets.html",
+      title: "Best Amazon Gadgets Right Now",
+      description: "Explore trending Amazon gadgets, smart accessories, portable devices, and useful tech finds worth checking now.",
+      intro: [
+        "Gadget pages are strong for both clicks and SEO because shoppers often browse them for discovery, not just discounts.",
+        "This page focuses on useful gadgets and tech products that feel practical, interesting, or giftable."
+      ],
+      section1Title: "Why gadget pages work",
+      section1Text: "People love browsing gadgets because they are easy to understand, easy to compare, and often impulse-friendly.",
+      section2Title: "What appears here",
+      section2Text: "Expect chargers, smart accessories, portable devices, headphones, stands, docks, and other useful tech finds.",
+      navExtra: `<a href="/cheap-tech.html">Cheap Tech</a><a href="/tech.html">Tech</a>`,
+      filter: items => items.filter(p => looksLikeGadget(p.name, p.description, p.category)).slice(0, 48),
+      label: "Gadgets"
+    },
+    {
+      file: "amazon-home-decor-deals.html",
+      title: "Best Amazon Home Decor Deals",
+      description: "Browse Amazon home decor deals including lamps, blankets, wall accents, candles, mirrors, and stylish home finds.",
+      intro: [
+        "Home decor pages are useful because they attract shoppers looking for visual and lifestyle products, not just utility buys.",
+        "This page pulls together decorative items that can perform well for browsing and gift intent."
+      ],
+      section1Title: "Why decor deals matter",
+      section1Text: "Decor items often perform well with broad audiences because they are easy to visualize and easy to gift.",
+      section2Title: "What to expect",
+      section2Text: "Expect candles, lamps, blankets, vases, mirrors, wall accents, and other home-style products.",
+      navExtra: `<a href="/home.html">Home</a><a href="/best-gifts.html">Best Gifts</a>`,
+      filter: items => items.filter(p => looksLikeHomeDecor(p.name, p.description, p.category)).slice(0, 48),
+      label: "Home Decor"
+    },
+    {
+      file: "best-amazon-gifts-for-women.html",
+      title: "Best Amazon Gifts for Women",
+      description: "Discover Amazon gift ideas for women including beauty finds, jewelry, home accessories, fashion picks, and more.",
+      intro: [
+        "Gift pages with a more specific audience can bring in more targeted search traffic and stronger intent.",
+        "This page focuses on products that feel more relevant for women-oriented gift shopping."
+      ],
+      section1Title: "Why this page is useful",
+      section1Text: "Shoppers often search with a person in mind, not just a category. More specific gift pages can capture that intent.",
+      section2Title: "What kinds of products appear here",
+      section2Text: "Expect beauty products, jewelry, candles, accessories, decor, and other broadly giftable picks.",
+      navExtra: `<a href="/best-gifts.html">Best Gifts</a><a href="/fashion.html">Fashion</a>`,
+      filter: items => items.filter(p => looksLikeWomenGift(p.name, p.description, p.category)).slice(0, 48),
+      label: "Gifts for Women"
+    },
+    {
+      file: "best-amazon-gifts-for-men.html",
+      title: "Best Amazon Gifts for Men",
+      description: "Discover Amazon gift ideas for men including gadgets, tools, gaming gear, watches, accessories, and more.",
+      intro: [
+        "Gift pages with stronger audience intent can rank more precisely and feel more relevant to shoppers.",
+        "This page focuses on products that feel more naturally aligned with men-oriented gift browsing."
+      ],
+      section1Title: "Why this page can convert well",
+      section1Text: "A more specific page helps visitors browse with less friction when they already know who they are shopping for.",
+      section2Title: "What products appear here",
+      section2Text: "Expect gadgets, gaming items, tools, watches, accessories, outdoor products, and other practical gift picks.",
+      navExtra: `<a href="/best-gifts.html">Best Gifts</a><a href="/cheap-tech.html">Cheap Tech</a>`,
+      filter: items => items.filter(p => looksLikeMenGift(p.name, p.description, p.category)).slice(0, 48),
+      label: "Gifts for Men"
+    }
+  ];
+}
+
 async function generateEditorialPages() {
   const { data, error } = await sb
     .from("products")
@@ -804,11 +975,6 @@ async function generateEditorialPages() {
   const byCategory = category => items.filter(p => p.category === category);
   const bestSellers = items.filter(p => p.is_best_seller).slice(0, 48);
   const crazyDeals = items.filter(p => p.is_crazy_deal).slice(0, 48);
-  const under10 = items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 10).slice(0, 48);
-  const under20 = items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 20).slice(0, 48);
-  const under50 = items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 50).slice(0, 48);
-  const cheapTech = items.filter(p => p.category === "Tech" && Number(p.price || 0) > 0 && Number(p.price || 0) <= 50).slice(0, 48);
-  const bestGifts = items.filter(p => p.is_giftable || looksLikeGiftProduct(p.name, p.description, p.category)).slice(0, 48);
 
   fs.writeFileSync("deals.html", dealsPageTemplate(items.slice(0, 60)), "utf8");
 
@@ -890,90 +1056,21 @@ async function generateEditorialPages() {
     label: "All"
   }), "utf8");
 
-  fs.writeFileSync("under-10.html", editorialTemplate({
-    title: "Best Amazon Deals Under $10",
-    description: "Browse cheap Amazon deals under $10, including small gadgets, beauty items, home finds, and impulse buys worth checking.",
-    canonicalPath: "/under-10.html",
-    intro: [
-      "Cheap Amazon deals under $10 can convert surprisingly well because the buying decision feels easy and low-risk.",
-      "This page focuses on lower-priced products that still look useful, giftable, or interesting enough to click."
-    ],
-    section1Title: "Why under $10 deals work",
-    section1Text: "Low-priced products create less hesitation and often perform better for impulse-driven traffic, especially on mobile.",
-    section2Title: "What kind of products appear here",
-    section2Text: "You’ll usually find smaller accessories, beauty items, practical home products, and other low-friction purchases.",
-    navExtra: `<a href="/under-20.html">Under $20</a><a href="/under-50.html">Under $50</a>`,
-    items: under10,
-    label: "Under $10"
-  }), "utf8");
-
-  fs.writeFileSync("under-20.html", editorialTemplate({
-    title: "Best Amazon Deals Under $20",
-    description: "Discover useful Amazon deals under $20, including trending finds, practical gifts, beauty products, and budget-friendly tech.",
-    canonicalPath: "/under-20.html",
-    intro: [
-      "Amazon deals under $20 often sit in a sweet spot between affordability and usefulness.",
-      "This page helps shoppers find low-cost products that still feel worth buying."
-    ],
-    section1Title: "Why under $20 deals matter",
-    section1Text: "Products under $20 are easier to test, easier to gift, and often more attractive to broad audiences looking for value.",
-    section2Title: "How to use this page",
-    section2Text: "Start with the top items, then open products that look useful, giftable, or unusually discounted.",
-    navExtra: `<a href="/under-10.html">Under $10</a><a href="/cheap-tech.html">Cheap Tech</a>`,
-    items: under20,
-    label: "Under $20"
-  }), "utf8");
-
-  fs.writeFileSync("under-50.html", editorialTemplate({
-    title: "Best Amazon Deals Under $50",
-    description: "Explore Amazon deals under $50 across tech, home, kitchen, fashion, gifts, and more.",
-    canonicalPath: "/under-50.html",
-    intro: [
-      "Deals under $50 can capture a large part of Amazon shopping intent because they still feel affordable while offering more product variety.",
-      "This page groups stronger-value deals that remain in a manageable price range for many shoppers."
-    ],
-    section1Title: "Why under $50 pages perform well",
-    section1Text: "This price range includes a wider set of useful products while still feeling accessible for many buyers.",
-    section2Title: "What to expect here",
-    section2Text: "Expect more variety: tech accessories, home goods, fitness products, gifts, and practical everyday buys.",
-    navExtra: `<a href="/under-20.html">Under $20</a><a href="/best-gifts.html">Best Gifts</a>`,
-    items: under50,
-    label: "Under $50"
-  }), "utf8");
-
-  fs.writeFileSync("cheap-tech.html", editorialTemplate({
-    title: "Best Cheap Amazon Tech Deals",
-    description: "Browse affordable Amazon tech deals including chargers, headphones, keyboards, smart accessories, and budget gadgets.",
-    canonicalPath: "/cheap-tech.html",
-    intro: [
-      "Cheap tech is one of the easiest categories to browse because visitors often know what they want and how much they want to spend.",
-      "This page focuses on lower-priced tech products that still look useful, giftable, or popular."
-    ],
-    section1Title: "Why cheap tech converts",
-    section1Text: "Affordable tech products often feel practical, low-risk, and easy to buy quickly, especially when the price looks clean.",
-    section2Title: "What appears on this page",
-    section2Text: "You’ll usually see chargers, accessories, headphones, keyboards, adapters, and small electronics with stronger value signals.",
-    navExtra: `<a href="/tech.html">Tech</a><a href="/under-50.html">Under $50</a>`,
-    items: cheapTech,
-    label: "Cheap Tech"
-  }), "utf8");
-
-  fs.writeFileSync("best-gifts.html", editorialTemplate({
-    title: "Best Amazon Gift Ideas and Giftable Finds",
-    description: "Find Amazon gift ideas across beauty, jewelry, home, gadgets, and useful products that are easy to buy and easy to like.",
-    canonicalPath: "/best-gifts.html",
-    intro: [
-      "Gift-oriented pages work well because many shoppers are not just looking for deals, they are looking for ideas.",
-      "This page groups products that feel more giftable, more presentable, or more likely to appeal to a broad audience."
-    ],
-    section1Title: "Why gift pages matter",
-    section1Text: "Gift pages widen the audience beyond bargain hunters by helping visitors discover products they might buy for someone else.",
-    section2Title: "What makes a product giftable",
-    section2Text: "Products that are useful, visually appealing, personal, or easy to understand often work better in gift-focused browsing.",
-    navExtra: `<a href="/under-20.html">Under $20</a><a href="/best-sellers.html">Best Sellers</a>`,
-    items: bestGifts,
-    label: "Best Gifts"
-  }), "utf8");
+  for (const cfg of longTailConfig()) {
+    fs.writeFileSync(cfg.file, editorialTemplate({
+      title: cfg.title,
+      description: cfg.description,
+      canonicalPath: `/${cfg.file}`,
+      intro: cfg.intro,
+      section1Title: cfg.section1Title,
+      section1Text: cfg.section1Text,
+      section2Title: cfg.section2Title,
+      section2Text: cfg.section2Text,
+      navExtra: cfg.navExtra,
+      items: cfg.filter(items),
+      label: cfg.label
+    }), "utf8");
+  }
 
   console.log("Editorial pages generated");
 }
@@ -998,6 +1095,10 @@ async function generateSitemap() {
     { loc: `${SITE_URL}/under-50.html`, changefreq: "daily", priority: "0.9" },
     { loc: `${SITE_URL}/cheap-tech.html`, changefreq: "daily", priority: "0.85" },
     { loc: `${SITE_URL}/best-gifts.html`, changefreq: "daily", priority: "0.85" },
+    { loc: `${SITE_URL}/best-amazon-gadgets.html`, changefreq: "daily", priority: "0.85" },
+    { loc: `${SITE_URL}/amazon-home-decor-deals.html`, changefreq: "daily", priority: "0.85" },
+    { loc: `${SITE_URL}/best-amazon-gifts-for-women.html`, changefreq: "daily", priority: "0.85" },
+    { loc: `${SITE_URL}/best-amazon-gifts-for-men.html`, changefreq: "daily", priority: "0.85" },
     { loc: `${SITE_URL}/tech.html`, changefreq: "daily", priority: "0.8" },
     { loc: `${SITE_URL}/fashion.html`, changefreq: "daily", priority: "0.8" },
     { loc: `${SITE_URL}/jewelry.html`, changefreq: "daily", priority: "0.8" },
@@ -1039,7 +1140,7 @@ ${allUrls.map(url => `  <url>
 }
 
 async function main() {
-  console.log("Starting sync V5");
+  console.log("Starting sync SEO extreme");
 
   const activeCountBefore = await getActiveDealsCount();
   console.log(`Active deals before sync: ${activeCountBefore}`);
