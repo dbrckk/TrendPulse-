@@ -1,43 +1,61 @@
 name: Post Random Deal to X
 
 on:
-  schedule:
-    - cron: "*/20 * * * *"
   workflow_dispatch:
-
-permissions:
-  contents: write
+  schedule:
+    - cron: "52 11,15,19 * * *"
 
 jobs:
   tweet:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+
+      - name: Restore X session cache
+        uses: actions/cache@v4
+        with:
+          path: .x-session.json
+          key: x-session-${{ github.ref_name }}
+          restore-keys: |
+            x-session-
 
       - name: Install dependencies
         run: npm install
 
-      - name: Write X session file
-        run: printf '%s' '${{ secrets.X_SESSION_JSON }}' > x-session.json
-
       - name: Run tweet automation
-        run: node post-random-deal.js
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          SITE_URL: https://trend-pulse.shop
+          SITE_URL: ${{ secrets.SITE_URL }}
+          X_EMAIL: ${{ secrets.X_EMAIL }}
+          X_USERNAME: ${{ secrets.X_USERNAME }}
+          X_PASSWORD: ${{ secrets.X_PASSWORD }}
+          X_PHONE: ${{ secrets.X_PHONE }}
+        run: node post-random-deal.js
 
       - name: Commit tweet state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tweet-state.json
-          git diff --cached --quiet || git commit -m "Update tweet state"
-          git push
+
+          git add .tweet-state.json || true
+
+          if git diff --cached --quiet; then
+            echo "No tweet state changes to commit."
+          else
+            git commit -m "Update tweet state"
+            git push
+          fi
