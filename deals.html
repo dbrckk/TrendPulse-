@@ -1,247 +1,1997 @@
-<!-- deals.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>All Amazon Deals | TrendPulse</title>
-  <meta
-    name="description"
-    content="Browse all TrendPulse Amazon deals across gadgets, gifts, home finds, and budget-friendly products focused on the US market."
-  />
-  <meta name="robots" content="index,follow" />
-  <link rel="canonical" href="https://www.trend-pulse.shop/deals.html" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="All Amazon Deals | TrendPulse" />
-  <meta
-    property="og:description"
-    content="Browse all TrendPulse Amazon deals across gadgets, gifts, home finds, and budget-friendly products focused on the US market."
-  />
-  <meta property="og:url" content="https://www.trend-pulse.shop/deals.html" />
-  <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="All Amazon Deals | TrendPulse" />
-  <meta
-    name="twitter:description"
-    content="Browse all TrendPulse Amazon deals across gadgets, gifts, home finds, and budget-friendly products focused on the US market."
-  />
-  <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#09090b" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/assets/js/trendpulse-data.js" defer></script>
-  <script src="/assets/js/trendpulse-ui.js" defer></script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "All Amazon Deals | TrendPulse",
-    "url": "https://www.trend-pulse.shop/deals.html",
-    "description": "Browse all TrendPulse Amazon deals across gadgets, gifts, home finds, and budget-friendly products focused on the US market."
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://www.trend-pulse.shop/"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Deals",
-        "item": "https://www.trend-pulse.shop/deals.html"
-      }
-    ]
-  }
-  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Amazon Deals Today | TrendPulse</title>
+  <meta name="description" content="Browse trending Amazon deals updated live. Discover hot discounts, top-rated products, and the best deals in the US.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://trend-pulse.shop/deals.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Amazon Deals Today | TrendPulse">
+  <meta property="og:description" content="Browse trending Amazon deals updated live. Discover hot discounts, top-rated products, and the best deals in the US.">
+  <meta property="og:url" content="https://trend-pulse.shop/deals.html">
+  <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Amazon Deals Today | TrendPulse">
+  <meta name="twitter:description" content="Browse trending Amazon deals updated live. Discover hot discounts, top-rated products, and the best deals in the US.">
+  <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <style>
+    body{background:#050505;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    .soft-card{background:linear-gradient(180deg,#111722 0%,#090b11 100%);border:1px solid rgba(255,255,255,.08)}
+    .deal-card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+    .deal-card:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(0,0,0,.30);border-color:rgba(255,255,255,.16)}
+    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .chip{font-size:12px;font-weight:800;border-radius:999px;padding:10px 14px;border:1px solid rgb(39 39 42);background:rgb(24 24 27);color:rgb(228 228 231);white-space:nowrap;text-decoration:none;display:inline-block}
+    a{text-decoration:none}
+    .navlink{color:#d4d4d8;font-size:14px;font-weight:600}
+    .navlink:hover{color:#fff}
+    .grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    @media(min-width:768px){.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  </style>
 </head>
-<body class="bg-zinc-950 pb-24 text-zinc-100 antialiased md:pb-0">
-  <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/85 backdrop-blur">
-    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-      <a href="/" class="text-xl font-bold tracking-tight text-white">TrendPulse</a>
-
-      <nav class="hidden items-center gap-5 text-sm text-zinc-300 md:flex">
-        <a href="/" class="hover:text-white">Home</a>
-        <a href="/best-sellers.html" class="hover:text-white">Best Sellers</a>
-        <a href="/deals.html" class="text-white">Deals</a>
-        <a href="/cheap-tech.html" class="hover:text-white">Cheap Tech</a>
-        <a href="/best-gifts.html" class="hover:text-white">Best Gifts</a>
-      </nav>
-
-      <a
-        href="/best-sellers.html"
-        class="inline-flex items-center justify-center rounded-2xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
-      >
-        Best Sellers
+<body>
+<div class="wrap">
+  
+    <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <a href="/" style="font-size:28px;font-weight:900;font-style:italic;color:#fff">TrendPulse</a>
+      <div style="display:flex;gap:12px;align-items:center">
+        <a href="/best-sellers.html" class="navlink">Best Sellers</a>
+        <a href="/deals.html" class="navlink">All Deals</a>
+      </div>
+    </header>
+  
+  <section style="margin-bottom:20px">
+    <h1 style="font-size:56px;line-height:.95;font-weight:900;font-style:italic;letter-spacing:-.05em;margin:0 0 10px">Amazon Deals Today</h1>
+    <p style="color:#a1a1aa;max-width:760px;line-height:1.7;font-size:15px;margin:0 0 16px">
+      Explore live Amazon deals, trending discounts, and popular product picks updated from our automated deal feed.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+      <a class="chip" href="/">Home</a>
+      <a class="chip" href="/best-amazon-deals.html">Editorial Deals</a>
+      <a class="chip" href="/best-sellers.html">Best Sellers</a>
+      <a class="chip" href="/crazy-deals.html">Crazy Deals</a>
+      <a class="chip" href="/under-20.html">Under $20</a>
+      <a class="chip" href="/cheap-tech.html">Cheap Tech</a>
+      <a class="chip" href="/best-gifts.html">Best Gifts</a>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
+      <div class="chip">137 live deals</div>
+      <div class="chip">Updated live</div>
+      <div class="chip">US Amazon offers</div>
+    </div>
+  </section>
+  <section>
+    <div class="grid4">
+      
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B019WZLXZO" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/08/vanity-fair-bra.jpg?w=912"
+          alt="Up to 70% Off Team-Fave Vanity Fair Bras on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B019WZLXZO.01.LZZZZZZZ.jpg'"
+        >
       </a>
-    </div>
-  </header>
-
-  <main class="mx-auto max-w-6xl px-4 py-8 sm:py-10">
-    <nav class="mb-6 text-sm text-zinc-400">
-      <a href="/" class="hover:text-white">Home</a>
-      <span class="mx-2">/</span>
-      <span class="text-zinc-200">Deals</span>
-    </nav>
-
-    <section class="rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 shadow-2xl shadow-black/20 sm:p-8">
-      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Live Deal Directory</p>
-      <h1 class="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">Find an Amazon product faster</h1>
-      <p class="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
-        This page is built to help you choose quickly: browse by category, sort by relevance or price,
-        and jump into a short product page before heading to Amazon.
-      </p>
-      <p class="mt-4 text-xs text-zinc-500">Affiliate disclosure: TrendPulse may earn from qualifying purchases.</p>
-    </section>
-
-    <section class="mt-6 flex gap-2 overflow-x-auto pb-1">
-      <a href="/deals.html" class="whitespace-nowrap rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-white">All</a>
-      <a href="/deals.html?q=tech" class="whitespace-nowrap rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 hover:text-white">Tech</a>
-      <a href="/deals.html?q=gift" class="whitespace-nowrap rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 hover:text-white">Gifts</a>
-      <a href="/deals.html?q=home" class="whitespace-nowrap rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 hover:text-white">Home</a>
-      <a href="/deals.html?q=kitchen" class="whitespace-nowrap rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 hover:text-white">Kitchen</a>
-      <a href="/deals.html?q=car" class="whitespace-nowrap rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 hover:text-white">Auto</a>
-      <a href="/deals.html?q=travel" class="whitespace-nowrap rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 hover:text-white">Travel</a>
-    </section>
-
-    <section class="mt-8 grid gap-4 lg:grid-cols-[290px_1fr]">
-      <aside class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-5">
-        <h2 class="text-lg font-semibold text-white">Choose Faster</h2>
-
-        <div class="mt-5">
-          <label for="searchInput" class="mb-2 block text-sm font-medium text-zinc-200">Search</label>
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="Search deals..."
-            class="w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-zinc-100 outline-none transition focus:border-zinc-500"
-          />
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⚠ CRAZY DEAL</div>
+        <a href="/deal.html?asin=B019WZLXZO" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Up to 70% Off Team-Fave Vanity Fair Bras on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$13.49</div>
+          <div class="text-zinc-500 line-through text-xs">$44.97</div>
         </div>
-
-        <div class="mt-5">
-          <label for="categoryFilter" class="mb-2 block text-sm font-medium text-zinc-200">Category</label>
-          <select
-            id="categoryFilter"
-            class="w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-zinc-100 outline-none transition focus:border-zinc-500"
-          >
-            <option value="all">All Categories</option>
-            <option value="tech">Cheap Tech</option>
-            <option value="gifts">Best Gifts</option>
-            <option value="home">Home Finds</option>
-            <option value="kitchen">Kitchen</option>
-            <option value="auto">Auto</option>
-          </select>
-        </div>
-
-        <div class="mt-5">
-          <label for="priceFilter" class="mb-2 block text-sm font-medium text-zinc-200">Price Range</label>
-          <select
-            id="priceFilter"
-            class="w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-zinc-100 outline-none transition focus:border-zinc-500"
-          >
-            <option value="all">All Prices</option>
-            <option value="under-10">Under $10</option>
-            <option value="under-25">Under $25</option>
-            <option value="under-50">Under $50</option>
-          </select>
-        </div>
-
-        <div class="mt-5">
-          <label for="sortFilter" class="mb-2 block text-sm font-medium text-zinc-200">Sort</label>
-          <select
-            id="sortFilter"
-            class="w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-zinc-100 outline-none transition focus:border-zinc-500"
-          >
-            <option value="relevance">Best Picks</option>
-            <option value="low">Price: Low to High</option>
-            <option value="high">Price: High to Low</option>
-            <option value="title">Title: A to Z</option>
-          </select>
-        </div>
-
-        <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 text-sm text-zinc-300">
-          <p class="font-medium text-white">Quick note</p>
-          <p class="mt-2">The goal here is speed: short product cards, simple filters, and a fast route to Amazon.</p>
-        </div>
-      </aside>
-
-      <section>
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-2xl font-bold tracking-tight text-white">Featured Deals</h2>
-            <p class="mt-1 text-sm text-zinc-400">Pick by price, use case, or category.</p>
-          </div>
-          <p id="resultCount" class="text-sm text-zinc-400">0 deals</p>
-        </div>
-
-        <div id="deals-grid" class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-3"></div>
-      </section>
-    </section>
-  </main>
-
-  <footer class="border-t border-zinc-800 mt-16">
-    <div class="max-w-6xl mx-auto px-4 py-10 text-sm text-zinc-400">
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <div>
-          <div class="text-white font-semibold text-base">TrendPulse</div>
-          <p class="mt-3 leading-6">
-            Mobile-first Amazon deal discovery focused on the US market.
-            We highlight strong discounts, popular picks, and budget-friendly finds.
-          </p>
-        </div>
-
-        <div>
-          <div class="text-white font-semibold mb-3">Quick Links</div>
-          <ul class="space-y-2">
-            <li><a class="hover:text-white" href="/best-sellers.html">Best Sellers</a></li>
-            <li><a class="hover:text-white" href="/deals.html">All Deals</a></li>
-            <li><a class="hover:text-white" href="/cheap-tech.html">Cheap Tech</a></li>
-            <li><a class="hover:text-white" href="/best-gifts.html">Best Gifts</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <div class="text-white font-semibold mb-3">Legal</div>
-          <ul class="space-y-2">
-            <li><a class="hover:text-white" href="/affiliate-disclosure.html">Affiliate Disclosure</a></li>
-            <li><a class="hover:text-white" href="/privacy.html">Privacy Policy</a></li>
-            <li><a class="hover:text-white" href="/terms.html">Terms</a></li>
-            <li><a class="hover:text-white" href="/contact.html">Contact</a></li>
-          </ul>
-        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Often disappears fast</div>
+        <a href="/deal.html?asin=B019WZLXZO" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
       </div>
-
-      <div class="mt-8 pt-6 border-t border-zinc-800 space-y-2">
-        <p>As an Amazon Associate, TrendPulse earns from qualifying purchases.</p>
-        <p>Prices and availability can change at any time on Amazon.</p>
-        <p>© 2026 TrendPulse — Amazon Deals Tracker</p>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0FY3XJRQZ" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/08/vanity-fair-bra.jpg?w=912"
+          alt="Up to 70% Off Team-Fave Vanity Fair Bras on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0FY3XJRQZ.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⚠ CRAZY DEAL</div>
+        <a href="/deal.html?asin=B0FY3XJRQZ" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Up to 70% Off Team-Fave Vanity Fair Bras on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$13.49</div>
+          <div class="text-zinc-500 line-through text-xs">$44.97</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Often disappears fast</div>
+        <a href="/deal.html?asin=B0FY3XJRQZ" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
       </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07TJ9VYFK" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/08/Under-Armour-Polo-Shirts-2.jpg?w=912"
+          alt="Amazon’s Big Spring Sale = Up to 65% Off Under Armour, Levi’s &amp; More"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07TJ9VYFK.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⚠ CRAZY DEAL</div>
+        <a href="/deal.html?asin=B07TJ9VYFK" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Amazon’s Big Spring Sale = Up to 65% Off Under Armour, Levi’s &amp; More</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$17.99</div>
+          <div class="text-zinc-500 line-through text-xs">$51.40</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Often disappears fast</div>
+        <a href="/deal.html?asin=B07TJ9VYFK" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DJXVBNW8" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/07/womens-rash-guard.jpg?w=912"
+          alt="Women’s UPF 50+ Rash Guards Just $8.99 on Amazon (Reg. $18)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DJXVBNW8.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0DJXVBNW8" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Women’s UPF 50+ Rash Guards Just $8.99 on Amazon (Reg. $18)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$8.99</div>
+          <div class="text-zinc-500 line-through text-xs">$17.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0DJXVBNW8" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DJY3V32T" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/07/womens-rash-guard.jpg?w=912"
+          alt="Women’s UPF 50+ Rash Guards Just $8.99 on Amazon (Reg. $18)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DJY3V32T.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0DJY3V32T" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Women’s UPF 50+ Rash Guards Just $8.99 on Amazon (Reg. $18)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$8.99</div>
+          <div class="text-zinc-500 line-through text-xs">$17.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0DJY3V32T" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07STT71ZG" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Gladdon-Crossbody-Bag.jpg?w=912"
+          alt="Vegan Leather Crossbody Bags Only $9.99 on Amazon (Reg. $25)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07STT71ZG.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B07STT71ZG" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Vegan Leather Crossbody Bags Only $9.99 on Amazon (Reg. $25)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$9.99</div>
+          <div class="text-zinc-500 line-through text-xs">$19.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B07STT71ZG" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0FY7V7X3K" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/12/Orgain-High-Protein-Shakes-Variety.jpg?w=912"
+          alt="Up to 45% Off Orgain Protein Shakes on Amazon | Stock Up &amp; Save"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0FY7V7X3K.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0FY7V7X3K" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Up to 45% Off Orgain Protein Shakes on Amazon | Stock Up &amp; Save</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$25.19</div>
+          <div class="text-zinc-500 line-through text-xs">$45.80</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0FY7V7X3K" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DHRJNCDX" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/02/AWLKIM-Digital-Meat-Thermometer.jpg?w=912"
+          alt="Digital Meat Thermometer Only $3.59 on Amazon (Reg. $10)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DHRJNCDX.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0DHRJNCDX" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Digital Meat Thermometer Only $3.59 on Amazon (Reg. $10)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3.59</div>
+          <div class="text-zinc-500 line-through text-xs">$5.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0DHRJNCDX" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DQ5RZDDZ" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2017/11/rei-hydroflask.jpg?w=912"
+          alt="Amazon’s Big Spring Sale Ends TONIGHT | Up to 55% Off Hydro Flask, Under Armour &amp; More"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DQ5RZDDZ.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0DQ5RZDDZ" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Amazon’s Big Spring Sale Ends TONIGHT | Up to 55% Off Hydro Flask, Under Armour &amp; More</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$20.23</div>
+          <div class="text-zinc-500 line-through text-xs">$44.96</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0DQ5RZDDZ" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07XRJB9Z9" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Gladdon-Crossbody-Bag.jpg?w=912"
+          alt="Vegan Leather Crossbody Bags Only $9.99 on Amazon (Reg. $25)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07XRJB9Z9.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B07XRJB9Z9" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Vegan Leather Crossbody Bags Only $9.99 on Amazon (Reg. $25)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$9.99</div>
+          <div class="text-zinc-500 line-through text-xs">$19.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B07XRJB9Z9" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0CY69ZBZY" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/02/Fisher-Price-Picnic-Basket-Set.jpg?w=912"
+          alt="Up to 50% Off Fisher Price Toys on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CY69ZBZY.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0CY69ZBZY" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Up to 50% Off Fisher Price Toys on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$28.99</div>
+          <div class="text-zinc-500 line-through text-xs">$57.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0CY69ZBZY" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0F4Q9TRPG" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Alcohol-Markers.jpg?w=912"
+          alt="Dual-Tip Alcohol Markers Set Only $12 Shipped on Amazon (80 Colors + Storage Case)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0F4Q9TRPG.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0F4Q9TRPG" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Dual-Tip Alcohol Markers Set Only $12 Shipped on Amazon (80 Colors + Storage Case)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$12</div>
+          <div class="text-zinc-500 line-through text-xs">$24</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0F4Q9TRPG" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0F53ZRYZB" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Gardner-Pet-1-Gallon-Pet-Water-Fountain.jpg?w=912"
+          alt="Pet Water Fountain Just $14.99 on Amazon (Reg. $30) | Splash-Proof &amp; Easy to Clean"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0F53ZRYZB.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0F53ZRYZB" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Pet Water Fountain Just $14.99 on Amazon (Reg. $30) | Splash-Proof &amp; Easy to Clean</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$14.99</div>
+          <div class="text-zinc-500 line-through text-xs">$29.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0F53ZRYZB" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0FSWKSPRF" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/trytuny-Artificial-Flowers.jpg?w=912"
+          alt="50% Off Artificial Flowers on Amazon (Instant Spring Blooms That Won’t Fade)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0FSWKSPRF.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0FSWKSPRF" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">50% Off Artificial Flowers on Amazon (Instant Spring Blooms That Won’t Fade)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$32.99</div>
+          <div class="text-zinc-500 line-through text-xs">$65.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0FSWKSPRF" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DS4QKRZH" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/jelly-bra-1.jpg?w=912"
+          alt="Wireless Jelly Push-Up Bras from $8.49 on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DS4QKRZH.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0DS4QKRZH" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Wireless Jelly Push-Up Bras from $8.49 on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$8.49</div>
+          <div class="text-zinc-500 line-through text-xs">$16.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0DS4QKRZH" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DK43W8G7" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/10/2_90838d.jpg?w=912"
+          alt="*RARE* Up to 50% Off LEGO Sets on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DK43W8G7.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0DK43W8G7" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">*RARE* Up to 50% Off LEGO Sets on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$9.99</div>
+          <div class="text-zinc-500 line-through text-xs">$19.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0DK43W8G7" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0F53XVG7M" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2026/03/Automatic-Cat-Water-Fountain.jpg"
+          alt="Automatic Cat Water Fountain just $14.99 (Reg. $30!)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0F53XVG7M.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0F53XVG7M" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Automatic Cat Water Fountain just $14.99 (Reg. $30!)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$14.99</div>
+          <div class="text-zinc-500 line-through text-xs">$29.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0F53XVG7M" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0CQ42Q5J9" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/03/Tide-Original-Laundry-Detergent.jpg?w=912"
+          alt="*HOT* Almost 50% Off Tide Detergent Bottles on Amazon After Rebate"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CQ42Q5J9.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0CQ42Q5J9" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">*HOT* Almost 50% Off Tide Detergent Bottles on Amazon After Rebate</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">Check price</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0CQ42Q5J9" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B08BN2GR87" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/01/eos-Watermelon-Frose-Lip-Balm.jpg?w=912"
+          alt="eos Lip Balm 2-Pack Only $3 Shipped on Amazon (Easy Easter Basket Filler!)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B08BN2GR87.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B08BN2GR87" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">eos Lip Balm 2-Pack Only $3 Shipped on Amazon (Easy Easter Basket Filler!)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3</div>
+          <div class="text-zinc-500 line-through text-xs">$4</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B08BN2GR87" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0B4PLVRN8" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/05/fruit-by-the-foot-.jpg?w=912"
+          alt="Mini Fruit by the Foot 3-Pack Only 65¢ Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0B4PLVRN8.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0B4PLVRN8" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Mini Fruit by the Foot 3-Pack Only 65¢ Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">Check price</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0B4PLVRN8" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B011T9AYVK" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/01/Meyers-lilac-spray.jpg?w=912"
+          alt="Mrs. Meyer’s Multi-Surface Spray Just $3.67 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B011T9AYVK.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B011T9AYVK" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Mrs. Meyer’s Multi-Surface Spray Just $3.67 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3.67</div>
+          <div class="text-zinc-500 line-through text-xs">$4.59</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B011T9AYVK" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B08KT5KYJ1" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2024/02/EOS-LOTION-lineup.jpg?w=912"
+          alt="eos Body Lotion Just $5.58 Shipped on Amazon (Reg. $11)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B08KT5KYJ1.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B08KT5KYJ1" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">eos Body Lotion Just $5.58 Shipped on Amazon (Reg. $11)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$5.58</div>
+          <div class="text-zinc-500 line-through text-xs">$6.98</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B08KT5KYJ1" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0F7L46CK3" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/amazon-thermometer.jpg?w=912"
+          alt="Digital Meat Thermometer Only $4 on Amazon (Reg. $10)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0F7L46CK3.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0F7L46CK3" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Digital Meat Thermometer Only $4 on Amazon (Reg. $10)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$4</div>
+          <div class="text-zinc-500 line-through text-xs">$5.71</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0F7L46CK3" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0C5GF8K19" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2021/11/C4-Energy-Drinks.jpg?w=912"
+          alt="C4 Energy Drink 12-Pack Just $12 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0C5GF8K19.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0C5GF8K19" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">C4 Energy Drink 12-Pack Just $12 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$12</div>
+          <div class="text-zinc-500 line-through text-xs">$17.14</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0C5GF8K19" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07Q1DBZR9" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Ziploc-Gallon-Food-Storage-Bags-30-Count.jpg?w=912"
+          alt="FOUR Ziploc Gallon Food Storage Bags 30-Count Boxes Only $12 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07Q1DBZR9.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B07Q1DBZR9" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">FOUR Ziploc Gallon Food Storage Bags 30-Count Boxes Only $12 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$12</div>
+          <div class="text-zinc-500 line-through text-xs">$15</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B07Q1DBZR9" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0F5BW4WV3" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/01/loreal-collagen-bounce-serum.jpg?w=912"
+          alt="L’Oreal Collagen Cream &amp; Serum Just $4.49 Each Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0F5BW4WV3.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0F5BW4WV3" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">L’Oreal Collagen Cream &amp; Serum Just $4.49 Each Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$4.49</div>
+          <div class="text-zinc-500 line-through text-xs">$5.28</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0F5BW4WV3" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DK7PN6GD" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2025/03/Screenshot-2025-03-17-at-12.35.42%E2%80%AFPM.jpg"
+          alt="Mullein Leaf Organic Liquid Drops only $20.92 shipped!"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DK7PN6GD.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0DK7PN6GD" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Mullein Leaf Organic Liquid Drops only $20.92 shipped!</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$20.92</div>
+          <div class="text-zinc-500 line-through text-xs">$26.15</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0DK7PN6GD" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0D346NFWG" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/03/Dove-Men-Care-Bar-Soap.jpg?w=912"
+          alt="Dove Men 3-in-1 Bar Soap 8-Pack Just $9.67 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0D346NFWG.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0D346NFWG" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Dove Men 3-in-1 Bar Soap 8-Pack Just $9.67 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$9.67</div>
+          <div class="text-zinc-500 line-through text-xs">$11.38</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0D346NFWG" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DX45C592" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/02/hefty-50-count.jpg?w=912"
+          alt="Hefty 30-Gallon Fabuloso Trash Bags 50-Count Just $12 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DX45C592.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0DX45C592" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Hefty 30-Gallon Fabuloso Trash Bags 50-Count Just $12 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$12</div>
+          <div class="text-zinc-500 line-through text-xs">$14.12</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0DX45C592" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B09RKDGYJD" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2025/05/Screenshot-2025-05-01-at-3.43.00%E2%80%AFPM.jpg"
+          alt="*HOT* Collagen Gummies with Biotin, 60-Count only $16.86 shipped {Gretchen Loves These!}"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B09RKDGYJD.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B09RKDGYJD" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">*HOT* Collagen Gummies with Biotin, 60-Count only $16.86 shipped {Gretchen Loves These!}</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$16.86</div>
+          <div class="text-zinc-500 line-through text-xs">$22.48</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B09RKDGYJD" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0F53L5MCG" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/10/joyroom-earbuds3.jpg?w=912"
+          alt="Last Chance: Team-Fave Wireless Earbuds Just $15.80 on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0F53L5MCG.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
+        <a href="/deal.html?asin=B0F53L5MCG" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Last Chance: Team-Fave Wireless Earbuds Just $15.80 on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$15.80</div>
+          <div class="text-zinc-500 line-through text-xs">$21.07</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
+        <a href="/deal.html?asin=B0F53L5MCG" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B09HH95J2Z" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/11/Amazon-Basics-Hand-Soap-Refill.jpg?w=912"
+          alt="Amazon Basics Hand Soap 50oz Refill Just $3.35 Shipped"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B09HH95J2Z.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B09HH95J2Z" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Amazon Basics Hand Soap 50oz Refill Just $3.35 Shipped</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3.35</div>
+          <div class="text-zinc-500 line-through text-xs">$3.94</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B09HH95J2Z" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0FBRZD73H" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/02/True-Fresh-Dishwasher-Cleaner-Tablets.jpg?w=912"
+          alt="Dishwasher Cleaner Tablets 24-Pack Only $7 Shipped on Amazon (Reg. $18)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0FBRZD73H.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0FBRZD73H" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Dishwasher Cleaner Tablets 24-Pack Only $7 Shipped on Amazon (Reg. $18)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$7</div>
+          <div class="text-zinc-500 line-through text-xs">$8.24</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0FBRZD73H" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0FQK9V93M" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/poppi-holiday-ginger-fizz.jpg?w=912"
+          alt="Poppi Soda Holiday Ginger Fizz 12-Pack Just $15.84 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0FQK9V93M.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0FQK9V93M" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Poppi Soda Holiday Ginger Fizz 12-Pack Just $15.84 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$15.84</div>
+          <div class="text-zinc-500 line-through text-xs">$18.64</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0FQK9V93M" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B073S4TP58" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/03/Frito-Lay-Baked-Chips.jpg?w=912"
+          alt="Frito-Lay Baked &amp; Popped 40-Count Variety Pack Only $14.89 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B073S4TP58.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B073S4TP58" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Frito-Lay Baked &amp; Popped 40-Count Variety Pack Only $14.89 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$14.89</div>
+          <div class="text-zinc-500 line-through text-xs">$17.52</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B073S4TP58" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07VKQ2WX8" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/02/kelloggs-nutri-grain-bars-.png"
+          alt="Kellogg’s Nutri-Grain Bars 32-Count Just $7.48 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07VKQ2WX8.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B07VKQ2WX8" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Kellogg’s Nutri-Grain Bars 32-Count Just $7.48 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$7.48</div>
+          <div class="text-zinc-500 line-through text-xs">$9.35</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B07VKQ2WX8" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B00HT6E4SM" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/04/Playtex-Sport-Tampons-1.jpg?w=912"
+          alt="Playtex Sport Tampons 32-Count Box Only $5 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B00HT6E4SM.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B00HT6E4SM" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Playtex Sport Tampons 32-Count Box Only $5 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$5</div>
+          <div class="text-zinc-500 line-through text-xs">$6.25</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B00HT6E4SM" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0CM7Z667L" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/01/Bactine-MAX-Antibiotic.jpg?w=912"
+          alt="Bactine MAX Antibiotic Ointment Just $3.73 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CM7Z667L.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0CM7Z667L" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Bactine MAX Antibiotic Ointment Just $3.73 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3.73</div>
+          <div class="text-zinc-500 line-through text-xs">$4.66</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0CM7Z667L" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07GSZM4YM" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/mr-sketch-22-b.jpg?w=912"
+          alt="Mr. Sketch Scented Markers 20-Pack Only $11 Shipped on Amazon (Easter Basket Filler)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07GSZM4YM.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B07GSZM4YM" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Mr. Sketch Scented Markers 20-Pack Only $11 Shipped on Amazon (Easter Basket Filler)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$11</div>
+          <div class="text-zinc-500 line-through text-xs">$12.22</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B07GSZM4YM" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B00JVLQBR0" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/snyders.jpg?w=912"
+          alt="SIX Bags of Snyder’s Pretzels Pieces Only $10 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B00JVLQBR0.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B00JVLQBR0" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">SIX Bags of Snyder’s Pretzels Pieces Only $10 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$10</div>
+          <div class="text-zinc-500 line-through text-xs">$11.11</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B00JVLQBR0" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0D16L5F2M" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/02/medicube-collagen-wrapping-mask.jpg?w=912"
+          alt="Last Day to Score medicube Skincare from $11 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0D16L5F2M.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0D16L5F2M" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Last Day to Score medicube Skincare from $11 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$11</div>
+          <div class="text-zinc-500 line-through text-xs">$12.22</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0D16L5F2M" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0CRM9LQW2" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2025/07/Screenshot-2025-07-09-at-1.15.49%E2%80%AFPM.jpg"
+          alt="*HOT* JLab JBuds Lux Noise Cancelling Wireless Over Ear Headphones only $41.99 shipped (Reg. $80!)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CRM9LQW2.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0CRM9LQW2" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">*HOT* JLab JBuds Lux Noise Cancelling Wireless Over Ear Headphones only $41.99 shipped (Reg. $80!)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$41.99</div>
+          <div class="text-zinc-500 line-through text-xs">$49.40</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0CRM9LQW2" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B00FFDP0AC" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/02/Lysol-Hydrogen-Peroxide-Toilet-Cleaner.jpg?w=912"
+          alt="Lysol Toilet Cleaner 2-Pack Just $3.53 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B00FFDP0AC.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B00FFDP0AC" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Lysol Toilet Cleaner 2-Pack Just $3.53 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3.53</div>
+          <div class="text-zinc-500 line-through text-xs">$4.15</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B00FFDP0AC" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0FNYPBMHG" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/junkless-protein-bar.jpg?w=912"
+          alt="Junkless Protein Bars 12-Packs Only $13.50 Shipped on Amazon (Reg. $30)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0FNYPBMHG.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0FNYPBMHG" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Junkless Protein Bars 12-Packs Only $13.50 Shipped on Amazon (Reg. $30)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$13.50</div>
+          <div class="text-zinc-500 line-through text-xs">$15.88</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0FNYPBMHG" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B01NAAZEHL" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/02/head-and-shoulders-dandruff.jpg?w=912"
+          alt="Head &amp; Shoulders Dandruff Shampoo &amp; Conditioner Only $3.77 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B01NAAZEHL.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B01NAAZEHL" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Head &amp; Shoulders Dandruff Shampoo &amp; Conditioner Only $3.77 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3.77</div>
+          <div class="text-zinc-500 line-through text-xs">$4.44</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B01NAAZEHL" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B082V9BTWQ" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/finish-quantum-70.jpg?w=912"
+          alt="Finish Dishwasher Pods 70-Pack Just $14.62 Shipped on Amazon (Reg. $22)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B082V9BTWQ.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B082V9BTWQ" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Finish Dishwasher Pods 70-Pack Just $14.62 Shipped on Amazon (Reg. $22)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$14.62</div>
+          <div class="text-zinc-500 line-through text-xs">$17.20</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B082V9BTWQ" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B08MJZYW8P" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/06/2_51c7df.jpg?w=912"
+          alt="Over $20 Off Top-Rated ELEMIS Products on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B08MJZYW8P" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Over $20 Off Top-Rated ELEMIS Products on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$20</div>
+          <div class="text-zinc-500 line-through text-xs">$23.53</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B08MJZYW8P" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0CJX1HK52" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/01/bloom-greens-powder-amazon-3.jpg?w=912"
+          alt="Bloom Nutrition Greens &amp; Superfood Only $23.62 Shipped on Amazon (Reg. $40)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CJX1HK52.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0CJX1HK52" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Bloom Nutrition Greens &amp; Superfood Only $23.62 Shipped on Amazon (Reg. $40)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$23.62</div>
+          <div class="text-zinc-500 line-through text-xs">$27.79</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0CJX1HK52" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0918W1TVB" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Lesser-Evil-Popcorn-1.jpg"
+          alt="LesserEvil Popcorn 24-Pack Just $7.95 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0918W1TVB.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0918W1TVB" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">LesserEvil Popcorn 24-Pack Just $7.95 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$7.95</div>
+          <div class="text-zinc-500 line-through text-xs">$9.35</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0918W1TVB" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DFNM6NVQ" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2022/12/H2S-1200x630-13-10.jpg?w=912"
+          alt="Bloom Nutrition Sparkling Energy Drink 12-Pack Only $17.64 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DFNM6NVQ.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0DFNM6NVQ" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Bloom Nutrition Sparkling Energy Drink 12-Pack Only $17.64 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$17.64</div>
+          <div class="text-zinc-500 line-through text-xs">$20.75</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0DFNM6NVQ" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07X62WVM4" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2023/10/Screenshot-2025-01-17-at-12.16.16%E2%80%AFPM.jpg"
+          alt="Cliganic USDA Organic Lip Balm Set (6 pack) only $7.49 shipped!"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07X62WVM4.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B07X62WVM4" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Cliganic USDA Organic Lip Balm Set (6 pack) only $7.49 shipped!</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$7.49</div>
+          <div class="text-zinc-500 line-through text-xs">$8.81</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B07X62WVM4" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07N7PK9QK" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2022/10/mielle-rosemary-mint-scalp-strengtheneing-oil-1.jpg?w=912"
+          alt="Mielle Organics Scalp &amp; Hair Strengthening Oil Just $5 Shipped on Amazon (Reg. $10)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07N7PK9QK.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B07N7PK9QK" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Mielle Organics Scalp &amp; Hair Strengthening Oil Just $5 Shipped on Amazon (Reg. $10)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$5</div>
+          <div class="text-zinc-500 line-through text-xs">$5.26</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B07N7PK9QK" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0B45LL4DD" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/07/Beauty-of-Joseon-Revive-Under-Eye-Patch-60-Count-1.jpg?w=912"
+          alt="Beauty of Joseon Skincare from $10.71 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0B45LL4DD.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0B45LL4DD" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Beauty of Joseon Skincare from $10.71 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$10.71</div>
+          <div class="text-zinc-500 line-through text-xs">$11.90</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0B45LL4DD" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DBF65JYY" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Medicube-Pink-Serum.jpg"
+          alt="Medicube Pink Peptide Serum Just $14 Shipped on Amazon (+ More Deals that End Tonight)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DBF65JYY.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0DBF65JYY" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Medicube Pink Peptide Serum Just $14 Shipped on Amazon (+ More Deals that End Tonight)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$14</div>
+          <div class="text-zinc-500 line-through text-xs">$15.56</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0DBF65JYY" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B09V7Z4TJG" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/medicube-zero-pore-pad.jpg?w=912"
+          alt="Medicube Toner Pads 70-Count Only $14 Shipped on Amazon (Reg. $31)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B09V7Z4TJG.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B09V7Z4TJG" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Medicube Toner Pads 70-Count Only $14 Shipped on Amazon (Reg. $31)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$14</div>
+          <div class="text-zinc-500 line-through text-xs">$15.56</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B09V7Z4TJG" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0CQ6VDVBH" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/12/Touchland-Hand-Sanitizer-Set.jpg?w=912"
+          alt="Touchland Hand Sanitizer 4-Pack w/ Case Just $34.72 Shipped for Amazon Prime Members"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CQ6VDVBH.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0CQ6VDVBH" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Touchland Hand Sanitizer 4-Pack w/ Case Just $34.72 Shipped for Amazon Prime Members</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$34.72</div>
+          <div class="text-zinc-500 line-through text-xs">$38.58</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0CQ6VDVBH" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07N316V8C" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2022/04/Angry-Orange.jpg?w=912"
+          alt="Highly-Rated Angry Orange Pet Odor Eliminator Just $14.99 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07N316V8C.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B07N316V8C" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Highly-Rated Angry Orange Pet Odor Eliminator Just $14.99 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$14.99</div>
+          <div class="text-zinc-500 line-through text-xs">$15.78</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B07N316V8C" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B01K85YZZW" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/03/tic-tac-packs.png"
+          alt="Giant Tic Tac Box w/ 60 Mini Packs Available on Amazon (Easter Basket Filler)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B01K85YZZW.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B01K85YZZW" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Giant Tic Tac Box w/ 60 Mini Packs Available on Amazon (Easter Basket Filler)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$21.43</div>
+          <div class="text-zinc-500 line-through text-xs">$22.56</div>
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B01K85YZZW" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0BYJ7SCBF" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2026/03/pimple-patches.jpg"
+          alt="LitBear Cute Cat Acne Patch Pimple Patches (96 count) only $3.99 shipped!"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0BYJ7SCBF.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0BYJ7SCBF" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">LitBear Cute Cat Acne Patch Pimple Patches (96 count) only $3.99 shipped!</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3.99</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0BYJ7SCBF" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B08HJM5ZN4" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Cetaphil-Sunscreen-Stick.jpg"
+          alt="Cetaphil SPF 50 Sunscreen Stick Only $4.59 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B08HJM5ZN4.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B08HJM5ZN4" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Cetaphil SPF 50 Sunscreen Stick Only $4.59 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$4.59</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B08HJM5ZN4" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0F4DFMC2T" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/munchpods-10pack-e1774804658671.jpg?w=912"
+          alt="Munchpods Reusable Snack Containers 10-Pack Just $6.49 on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0F4DFMC2T.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0F4DFMC2T" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Munchpods Reusable Snack Containers 10-Pack Just $6.49 on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$6.49</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0F4DFMC2T" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07YZX6CYP" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Amazon-Taco-Seasoning.jpg"
+          alt="Amazon Spices &amp; Seasonings from 50¢ Shipped"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07YZX6CYP.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B07YZX6CYP" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Amazon Spices &amp; Seasonings from 50¢ Shipped</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">Check price</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B07YZX6CYP" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B000RUQPQQ" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/barilla-lasagne.jpg?w=912"
+          alt="TWO Barilla Oven Ready Lasagna Pasta Boxes Only $3.75 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B000RUQPQQ.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B000RUQPQQ" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">TWO Barilla Oven Ready Lasagna Pasta Boxes Only $3.75 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3.75</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B000RUQPQQ" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07L4LVT68" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/super-mario-bubly-blackberry.jpg?w=912"
+          alt="Super Mario bubly Sparkling Water 8-Count Just $3 Shipped on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07L4LVT68.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B07L4LVT68" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Super Mario bubly Sparkling Water 8-Count Just $3 Shipped on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B07L4LVT68" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07DR9CMGZ" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/EverPlus-Home-Security-Childproof-Door-Reinforcement-Lock.jpg?w=912"
+          alt="Childproof Door Reinforcement Lock Just $9 on Amazon (Reg. $17) | Stronger Than a Deadbolt"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07DR9CMGZ.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B07DR9CMGZ" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Childproof Door Reinforcement Lock Just $9 on Amazon (Reg. $17) | Stronger Than a Deadbolt</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$9</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B07DR9CMGZ" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0CZ6WCHGF" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/Label-Maker.jpg?w=912"
+          alt="Wireless Label Maker Only $9.99 on Amazon (Reg. $30) – Last Chance!"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CZ6WCHGF.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0CZ6WCHGF" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Wireless Label Maker Only $9.99 on Amazon (Reg. $30) – Last Chance!</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$9.99</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0CZ6WCHGF" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0CKZ4ZWYG" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/SINOPHANT-Womens-High-Waisted-Leggings.jpg?w=912"
+          alt="Women’s High-Waisted Leggings w/ Pockets ONLY $3.99 on Amazon"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CKZ4ZWYG.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0CKZ4ZWYG" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Women’s High-Waisted Leggings w/ Pockets ONLY $3.99 on Amazon</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$3.99</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0CKZ4ZWYG" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B07VS46CXT" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2023/03/Play-Doh-Eggs-2.jpg?w=912"
+          alt="Play-Doh Eggs 24-Pack Only $15.99 on Amazon | Candy-Free Easter Egg Hunt Idea!"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07VS46CXT.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B07VS46CXT" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Play-Doh Eggs 24-Pack Only $15.99 on Amazon | Candy-Free Easter Egg Hunt Idea!</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$15.99</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B07VS46CXT" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B09QTM72NP" class="block">
+        <img
+          src="https://www.datocms-assets.com/64599/1774899286-wrangler-mens-jeans-front-view-2wgi.avif?h=1024&amp;w=768"
+          alt="Wrangler Rustler Men&#39;s Relaxed Fit Jeans for $15 + free shipping w/ $35"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B09QTM72NP.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B09QTM72NP" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Wrangler Rustler Men&#39;s Relaxed Fit Jeans for $15 + free shipping w/ $35</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$15</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B09QTM72NP" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0G2QYFKD1" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2026/03/Wide-Leg-Jumpsuit.jpg"
+          alt="Women’s Wide Leg Jumpsuit with Pockets only $11.99!"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0G2QYFKD1.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0G2QYFKD1" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Women’s Wide Leg Jumpsuit with Pockets only $11.99!</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$11.99</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0G2QYFKD1" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0FP41XBDD" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/National-Geographic-Dinosaur-Activity-Kit.jpg?fit=1200%2C630&amp;strip=all"
+          alt="National Geographic Ultimate Dinosaur Activity Kit Only $14.68 on Amazon (Reg. $25)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0FP41XBDD.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0FP41XBDD" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">National Geographic Ultimate Dinosaur Activity Kit Only $14.68 on Amazon (Reg. $25)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$14.68</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0FP41XBDD" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B01LZW4IK4" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/01/CGK-Unlimited-Microfiber-Sheet-Sets.jpg?w=912"
+          alt="Luxury Cooling Sheet Sets from $16 on Amazon (Perfect for Hot Sleepers!)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B01LZW4IK4.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B01LZW4IK4" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Luxury Cooling Sheet Sets from $16 on Amazon (Perfect for Hot Sleepers!)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$16</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B01LZW4IK4" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0CFXN3C9B" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2026/03/Womens-Dresses-Fashion-2026-Long-Puff-Sleeve.jpg"
+          alt="Women’s Long Puff Sleeve Mini Dress only $19.73, plus more!"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CFXN3C9B.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0CFXN3C9B" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Women’s Long Puff Sleeve Mini Dress only $19.73, plus more!</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$19.73</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0CFXN3C9B" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0FHGWKYCH" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/02/led-flashlights.jpg?w=912"
+          alt="Rechargeable Flash Light 2-Pack Only $10.97 Shipped for Amazon Prime Members"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0FHGWKYCH.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0FHGWKYCH" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Rechargeable Flash Light 2-Pack Only $10.97 Shipped for Amazon Prime Members</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$10.97</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0FHGWKYCH" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DL8PGNSP" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2026/03/Mens-Lightweight-Joggers.jpg"
+          alt="Men’s Lightweight Joggers only $9.99!"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DL8PGNSP.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0DL8PGNSP" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Men’s Lightweight Joggers only $9.99!</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$9.99</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0DL8PGNSP" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B09JWZQCRZ" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2026/03/Regal-Games-Card-Games-for-Kids.jpg"
+          alt="Regal Games Card Games (6 pack) only $8.99 {Great for Easter Baskets!}"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B09JWZQCRZ.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B09JWZQCRZ" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Regal Games Card Games (6 pack) only $8.99 {Great for Easter Baskets!}</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$8.99</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B09JWZQCRZ" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0F489R1JY" class="block">
+        <img
+          src="https://moneysavingmom.com/wp-content/uploads/2025/11/Screenshot-2025-11-19-at-3.07.37%E2%80%AFPM.jpg"
+          alt="Boy’s Cross Necklaces (2 pack) only $4.99!"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0F489R1JY.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0F489R1JY" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Boy’s Cross Necklaces (2 pack) only $4.99!</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$4.99</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0F489R1JY" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0DS453DZ4" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2025/12/UNbrush-Super-Mini-3-Pack.jpg?w=912"
+          alt="Unbrush Mini Keychain Brush 3-Pack Just $12.87 on Walmart.com (Easter Basket Filler)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DS453DZ4.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0DS453DZ4" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Unbrush Mini Keychain Brush 3-Pack Just $12.87 on Walmart.com (Easter Basket Filler)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$12.87</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0DS453DZ4" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B084DW9G8W" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2023/04/GoFloats-Wiener-Dog-Pool-Floa.jpg?w=912"
+          alt="Pool Floats Just $19.54 on Amazon (Wiener Dog, Cheeseburger, &amp; More)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B084DW9G8W.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B084DW9G8W" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Pool Floats Just $19.54 on Amazon (Wiener Dog, Cheeseburger, &amp; More)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$19.54</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B084DW9G8W" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
+    <article class="deal-card soft-card rounded-2xl overflow-hidden">
+      <a href="/deal.html?asin=B0GFNBBBJX" class="block">
+        <img
+          src="https://hip2save.com/wp-content/uploads/2026/03/HiLife-Handheld-Clothes-Steamer.jpg?w=912"
+          alt="Handheld Clothes Steamer Just $11.99 on Amazon (Reg. $30)"
+          class="w-full h-44 md:h-52 object-cover bg-white"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0GFNBBBJX.01.LZZZZZZZ.jpg'"
+        >
+      </a>
+      <div class="p-3">
+        <div class="text-red-400 font-black text-[11px] mb-1">LIVE DEAL</div>
+        <a href="/deal.html?asin=B0GFNBBBJX" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Handheld Clothes Steamer Just $11.99 on Amazon (Reg. $30)</a>
+        <div class="flex items-end gap-2 mb-2 flex-wrap">
+          <div class="text-xl md:text-2xl font-black">$11.99</div>
+          
+        </div>
+        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Limited-time deal</div>
+        <a href="/deal.html?asin=B0GFNBBBJX" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+          Buy on Amazon →
+        </a>
+      </div>
+    </article>
+  
     </div>
+  </section>
+  
+  <footer style="text-align:center;color:#71717a;font-size:14px;margin-top:40px;padding-bottom:24px">
+    © 2026 TrendPulse — Amazon Deals Tracker
   </footer>
-
-  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-950/95 backdrop-blur md:hidden">
-    <div class="grid grid-cols-4">
-      <a href="/" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
-        <span>Home</span>
-      </a>
-      <a href="/deals.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-white">
-        <span>Deals</span>
-      </a>
-      <a href="/cheap-tech.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
-        <span>Tech</span>
-      </a>
-      <a href="/best-gifts.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
-        <span>Gifts</span>
-      </a>
-    </div>
-  </nav>
+</div>
 </body>
 </html>
