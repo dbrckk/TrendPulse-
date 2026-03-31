@@ -6,7 +6,7 @@ import fs from "fs";
 const parser = new Parser({
   timeout: 25000,
   headers: {
-    "User-Agent": "TrendPulseBot/12.0"
+    "User-Agent": "TrendPulseBot/13.0"
   }
 });
 
@@ -95,6 +95,7 @@ function productLink(product) {
 
 function extractAsinFromAmazonUrl(url) {
   if (!url) return null;
+
   const decoded = decodeURIComponent(url);
   const patterns = [
     /\/dp\/([A-Z0-9]{10})(?:[/?]|$)/i,
@@ -207,12 +208,17 @@ function inferCrazyDeal(product) {
   return discount >= 70 && price > 0 && price <= 60;
 }
 
+function looksLikeGiftProduct(title, description, category) {
+  const text = `${title} ${description} ${category}`.toLowerCase();
+  return /gift|christmas|present|birthday|mom|dad|wife|husband|kids|women|men|home decor|jewelry|beauty|candle|mug|blanket|accessory|gadget/.test(text);
+}
+
 async function fetchText(url) {
   try {
     const res = await fetch(url, {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/12.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/13.0"
       }
     });
 
@@ -229,7 +235,7 @@ async function resolveFinalUrl(url) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 TrendPulseBot/12.0"
+        "User-Agent": "Mozilla/5.0 TrendPulseBot/13.0"
       }
     });
 
@@ -380,6 +386,7 @@ async function extractDealFromArticle(item) {
   const originalPrice = discountPercent ? estimateOriginalPrice(price, discountPercent) : null;
   const sourceName = new URL(sourceUrl).hostname.replace(/^www\./, "");
   const description = buildDescription(sourceTitle, sourceDescription, price, discountPercent);
+  const category = extractCategory(sourceTitle, sourceDescription);
   const nowIso = new Date().toISOString();
 
   const product = {
@@ -392,7 +399,7 @@ async function extractDealFromArticle(item) {
     discount_percent: discountPercent ?? null,
     image_url: chooseImageUrl(metaImage, asin),
     affiliate_link: buildAffiliateLink(asin),
-    category: extractCategory(sourceTitle, sourceDescription),
+    category,
     likes: 0,
     nopes: 0,
     clicks: 0,
@@ -412,6 +419,7 @@ async function extractDealFromArticle(item) {
 
   product.is_best_seller = inferBestSeller(product);
   product.is_crazy_deal = inferCrazyDeal(product);
+  product.is_giftable = looksLikeGiftProduct(sourceTitle, sourceDescription, category);
 
   if (!isStrongEnoughProduct(product)) return null;
   return product;
@@ -618,10 +626,9 @@ function editorialTemplate({ title, description, canonicalPath, intro, section1T
       <a href="/deals.html">All Deals</a>
       <a href="/best-sellers.html">Best Sellers</a>
       <a href="/crazy-deals.html">Crazy Deals</a>
-      <a href="/tech.html">Tech</a>
-      <a href="/fashion.html">Fashion</a>
-      <a href="/jewelry.html">Jewelry</a>
-      <a href="/shoes.html">Shoes</a>
+      <a href="/under-10.html">Under $10</a>
+      <a href="/under-20.html">Under $20</a>
+      <a href="/under-50.html">Under $50</a>
       ${navExtra}
     </nav>
 
@@ -705,9 +712,9 @@ function dealsPageTemplate(items) {
         <a href="/best-amazon-deals.html">Editorial Deals</a>
         <a href="/best-sellers.html">Best Sellers</a>
         <a href="/crazy-deals.html">Crazy Deals</a>
-        <a href="/tech.html">Tech</a>
-        <a href="/fashion.html">Fashion</a>
-        <a href="/jewelry.html">Jewelry</a>
+        <a href="/under-10.html">Under $10</a>
+        <a href="/under-20.html">Under $20</a>
+        <a href="/under-50.html">Under $50</a>
       </nav>
       <div class="stats">
         <div class="pill">${items.length} live deals</div>
@@ -768,20 +775,11 @@ function simpleCategoryPageTemplate({ title, description, canonicalPath, items, 
       <a href="/deals.html">All Deals</a>
       <a href="/best-sellers.html">Best Sellers</a>
       <a href="/crazy-deals.html">Crazy Deals</a>
-      <a href="/tech.html">Tech</a>
-      <a href="/fashion.html">Fashion</a>
-      <a href="/jewelry.html">Jewelry</a>
-      <a href="/shoes.html">Shoes</a>
-      <a href="/sports.html">Sports</a>
-      <a href="/health.html">Health</a>
-      <a href="/baby.html">Baby</a>
-      <a href="/pets.html">Pets</a>
-      <a href="/office.html">Office</a>
-      <a href="/gaming.html">Gaming</a>
-      <a href="/outdoor.html">Outdoor</a>
-      <a href="/home.html">Home</a>
-      <a href="/kitchen.html">Kitchen</a>
-      <a href="/beauty.html">Beauty</a>
+      <a href="/under-10.html">Under $10</a>
+      <a href="/under-20.html">Under $20</a>
+      <a href="/under-50.html">Under $50</a>
+      <a href="/cheap-tech.html">Cheap Tech</a>
+      <a href="/best-gifts.html">Best Gifts</a>
     </nav>
     <div class="grid">
       ${renderCardGrid(items, label)}
@@ -794,7 +792,7 @@ function simpleCategoryPageTemplate({ title, description, canonicalPath, items, 
 async function generateEditorialPages() {
   const { data, error } = await sb
     .from("products")
-    .select("asin,name,description,price,original_price,image_url,affiliate_link,category,score,is_active,updated_at,is_best_seller,is_crazy_deal")
+    .select("asin,name,description,price,original_price,image_url,affiliate_link,category,score,is_active,updated_at,is_best_seller,is_crazy_deal,is_giftable")
     .eq("is_active", true)
     .order("score", { ascending: false })
     .order("updated_at", { ascending: false })
@@ -806,6 +804,11 @@ async function generateEditorialPages() {
   const byCategory = category => items.filter(p => p.category === category);
   const bestSellers = items.filter(p => p.is_best_seller).slice(0, 48);
   const crazyDeals = items.filter(p => p.is_crazy_deal).slice(0, 48);
+  const under10 = items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 10).slice(0, 48);
+  const under20 = items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 20).slice(0, 48);
+  const under50 = items.filter(p => Number(p.price || 0) > 0 && Number(p.price || 0) <= 50).slice(0, 48);
+  const cheapTech = items.filter(p => p.category === "Tech" && Number(p.price || 0) > 0 && Number(p.price || 0) <= 50).slice(0, 48);
+  const bestGifts = items.filter(p => p.is_giftable || looksLikeGiftProduct(p.name, p.description, p.category)).slice(0, 48);
 
   fs.writeFileSync("deals.html", dealsPageTemplate(items.slice(0, 60)), "utf8");
 
@@ -841,14 +844,14 @@ async function generateEditorialPages() {
     description: "Discover some of the most popular Amazon products people are already buying right now, including tech, home, beauty, fashion, and more.",
     canonicalPath: "/best-sellers.html",
     intro: [
-      "Not every visitor wants only discounted products. Some people simply want strong Amazon products that already have real buying appeal.",
-      "This page highlights products that look strong from a popularity and demand perspective, so visitors can find items they may actually want even when they are not the deepest discount on the site."
+      "Not everyone visiting a deals site wants only discounted products. Some visitors simply want popular Amazon items that already have strong buying appeal.",
+      "This page highlights products that look strong from a popularity and demand perspective, so visitors can find items they may actually want even if they are not the deepest discount on the site."
     ],
     section1Title: "Why best sellers matter",
-    section1Text: "Best-selling products reduce friction because shoppers already trust that these kinds of products are in demand. That makes them useful for both conversions and user confidence.",
+    section1Text: "Best-selling products reduce friction because shoppers already know these kinds of items are in demand. That makes them useful for both conversions and user trust.",
     section2Title: "How we use best sellers on TrendPulse",
-    section2Text: "We surface products that appear to have strong buyer appeal based on score, value, and site interaction signals, creating a more rounded shopping experience beyond discounts alone.",
-    navExtra: `<a href="/best-sellers.html">Best Sellers</a><a href="/crazy-deals.html">Crazy Deals</a>`,
+    section2Text: "We surface products that appear to have strong buyer appeal based on score, deal quality, and site interaction signals, creating a more rounded browsing experience beyond discounts alone.",
+    navExtra: `<a href="/cheap-tech.html">Cheap Tech</a><a href="/best-gifts.html">Best Gifts</a>`,
     items: bestSellers,
     label: "Best Seller"
   }), "utf8");
@@ -864,8 +867,8 @@ async function generateEditorialPages() {
     section1Title: "What counts as a crazy deal",
     section1Text: "On TrendPulse, crazy deals are products with much stronger-than-usual discount signals, especially when the price is still low enough to feel like an impulse buy.",
     section2Title: "Why these deals move fast",
-    section2Text: "Very strong discounts can lose traction quickly as inventory shifts or pricing updates. That makes fast visibility especially important for this type of page.",
-    navExtra: `<a href="/crazy-deals.html">Crazy Deals</a><a href="/best-sellers.html">Best Sellers</a>`,
+    section2Text: "Very strong discounts can lose traction quickly as inventory shifts or pricing updates. That makes visibility especially important for this type of page.",
+    navExtra: `<a href="/under-10.html">Under $10</a><a href="/under-20.html">Under $20</a>`,
     items: crazyDeals,
     label: "Crazy Deal"
   }), "utf8");
@@ -876,15 +879,100 @@ async function generateEditorialPages() {
     canonicalPath: "/best-amazon-deals.html",
     intro: [
       "Looking for the best Amazon deals right now? You’re in the right place. We track trending discounts, popular products, and price drops across Amazon to bring you the most relevant deals available today.",
-      "Our system automatically scans deal sources and highlights products with strong discounts, higher value, and better click potential."
+      "Our system automatically scans deal sources and highlights products with stronger discounts, better value, and higher click potential."
     ],
     section1Title: "Why these Amazon deals matter",
-    section1Text: "The most attractive deals are often the ones that combine useful products with meaningful discounts and current shopping momentum. Instead of showing random bargains, we focus on live deal signals and current relevance.",
+    section1Text: "The most attractive deals are often the ones that combine useful products with meaningful discounts and current shopping momentum. Instead of showing random bargains, TrendPulse focuses on live signals and stronger product relevance.",
     section2Title: "How to use this page",
-    section2Text: "Browse the featured products below, then open any item to view its dedicated deal page. You can also explore category collections like Tech, Fashion, Home, Kitchen, Beauty, and Best Sellers.",
-    navExtra: `<a href="/best-sellers.html">Best Sellers</a><a href="/crazy-deals.html">Crazy Deals</a>`,
+    section2Text: "Browse the featured products below, then open any item to view its dedicated deal page. You can also explore category pages like Tech, Fashion, Jewelry, Home, Kitchen, Beauty, and Best Sellers.",
+    navExtra: `<a href="/under-50.html">Under $50</a><a href="/cheap-tech.html">Cheap Tech</a>`,
     items: items.slice(0, 30),
     label: "All"
+  }), "utf8");
+
+  fs.writeFileSync("under-10.html", editorialTemplate({
+    title: "Best Amazon Deals Under $10",
+    description: "Browse cheap Amazon deals under $10, including small gadgets, beauty items, home finds, and impulse buys worth checking.",
+    canonicalPath: "/under-10.html",
+    intro: [
+      "Cheap Amazon deals under $10 can convert surprisingly well because the buying decision feels easy and low-risk.",
+      "This page focuses on lower-priced products that still look useful, giftable, or interesting enough to click."
+    ],
+    section1Title: "Why under $10 deals work",
+    section1Text: "Low-priced products create less hesitation and often perform better for impulse-driven traffic, especially on mobile.",
+    section2Title: "What kind of products appear here",
+    section2Text: "You’ll usually find smaller accessories, beauty items, practical home products, and other low-friction purchases.",
+    navExtra: `<a href="/under-20.html">Under $20</a><a href="/under-50.html">Under $50</a>`,
+    items: under10,
+    label: "Under $10"
+  }), "utf8");
+
+  fs.writeFileSync("under-20.html", editorialTemplate({
+    title: "Best Amazon Deals Under $20",
+    description: "Discover useful Amazon deals under $20, including trending finds, practical gifts, beauty products, and budget-friendly tech.",
+    canonicalPath: "/under-20.html",
+    intro: [
+      "Amazon deals under $20 often sit in a sweet spot between affordability and usefulness.",
+      "This page helps shoppers find low-cost products that still feel worth buying."
+    ],
+    section1Title: "Why under $20 deals matter",
+    section1Text: "Products under $20 are easier to test, easier to gift, and often more attractive to broad audiences looking for value.",
+    section2Title: "How to use this page",
+    section2Text: "Start with the top items, then open products that look useful, giftable, or unusually discounted.",
+    navExtra: `<a href="/under-10.html">Under $10</a><a href="/cheap-tech.html">Cheap Tech</a>`,
+    items: under20,
+    label: "Under $20"
+  }), "utf8");
+
+  fs.writeFileSync("under-50.html", editorialTemplate({
+    title: "Best Amazon Deals Under $50",
+    description: "Explore Amazon deals under $50 across tech, home, kitchen, fashion, gifts, and more.",
+    canonicalPath: "/under-50.html",
+    intro: [
+      "Deals under $50 can capture a large part of Amazon shopping intent because they still feel affordable while offering more product variety.",
+      "This page groups stronger-value deals that remain in a manageable price range for many shoppers."
+    ],
+    section1Title: "Why under $50 pages perform well",
+    section1Text: "This price range includes a wider set of useful products while still feeling accessible for many buyers.",
+    section2Title: "What to expect here",
+    section2Text: "Expect more variety: tech accessories, home goods, fitness products, gifts, and practical everyday buys.",
+    navExtra: `<a href="/under-20.html">Under $20</a><a href="/best-gifts.html">Best Gifts</a>`,
+    items: under50,
+    label: "Under $50"
+  }), "utf8");
+
+  fs.writeFileSync("cheap-tech.html", editorialTemplate({
+    title: "Best Cheap Amazon Tech Deals",
+    description: "Browse affordable Amazon tech deals including chargers, headphones, keyboards, smart accessories, and budget gadgets.",
+    canonicalPath: "/cheap-tech.html",
+    intro: [
+      "Cheap tech is one of the easiest categories to browse because visitors often know what they want and how much they want to spend.",
+      "This page focuses on lower-priced tech products that still look useful, giftable, or popular."
+    ],
+    section1Title: "Why cheap tech converts",
+    section1Text: "Affordable tech products often feel practical, low-risk, and easy to buy quickly, especially when the price looks clean.",
+    section2Title: "What appears on this page",
+    section2Text: "You’ll usually see chargers, accessories, headphones, keyboards, adapters, and small electronics with stronger value signals.",
+    navExtra: `<a href="/tech.html">Tech</a><a href="/under-50.html">Under $50</a>`,
+    items: cheapTech,
+    label: "Cheap Tech"
+  }), "utf8");
+
+  fs.writeFileSync("best-gifts.html", editorialTemplate({
+    title: "Best Amazon Gift Ideas and Giftable Finds",
+    description: "Find Amazon gift ideas across beauty, jewelry, home, gadgets, and useful products that are easy to buy and easy to like.",
+    canonicalPath: "/best-gifts.html",
+    intro: [
+      "Gift-oriented pages work well because many shoppers are not just looking for deals, they are looking for ideas.",
+      "This page groups products that feel more giftable, more presentable, or more likely to appeal to a broad audience."
+    ],
+    section1Title: "Why gift pages matter",
+    section1Text: "Gift pages widen the audience beyond bargain hunters by helping visitors discover products they might buy for someone else.",
+    section2Title: "What makes a product giftable",
+    section2Text: "Products that are useful, visually appealing, personal, or easy to understand often work better in gift-focused browsing.",
+    navExtra: `<a href="/under-20.html">Under $20</a><a href="/best-sellers.html">Best Sellers</a>`,
+    items: bestGifts,
+    label: "Best Gifts"
   }), "utf8");
 
   console.log("Editorial pages generated");
@@ -905,6 +993,11 @@ async function generateSitemap() {
     { loc: `${SITE_URL}/best-amazon-deals.html`, changefreq: "daily", priority: "0.95" },
     { loc: `${SITE_URL}/best-sellers.html`, changefreq: "daily", priority: "0.95" },
     { loc: `${SITE_URL}/crazy-deals.html`, changefreq: "daily", priority: "0.9" },
+    { loc: `${SITE_URL}/under-10.html`, changefreq: "daily", priority: "0.9" },
+    { loc: `${SITE_URL}/under-20.html`, changefreq: "daily", priority: "0.9" },
+    { loc: `${SITE_URL}/under-50.html`, changefreq: "daily", priority: "0.9" },
+    { loc: `${SITE_URL}/cheap-tech.html`, changefreq: "daily", priority: "0.85" },
+    { loc: `${SITE_URL}/best-gifts.html`, changefreq: "daily", priority: "0.85" },
     { loc: `${SITE_URL}/tech.html`, changefreq: "daily", priority: "0.8" },
     { loc: `${SITE_URL}/fashion.html`, changefreq: "daily", priority: "0.8" },
     { loc: `${SITE_URL}/jewelry.html`, changefreq: "daily", priority: "0.8" },
@@ -946,7 +1039,7 @@ ${allUrls.map(url => `  <url>
 }
 
 async function main() {
-  console.log("Starting sync V4");
+  console.log("Starting sync V5");
 
   const activeCountBefore = await getActiveDealsCount();
   console.log(`Active deals before sync: ${activeCountBefore}`);
