@@ -1,18 +1,21 @@
+// package.json
+
 {
   "name": "trendpulse",
-  "version": "5.1.0",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
-  "description": "TrendPulse - deals site and X automation",
+  "description": "TrendPulse mobile-first Amazon deal site focused on the US market.",
   "scripts": {
-    "sync": "node sync-deals.js",
-    "score": "node update-score.js",
-    "tweet": "node post-random-deal.js"
+    "check": "node scripts/check-site.js",
+    "sync": "node scripts/sync.mjs",
+    "score": "node scripts/score.mjs",
+    "tweet": "node scripts/tweet.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
     "cheerio": "^1.0.0",
-    "puppeteer": "^24.15.0",
+    "dotenv": "^16.4.7",
+    "puppeteer": "^24.7.1",
     "rss-parser": "^3.13.0"
   }
 }
