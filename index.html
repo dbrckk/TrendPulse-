@@ -4,21 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Best Amazon Deals Today | TrendPulse</title>
-  <meta name="description" content="Discover the best Amazon deals today, best sellers, crazy discounts, and trending product finds worth checking right now." />
+  <title>Best Amazon Deals Today (Up to 70% Off) | TrendPulse</title>
+  <meta name="description" content="Discover the best Amazon deals today. Huge discounts on tech, home, fashion, beauty, gifts, gadgets, and more. Updated often with trending Amazon finds." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://trend-pulse.shop/" />
   <meta name="theme-color" content="#050505" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Best Amazon Deals Today | TrendPulse" />
-  <meta property="og:description" content="Live Amazon deals, best sellers, and crazy discounts worth checking right now." />
+  <meta property="og:title" content="Best Amazon Deals Today (Up to 70% Off) | TrendPulse" />
+  <meta property="og:description" content="Live Amazon deals, popular products, budget finds, gift ideas, and strong price drops worth checking right now." />
   <meta property="og:url" content="https://trend-pulse.shop/" />
   <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Best Amazon Deals Today | TrendPulse" />
-  <meta name="twitter:description" content="Live Amazon deals, best sellers, and crazy discounts worth checking right now." />
+  <meta name="twitter:title" content="Best Amazon Deals Today (Up to 70% Off) | TrendPulse" />
+  <meta name="twitter:description" content="Live Amazon deals, popular products, budget finds, gift ideas, and strong price drops worth checking right now." />
   <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg" />
 
   <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -34,7 +34,7 @@
     "@type":"WebSite",
     "name":"TrendPulse",
     "url":"https://trend-pulse.shop/",
-    "description":"Discover the best Amazon deals today, best sellers, crazy discounts, and trending product finds."
+    "description":"Discover the best Amazon deals today with curated discounts, best sellers, budget finds, gadgets, gifts, and trending product picks."
   }
   </script>
 
@@ -55,6 +55,10 @@
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+    .soft-card {
+      background: linear-gradient(180deg, #111722 0%, #090b11 100%);
+      border: 1px solid rgba(255,255,255,.08);
     }
     .deal-card {
       transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
@@ -87,13 +91,28 @@
       letter-spacing: .02em;
       white-space: nowrap;
     }
-    .soft-card {
-      background: linear-gradient(180deg, #111722 0%, #090b11 100%);
-      border: 1px solid rgba(255,255,255,.08);
+    .trust-line {
+      color: #22c55e;
+      font-weight: 800;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .sticky-home-cta {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 60;
+      display: none;
+    }
+    @media (max-width: 767px) {
+      .sticky-home-cta {
+        display: block;
+      }
     }
   </style>
 </head>
-<body class="max-w-6xl mx-auto px-4 py-4 md:py-6 pb-12">
+<body class="max-w-6xl mx-auto px-4 py-4 md:py-6 pb-24 md:pb-12">
 
   <header class="flex justify-between items-center mb-4">
     <a href="/" class="text-2xl font-black italic tracking-tight">TrendPulse</a>
@@ -116,16 +135,22 @@
           Best Amazon Deals<br>That Are Actually<br>Worth Clicking
         </h1>
 
-        <p class="text-zinc-400 text-base md:text-lg leading-7 mb-5 max-w-2xl">
-          Real price drops, popular products, and stronger Amazon picks without the clutter.
+        <p class="text-zinc-400 text-base md:text-lg leading-7 mb-4 max-w-2xl">
+          Hand-picked deals, strong discounts, popular products, and budget-friendly finds without the clutter.
         </p>
+
+        <div class="trust-line mb-5">
+          ✔ Trending deals updated often<br>
+          ✔ Limited-time discounts<br>
+          ✔ Popular products selling fast
+        </div>
 
         <div class="flex flex-wrap gap-3 mb-5">
           <a href="#top-deals" class="bg-white text-black px-5 py-3 rounded-xl font-black">
-            Shop Top Deals
+            View Top Deals
           </a>
-          <a href="/best-sellers.html" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
-            Explore Best Sellers
+          <a href="/under-20.html" class="bg-zinc-950 border border-zinc-800 px-5 py-3 rounded-xl font-bold text-white">
+            Shop Under $20
           </a>
         </div>
 
@@ -139,13 +164,13 @@
             <div class="text-zinc-400 text-xs">Best sellers and trending items.</div>
           </div>
           <div class="rounded-2xl p-3 bg-zinc-950 border border-zinc-800 col-span-2 md:col-span-1">
-            <div class="text-white font-black mb-1">More categories</div>
-            <div class="text-zinc-400 text-xs">Tech, fashion, jewelry, home, and more.</div>
+            <div class="text-white font-black mb-1">Budget pages</div>
+            <div class="text-zinc-400 text-xs">Under $10, $20, $50 and more.</div>
           </div>
         </div>
       </div>
 
-      <div id="hero-deal" class="soft-card rounded-3xl overflow-hidden min-h-[370px] md:min-h-[450px]"></div>
+      <div id="hero-deal" class="soft-card rounded-3xl overflow-hidden min-h-[370px] md:min-h-[460px]"></div>
     </div>
   </section>
 
@@ -206,23 +231,63 @@
   </section>
 
   <section class="mb-8">
-    <div class="grid md:grid-cols-3 gap-4">
+    <div class="grid md:grid-cols-5 gap-4">
+      <a href="/under-10.html" class="deal-card soft-card block rounded-3xl p-5">
+        <div class="text-green-400 font-black text-xs mb-2">BUDGET</div>
+        <h2 class="text-xl font-black tracking-tight mb-2">Deals Under $10</h2>
+        <p class="text-zinc-400 text-sm leading-7">Cheap Amazon finds with low buying friction.</p>
+      </a>
+
+      <a href="/under-20.html" class="deal-card soft-card block rounded-3xl p-5">
+        <div class="text-green-400 font-black text-xs mb-2">VALUE</div>
+        <h2 class="text-xl font-black tracking-tight mb-2">Deals Under $20</h2>
+        <p class="text-zinc-400 text-sm leading-7">Low-cost picks that still feel useful.</p>
+      </a>
+
+      <a href="/cheap-tech.html" class="deal-card soft-card block rounded-3xl p-5">
+        <div class="text-blue-400 font-black text-xs mb-2">TECH</div>
+        <h2 class="text-xl font-black tracking-tight mb-2">Cheap Tech</h2>
+        <p class="text-zinc-400 text-sm leading-7">Accessories, gadgets, chargers and more.</p>
+      </a>
+
+      <a href="/best-gifts.html" class="deal-card soft-card block rounded-3xl p-5">
+        <div class="text-pink-400 font-black text-xs mb-2">GIFTS</div>
+        <h2 class="text-xl font-black tracking-tight mb-2">Best Gifts</h2>
+        <p class="text-zinc-400 text-sm leading-7">Giftable finds that are easy to like.</p>
+      </a>
+
       <a href="/best-sellers.html" class="deal-card soft-card block rounded-3xl p-5">
-        <div class="text-blue-400 font-black text-xs mb-2">BEST SELLERS</div>
-        <h2 class="text-2xl font-black tracking-tight mb-2">Popular Amazon Products</h2>
-        <p class="text-zinc-400 text-sm leading-7">For visitors who want strong products, even without extreme discounts.</p>
+        <div class="text-yellow-400 font-black text-xs mb-2">POPULAR</div>
+        <h2 class="text-xl font-black tracking-tight mb-2">Best Sellers</h2>
+        <p class="text-zinc-400 text-sm leading-7">Strong products people already buy.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="mb-8">
+    <div class="grid md:grid-cols-4 gap-4">
+      <a href="/best-amazon-gadgets.html" class="deal-card soft-card block rounded-3xl p-5">
+        <div class="text-cyan-400 font-black text-xs mb-2">GADGETS</div>
+        <h2 class="text-xl font-black tracking-tight mb-2">Amazon Gadgets</h2>
+        <p class="text-zinc-400 text-sm leading-7">Useful tech and impulse-friendly gadget picks.</p>
       </a>
 
-      <a href="/crazy-deals.html" class="deal-card soft-card block rounded-3xl p-5">
-        <div class="text-yellow-400 font-black text-xs mb-2">CRAZY DEALS</div>
-        <h2 class="text-2xl font-black tracking-tight mb-2">Deep Discounts & Fast Movers</h2>
-        <p class="text-zinc-400 text-sm leading-7">Products with unusually strong price drops worth checking fast.</p>
+      <a href="/amazon-home-decor-deals.html" class="deal-card soft-card block rounded-3xl p-5">
+        <div class="text-orange-400 font-black text-xs mb-2">DECOR</div>
+        <h2 class="text-xl font-black tracking-tight mb-2">Home Decor Deals</h2>
+        <p class="text-zinc-400 text-sm leading-7">Decorative finds, candles, lamps, blankets and more.</p>
       </a>
 
-      <a href="/best-amazon-deals.html" class="deal-card soft-card block rounded-3xl p-5">
-        <div class="text-red-400 font-black text-xs mb-2">GUIDES</div>
-        <h2 class="text-2xl font-black tracking-tight mb-2">SEO Shopping Pages</h2>
-        <p class="text-zinc-400 text-sm leading-7">Evergreen pages built for Google traffic and cleaner browsing.</p>
+      <a href="/best-amazon-gifts-for-women.html" class="deal-card soft-card block rounded-3xl p-5">
+        <div class="text-fuchsia-400 font-black text-xs mb-2">GIFTS</div>
+        <h2 class="text-xl font-black tracking-tight mb-2">Gifts for Women</h2>
+        <p class="text-zinc-400 text-sm leading-7">Beauty, jewelry, accessories and giftable finds.</p>
+      </a>
+
+      <a href="/best-amazon-gifts-for-men.html" class="deal-card soft-card block rounded-3xl p-5">
+        <div class="text-sky-400 font-black text-xs mb-2">GIFTS</div>
+        <h2 class="text-xl font-black tracking-tight mb-2">Gifts for Men</h2>
+        <p class="text-zinc-400 text-sm leading-7">Gadgets, tools, gaming and practical gift ideas.</p>
       </a>
     </div>
   </section>
@@ -237,9 +302,32 @@
     <div id="dynamic-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </section>
 
+  <section class="soft-card rounded-3xl p-5 md:p-7 mb-8">
+    <h2 class="text-2xl font-black tracking-tight mb-3">Best Amazon Deals Today</h2>
+    <p class="text-zinc-400 leading-7 text-sm md:text-base">
+      Looking for the best Amazon deals today? TrendPulse helps you discover strong discounts, popular products, budget-friendly finds, and trending Amazon deals across categories like tech, home, fashion, jewelry, kitchen, beauty, gaming, pets, and more. We highlight deals under $10, under $20, under $50, best sellers, gift ideas, gadgets, decor products, and products with unusually sharp price drops so visitors can browse faster and click more confidently.
+    </p>
+    <div class="flex flex-wrap gap-3 mt-4 text-sm font-bold">
+      <a href="/under-10.html" class="text-blue-300 hover:text-white">Deals Under $10</a>
+      <a href="/under-20.html" class="text-blue-300 hover:text-white">Deals Under $20</a>
+      <a href="/under-50.html" class="text-blue-300 hover:text-white">Deals Under $50</a>
+      <a href="/cheap-tech.html" class="text-blue-300 hover:text-white">Cheap Tech</a>
+      <a href="/best-gifts.html" class="text-blue-300 hover:text-white">Best Gifts</a>
+      <a href="/best-amazon-gadgets.html" class="text-blue-300 hover:text-white">Amazon Gadgets</a>
+      <a href="/amazon-home-decor-deals.html" class="text-blue-300 hover:text-white">Home Decor Deals</a>
+      <a href="/best-amazon-gifts-for-women.html" class="text-blue-300 hover:text-white">Gifts for Women</a>
+      <a href="/best-amazon-gifts-for-men.html" class="text-blue-300 hover:text-white">Gifts for Men</a>
+      <a href="/crazy-deals.html" class="text-blue-300 hover:text-white">Crazy Deals</a>
+    </div>
+  </section>
+
   <footer class="text-center text-zinc-500 text-sm mt-10 pb-6">
     © 2026 TrendPulse — Amazon Deals Tracker
   </footer>
+
+  <a href="#top-deals" class="sticky-home-cta bg-[#ff9900] text-black text-center py-4 rounded-2xl font-black shadow-2xl">
+    🔥 View Best Deals Now
+  </a>
 
   <script>
     const SB_URL = "https://hyrofyfhmabhlqbucjdp.supabase.co";
@@ -318,9 +406,16 @@
 
     function getBadgeText(p) {
       if (p.is_crazy_deal) return "⚠ CRAZY DEAL";
-      if (p.discount_percent) return `-${Math.round(p.discount_percent)}% OFF`;
+      if (p.discount_percent) return `🔥 ${Math.round(p.discount_percent)}% OFF`;
       if (p.is_best_seller) return "⭐ BEST SELLER";
       return "LIVE DEAL";
+    }
+
+    function getUrgencyText(p) {
+      if (p.is_crazy_deal) return "⚡ Often disappears fast";
+      if (Number(p.discount_percent || 0) >= 50) return "🔥 Strong price drop";
+      if (p.is_best_seller) return "👀 Popular with shoppers";
+      return "⚡ Limited-time deal";
     }
 
     function renderCard(p) {
@@ -333,12 +428,13 @@
           <div class="p-3">
             <div class="text-red-400 font-black text-[11px] mb-1">${getBadgeText(p)}</div>
             <a href="${dealUrl(p)}" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">${p.name}</a>
-            <div class="flex items-end gap-2 mb-3 flex-wrap">
+            <div class="flex items-end gap-2 mb-2 flex-wrap">
               <div class="text-xl md:text-2xl font-black">${formatPrice(p.price)}</div>
               ${p.original_price ? `<div class="text-zinc-500 line-through text-xs">${formatPrice(p.original_price)}</div>` : ""}
             </div>
-            <a href="${dealUrl(p)}" class="block text-center bg-blue-600 hover:bg-blue-500 transition px-4 py-3 rounded-xl font-black text-sm">
-              View Deal
+            <div class="text-[12px] text-orange-400 font-bold mb-3">${getUrgencyText(p)}</div>
+            <a href="${dealUrl(p)}" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
+              Buy on Amazon →
             </a>
           </div>
         </div>
@@ -349,17 +445,18 @@
       const imageList = getBestImageList(p);
       return `
         <a href="${dealUrl(p)}" class="block h-full">
-          <div class="h-full grid grid-rows-[220px_auto] md:grid-rows-[250px_auto]">
+          <div class="h-full grid grid-rows-[220px_auto] md:grid-rows-[260px_auto]">
             <div class="bg-white">
               ${buildSafeImageTag(imageList, p.name, "w-full h-full object-contain")}
             </div>
             <div class="p-5 md:p-6">
               <div class="text-red-400 font-black text-xs mb-2">${getBadgeText(p)}</div>
               <h2 class="text-2xl md:text-3xl font-black tracking-tight leading-tight mb-3 line-clamp-3">${p.name}</h2>
-              <div class="flex items-end gap-3 mb-4 flex-wrap">
+              <div class="flex items-end gap-3 mb-3 flex-wrap">
                 <div class="text-3xl md:text-4xl font-black">${formatPrice(p.price)}</div>
                 ${p.original_price ? `<div class="text-zinc-500 line-through text-lg">${formatPrice(p.original_price)}</div>` : ""}
               </div>
+              <div class="text-orange-400 text-sm font-bold mb-4">${getUrgencyText(p)}</div>
               <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
                 <div class="rounded-2xl p-3 bg-zinc-950 border border-zinc-800">
                   <div class="text-zinc-500 text-xs mb-1">Category</div>
@@ -370,8 +467,8 @@
                   <div class="font-black">${Math.round(Number(p.score || 0))}</div>
                 </div>
               </div>
-              <div class="inline-flex bg-blue-600 hover:bg-blue-500 transition px-5 py-3 rounded-xl font-black">
-                View Top Deal
+              <div class="inline-flex bg-[#ff9900] hover:bg-[#ffb84d] transition px-5 py-3 rounded-xl font-black text-black">
+                Buy on Amazon →
               </div>
             </div>
           </div>
