@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "https://trend-pulse.shop/:path*",
+      "destination": "https://www.trend-pulse.shop/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/deal/:asin/:slug*",
