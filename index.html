@@ -1,468 +1,345 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Best Amazon Deals Today (Up to 70% Off) | TrendPulse</title>
-  <meta name="description" content="Discover the best Amazon deals today. Huge discounts on tech, home, fashion, beauty, gifts, gadgets, and more.">
-  <meta name="robots" content="index, follow, max-image-preview:large">
-  <link rel="canonical" href="https://trend-pulse.shop/">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Best Amazon Deals Today (Up to 70% Off) | TrendPulse">
-  <meta property="og:description" content="Discover the best Amazon deals today. Huge discounts on tech, home, fashion, beauty, gifts, gadgets, and more.">
-  <meta property="og:url" content="https://trend-pulse.shop/">
-  <meta property="og:image" content="https://trend-pulse.shop/og-image.jpg">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Best Amazon Deals Today (Up to 70% Off) | TrendPulse">
-  <meta name="twitter:description" content="Discover the best Amazon deals today. Huge discounts on tech, home, fashion, beauty, gifts, gadgets, and more.">
-  <meta name="twitter:image" content="https://trend-pulse.shop/og-image.jpg">
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <style>
-    body{background:#050505;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0}
-    .wrap{max-width:1200px;margin:0 auto;padding:20px}
-    .soft-card{background:linear-gradient(180deg,#111722 0%,#090b11 100%);border:1px solid rgba(255,255,255,.08)}
-    .deal-card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-    .deal-card:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(0,0,0,.30);border-color:rgba(255,255,255,.16)}
-    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .chip{font-size:12px;font-weight:800;border-radius:999px;padding:10px 14px;border:1px solid rgb(39 39 42);background:rgb(24 24 27);color:rgb(228 228 231);white-space:nowrap;text-decoration:none;display:inline-block}
-    a{text-decoration:none}
-    .navlink{color:#d4d4d8;font-size:14px;font-weight:600}
-    .navlink:hover{color:#fff}
-    .grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    @media(min-width:768px){.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}}
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrendPulse | Trending Amazon Deals, Gifts & Budget Finds</title>
+  <meta
+    name="description"
+    content="Discover trending Amazon deals, best sellers, gift ideas, cheap tech, and budget-friendly finds. Mobile-first deal discovery focused on the US market."
+  />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://www.trend-pulse.shop/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="TrendPulse | Trending Amazon Deals, Gifts & Budget Finds" />
+  <meta
+    property="og:description"
+    content="Discover trending Amazon deals, best sellers, gift ideas, cheap tech, and budget-friendly finds. Mobile-first deal discovery focused on the US market."
+  />
+  <meta property="og:url" content="https://www.trend-pulse.shop/" />
+  <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TrendPulse | Trending Amazon Deals, Gifts & Budget Finds" />
+  <meta
+    name="twitter:description"
+    content="Discover trending Amazon deals, best sellers, gift ideas, cheap tech, and budget-friendly finds. Mobile-first deal discovery focused on the US market."
+  />
+  <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#09090b" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/assets/js/trendpulse-data.js" defer></script>
+  <script src="/assets/js/trendpulse-ui.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "TrendPulse",
+    "url": "https://www.trend-pulse.shop/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.trend-pulse.shop/deals.html?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "TrendPulse",
+    "url": "https://www.trend-pulse.shop/",
+    "logo": "https://www.trend-pulse.shop/icon-512.png"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Does TrendPulse sell products directly?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. TrendPulse is a deal discovery site. You browse products here, then continue to Amazon to buy."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What market does TrendPulse focus on?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "TrendPulse mainly focuses on the US Amazon marketplace."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do prices stay the same?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Amazon prices and availability can change quickly after a deal is published."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
-<body>
-<div class="wrap">
-  
-    <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <a href="/" style="font-size:28px;font-weight:900;font-style:italic;color:#fff">TrendPulse</a>
-      <div style="display:flex;gap:12px;align-items:center">
-        <a href="/best-sellers.html" class="navlink">Best Sellers</a>
-        <a href="/deals.html" class="navlink">All Deals</a>
-      </div>
-    </header>
-  
+<body class="bg-zinc-950 pb-24 text-zinc-100 antialiased md:pb-0">
+  <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/85 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+      <a href="/" class="text-xl font-bold tracking-tight text-white">TrendPulse</a>
 
-  <section style="margin-bottom:20px">
-    <div style="display:grid;gap:16px;grid-template-columns:1.05fr .95fr">
-      <div class="soft-card" style="border-radius:24px;padding:28px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-          <span style="font-size:11px;padding:5px 10px;border-radius:999px;font-weight:800;background:#ef4444;color:#fff">🔥 Updated Often</span>
-          <span style="font-size:11px;padding:5px 10px;border-radius:999px;font-weight:800;background:#3b82f6;color:#fff">⭐ Best Sellers</span>
-          <span style="font-size:11px;padding:5px 10px;border-radius:999px;font-weight:800;background:#facc15;color:#000">⚠ Big Price Drops</span>
-        </div>
-        <h1 style="font-size:64px;line-height:.92;font-weight:900;font-style:italic;letter-spacing:-.05em;margin:0 0 12px">
-          Best Amazon Deals<br>That Are Actually<br>Worth Clicking
-        </h1>
-        <p style="color:#a1a1aa;font-size:18px;line-height:1.7;margin:0 0 14px">
-          Hand-picked deals, strong discounts, popular products, and budget-friendly finds without the clutter.
-        </p>
-        <div style="color:#22c55e;font-weight:800;font-size:13px;line-height:1.7;margin-bottom:16px">
-          ✔ Trending deals updated often<br>
-          ✔ Limited-time discounts<br>
-          ✔ Popular products selling fast
-        </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
-          <a href="#top-deals" style="background:#fff;color:#000;padding:14px 18px;border-radius:12px;font-weight:900">View Top Deals</a>
-          <a href="/under-20.html" style="background:#09090b;color:#fff;border:1px solid #27272a;padding:14px 18px;border-radius:12px;font-weight:800">Shop Under $20</a>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
-          <div style="background:#09090b;border:1px solid #27272a;border-radius:16px;padding:12px">
-            <div style="font-weight:900;margin-bottom:4px">Fast browsing</div>
-            <div style="font-size:12px;color:#a1a1aa">Image, price, discount, click.</div>
-          </div>
-          <div style="background:#09090b;border:1px solid #27272a;border-radius:16px;padding:12px">
-            <div style="font-weight:900;margin-bottom:4px">Popular picks</div>
-            <div style="font-size:12px;color:#a1a1aa">Best sellers and trending items.</div>
-          </div>
-          <div style="background:#09090b;border:1px solid #27272a;border-radius:16px;padding:12px">
-            <div style="font-weight:900;margin-bottom:4px">Budget pages</div>
-            <div style="font-size:12px;color:#a1a1aa">Under $10, $20, $50 and more.</div>
-          </div>
-        </div>
-      </div>
-      
-    <a href="/deal.html?asin=B019WZLXZO" class="soft-card" style="border-radius:24px;overflow:hidden;display:block;min-height:420px">
-      <div style="display:grid;grid-template-rows:260px auto;height:100%">
-        <div style="background:#fff">
-          <img
-            src="https://hip2save.com/wp-content/uploads/2025/08/vanity-fair-bra.jpg?w=912"
-            alt="Up to 70% Off Team-Fave Vanity Fair Bras on Amazon"
-            style="width:100%;height:100%;object-fit:contain"
-            onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B019WZLXZO.01.LZZZZZZZ.jpg'"
+      <nav class="hidden items-center gap-5 text-sm text-zinc-300 md:flex">
+        <a href="/" class="text-white">Home</a>
+        <a href="/best-sellers.html" class="hover:text-white">Best Sellers</a>
+        <a href="/deals.html" class="hover:text-white">Deals</a>
+        <a href="/cheap-tech.html" class="hover:text-white">Cheap Tech</a>
+        <a href="/best-gifts.html" class="hover:text-white">Best Gifts</a>
+      </nav>
+
+      <a
+        href="/deals.html"
+        class="inline-flex items-center justify-center rounded-2xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
+      >
+        Browse Deals
+      </a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+    <section class="rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 shadow-2xl shadow-black/20 sm:p-8">
+      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">US Amazon Market Prioritized</p>
+      <h1 class="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
+        Trending Amazon deals, gift ideas, and budget-friendly finds
+      </h1>
+      <p class="mt-4 max-w-2xl text-base leading-7 text-zinc-300">
+        TrendPulse helps you spot interesting Amazon finds faster. We focus on popular categories, stronger value,
+        broad appeal, and useful products that feel worth the click.
+      </p>
+
+      <form action="/deals.html" method="get" class="mt-6">
+        <label for="hero-search" class="sr-only">Search deals</label>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <input
+            id="hero-search"
+            name="q"
+            type="text"
+            placeholder="Search products, gifts, gadgets..."
+            class="w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none transition focus:border-zinc-500"
+          />
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:opacity-90"
           >
+            Search Deals
+          </button>
         </div>
-        <div style="padding:24px">
-          <div style="color:#f87171;font-size:12px;font-weight:900;margin-bottom:8px">⚠ CRAZY DEAL</div>
-          <h2 style="font-size:34px;line-height:1.05;font-weight:900;letter-spacing:-.03em;margin:0 0 12px">Up to 70% Off Team-Fave Vanity Fair Bras on Amazon</h2>
-          <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px">
-            <div style="font-size:38px;font-weight:900">$13.49</div>
-            <div style="color:#71717a;text-decoration:line-through;font-size:18px">$44.97</div>
-          </div>
-          <div style="color:#fb923c;font-size:14px;font-weight:800;margin-bottom:16px">⚡ Often disappears fast</div>
-          <div style="display:inline-flex;background:#ff9900;color:#000;padding:14px 18px;border-radius:14px;font-weight:900">
-            Buy on Amazon →
-          </div>
+      </form>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href="/cheap-tech.html" class="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Cheap Tech</a>
+        <a href="/best-gifts.html" class="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Best Gifts</a>
+        <a href="/best-sellers.html" class="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Best Sellers</a>
+        <a href="/home.html" class="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Home Finds</a>
+        <a href="/kitchen.html" class="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Kitchen</a>
+      </div>
+
+      <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div class="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+          <div class="text-lg font-bold text-white">US</div>
+          <div class="mt-1 text-xs text-zinc-400">Market Focus</div>
+        </div>
+        <div class="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+          <div class="text-lg font-bold text-white">Mobile</div>
+          <div class="mt-1 text-xs text-zinc-400">First Browsing</div>
+        </div>
+        <div class="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+          <div class="text-lg font-bold text-white">Daily</div>
+          <div class="mt-1 text-xs text-zinc-400">Deal Discovery</div>
+        </div>
+        <div class="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+          <div class="text-lg font-bold text-white">Fast</div>
+          <div class="mt-1 text-xs text-zinc-400">Category Filters</div>
         </div>
       </div>
-    </a>
-  
+
+      <p class="mt-4 text-xs text-zinc-500">
+        Affiliate disclosure: TrendPulse may earn from qualifying purchases.
+      </p>
+    </section>
+
+    <section class="mt-8 rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5">
+      <h2 class="text-lg font-semibold text-white">How TrendPulse picks deals</h2>
+      <div class="mt-3 grid gap-3 text-sm text-zinc-300 md:grid-cols-3">
+        <div>We prioritize strong value and products with broad shopper appeal.</div>
+        <div>We focus mainly on the US Amazon marketplace.</div>
+        <div>Prices can move fast, so availability may change after we publish.</div>
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Top Picks</p>
+          <h2 class="mt-2 text-2xl font-bold tracking-tight text-white">Top Deals Right Now</h2>
+        </div>
+        <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white">See all deals</a>
+      </div>
+
+      <div id="home-deals" class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4"></div>
+    </section>
+
+    <section class="mt-12">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Browse Faster</p>
+          <h2 class="mt-2 text-2xl font-bold tracking-tight text-white">Popular Categories</h2>
+        </div>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <a href="/best-sellers.html" class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600">
+          <h3 class="text-lg font-semibold text-white">Best Sellers</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Popular Amazon products with strong buying appeal.</p>
+        </a>
+
+        <a href="/cheap-tech.html" class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600">
+          <h3 class="text-lg font-semibold text-white">Cheap Tech</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Budget gadgets, useful accessories, and practical tech picks.</p>
+        </a>
+
+        <a href="/best-gifts.html" class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600">
+          <h3 class="text-lg font-semibold text-white">Best Gifts</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Giftable Amazon finds for birthdays, holidays, and last-minute ideas.</p>
+        </a>
+
+        <a href="/deals.html" class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600">
+          <h3 class="text-lg font-semibold text-white">All Deals</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Explore more trending deals across categories and price points.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="mt-12 grid gap-4 lg:grid-cols-2">
+      <div class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6">
+        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Why People Click</p>
+        <h2 class="mt-2 text-2xl font-bold tracking-tight text-white">Built for quick mobile browsing</h2>
+        <p class="mt-4 text-sm leading-7 text-zinc-300">
+          Instead of scrolling endless retailer pages, TrendPulse gives you a cleaner entry point:
+          categories, deal cards, simple detail pages, and a faster path to products worth checking.
+        </p>
+      </div>
+
+      <div class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6">
+        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Before You Buy</p>
+        <h2 class="mt-2 text-2xl font-bold tracking-tight text-white">A few useful notes</h2>
+        <ul class="mt-4 space-y-3 text-sm leading-7 text-zinc-300">
+          <li>Amazon prices may change quickly after a deal is listed.</li>
+          <li>TrendPulse does not sell products directly.</li>
+          <li>Most pages prioritize broad-appeal products and budget-friendly buying intent.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="mt-12 rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <h2 class="text-xl font-semibold text-white">Explore More Deals</h2>
+      <div class="mt-5 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+        <a href="/best-tech-deals-under-50.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Best Tech Under $50</a>
+        <a href="/best-gifts.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Best Gifts</a>
+        <a href="/cheap-tech.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Cheap Tech</a>
+        <a href="/home.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Home Deals</a>
+        <a href="/best-kitchen-deals-this-week.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Kitchen Deals</a>
+        <a href="/best-beauty-deals-on-amazon.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Beauty Deals</a>
+        <a href="/tech.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Tech Category</a>
+        <a href="/best-amazon-deals.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Best Amazon Deals</a>
+      </div>
+    </section>
+
+    <section class="mt-12 rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <h2 class="text-xl font-semibold text-white">FAQ</h2>
+      <div class="mt-5 space-y-5 text-zinc-300">
+        <div>
+          <h3 class="font-medium text-white">Does TrendPulse sell products directly?</h3>
+          <p class="mt-2 leading-7">
+            No. TrendPulse is a deal discovery site. You browse products here, then continue to Amazon to buy.
+          </p>
+        </div>
+        <div>
+          <h3 class="font-medium text-white">What market does TrendPulse focus on?</h3>
+          <p class="mt-2 leading-7">
+            TrendPulse mainly focuses on the US Amazon marketplace.
+          </p>
+        </div>
+        <div>
+          <h3 class="font-medium text-white">Do prices stay the same?</h3>
+          <p class="mt-2 leading-7">
+            No. Amazon prices and availability can change quickly after a deal is published.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-zinc-800 mt-16">
+    <div class="max-w-6xl mx-auto px-4 py-10 text-sm text-zinc-400">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div>
+          <div class="text-white font-semibold text-base">TrendPulse</div>
+          <p class="mt-3 leading-6">
+            Mobile-first Amazon deal discovery focused on the US market.
+            We highlight strong discounts, popular picks, and budget-friendly finds.
+          </p>
+        </div>
+
+        <div>
+          <div class="text-white font-semibold mb-3">Quick Links</div>
+          <ul class="space-y-2">
+            <li><a class="hover:text-white" href="/best-sellers.html">Best Sellers</a></li>
+            <li><a class="hover:text-white" href="/deals.html">All Deals</a></li>
+            <li><a class="hover:text-white" href="/cheap-tech.html">Cheap Tech</a></li>
+            <li><a class="hover:text-white" href="/best-gifts.html">Best Gifts</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="text-white font-semibold mb-3">Legal</div>
+          <ul class="space-y-2">
+            <li><a class="hover:text-white" href="/affiliate-disclosure.html">Affiliate Disclosure</a></li>
+            <li><a class="hover:text-white" href="/privacy.html">Privacy Policy</a></li>
+            <li><a class="hover:text-white" href="/terms.html">Terms</a></li>
+            <li><a class="hover:text-white" href="/contact.html">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-zinc-800 space-y-2">
+        <p>As an Amazon Associate, TrendPulse earns from qualifying purchases.</p>
+        <p>Prices and availability can change at any time on Amazon.</p>
+        <p>© 2026 TrendPulse — Amazon Deals Tracker</p>
+      </div>
     </div>
-  </section>
-
-  <section style="margin-bottom:20px">
-    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
-      <div class="soft-card" style="border-radius:16px;padding:16px"><div style="color:#71717a;font-size:14px;margin-bottom:4px">Live Deals</div><div style="font-size:32px;font-weight:900">165</div></div>
-      <div class="soft-card" style="border-radius:16px;padding:16px"><div style="color:#71717a;font-size:14px;margin-bottom:4px">Best Sellers</div><div style="font-size:32px;font-weight:900">37</div></div>
-      <div class="soft-card" style="border-radius:16px;padding:16px"><div style="color:#71717a;font-size:14px;margin-bottom:4px">Crazy Deals</div><div style="font-size:32px;font-weight:900">3</div></div>
-      <div class="soft-card" style="border-radius:16px;padding:16px"><div style="color:#71717a;font-size:14px;margin-bottom:4px">Under $25</div><div style="font-size:32px;font-weight:900">131</div></div>
-    </div>
-  </section>
-
-  <section style="margin-bottom:20px">
-    <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px">
-      <a class="chip" href="/deals.html">Top Picks</a><a class="chip" href="/best-sellers.html">Best Sellers</a><a class="chip" href="/crazy-deals.html">Crazy Deals</a><a class="chip" href="/under-10.html">Under $10</a><a class="chip" href="/under-20.html">Under $20</a><a class="chip" href="/under-50.html">Under $50</a><a class="chip" href="/cheap-tech.html">Cheap Tech</a><a class="chip" href="/best-gifts.html">Best Gifts</a>
-    </div>
-  </section>
-
-  <section id="top-deals" style="margin-bottom:28px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:16px">
-      <div>
-        <h2 style="font-size:32px;font-weight:900;letter-spacing:-.03em;margin:0 0 4px">Top Deals Right Now</h2>
-        <p style="color:#a1a1aa;font-size:14px;margin:0">The strongest products to check first.</p>
-      </div>
-      <a href="/deals.html" class="navlink">See all</a>
-    </div>
-    <div class="grid4">
-      
-    <article class="deal-card soft-card rounded-2xl overflow-hidden">
-      <a href="/deal.html?asin=B019WZLXZO" class="block">
-        <img
-          src="https://hip2save.com/wp-content/uploads/2025/08/vanity-fair-bra.jpg?w=912"
-          alt="Up to 70% Off Team-Fave Vanity Fair Bras on Amazon"
-          class="w-full h-44 md:h-52 object-cover bg-white"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B019WZLXZO.01.LZZZZZZZ.jpg'"
-        >
-      </a>
-      <div class="p-3">
-        <div class="text-red-400 font-black text-[11px] mb-1">⚠ CRAZY DEAL</div>
-        <a href="/deal.html?asin=B019WZLXZO" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Up to 70% Off Team-Fave Vanity Fair Bras on Amazon</a>
-        <div class="flex items-end gap-2 mb-2 flex-wrap">
-          <div class="text-xl md:text-2xl font-black">$13.49</div>
-          <div class="text-zinc-500 line-through text-xs">$44.97</div>
-        </div>
-        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Often disappears fast</div>
-        <a href="/deal.html?asin=B019WZLXZO" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
-          Buy on Amazon →
-        </a>
-      </div>
-    </article>
-  
-    <article class="deal-card soft-card rounded-2xl overflow-hidden">
-      <a href="/deal.html?asin=B0FY3XJRQZ" class="block">
-        <img
-          src="https://hip2save.com/wp-content/uploads/2025/08/vanity-fair-bra.jpg?w=912"
-          alt="Up to 70% Off Team-Fave Vanity Fair Bras on Amazon"
-          class="w-full h-44 md:h-52 object-cover bg-white"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0FY3XJRQZ.01.LZZZZZZZ.jpg'"
-        >
-      </a>
-      <div class="p-3">
-        <div class="text-red-400 font-black text-[11px] mb-1">⚠ CRAZY DEAL</div>
-        <a href="/deal.html?asin=B0FY3XJRQZ" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Up to 70% Off Team-Fave Vanity Fair Bras on Amazon</a>
-        <div class="flex items-end gap-2 mb-2 flex-wrap">
-          <div class="text-xl md:text-2xl font-black">$13.49</div>
-          <div class="text-zinc-500 line-through text-xs">$44.97</div>
-        </div>
-        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Often disappears fast</div>
-        <a href="/deal.html?asin=B0FY3XJRQZ" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
-          Buy on Amazon →
-        </a>
-      </div>
-    </article>
-  
-    <article class="deal-card soft-card rounded-2xl overflow-hidden">
-      <a href="/deal.html?asin=B07TJ9VYFK" class="block">
-        <img
-          src="https://hip2save.com/wp-content/uploads/2025/08/Under-Armour-Polo-Shirts-2.jpg?w=912"
-          alt="Amazon’s Big Spring Sale = Up to 65% Off Under Armour, Levi’s &amp; More"
-          class="w-full h-44 md:h-52 object-cover bg-white"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07TJ9VYFK.01.LZZZZZZZ.jpg'"
-        >
-      </a>
-      <div class="p-3">
-        <div class="text-red-400 font-black text-[11px] mb-1">⚠ CRAZY DEAL</div>
-        <a href="/deal.html?asin=B07TJ9VYFK" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Amazon’s Big Spring Sale = Up to 65% Off Under Armour, Levi’s &amp; More</a>
-        <div class="flex items-end gap-2 mb-2 flex-wrap">
-          <div class="text-xl md:text-2xl font-black">$17.99</div>
-          <div class="text-zinc-500 line-through text-xs">$51.40</div>
-        </div>
-        <div class="text-[12px] text-orange-400 font-bold mb-3">⚡ Often disappears fast</div>
-        <a href="/deal.html?asin=B07TJ9VYFK" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
-          Buy on Amazon →
-        </a>
-      </div>
-    </article>
-  
-    <article class="deal-card soft-card rounded-2xl overflow-hidden">
-      <a href="/deal.html?asin=B0DJXVBNW8" class="block">
-        <img
-          src="https://hip2save.com/wp-content/uploads/2025/07/womens-rash-guard.jpg?w=912"
-          alt="Women’s UPF 50+ Rash Guards Just $8.99 on Amazon (Reg. $18)"
-          class="w-full h-44 md:h-52 object-cover bg-white"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DJXVBNW8.01.LZZZZZZZ.jpg'"
-        >
-      </a>
-      <div class="p-3">
-        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
-        <a href="/deal.html?asin=B0DJXVBNW8" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Women’s UPF 50+ Rash Guards Just $8.99 on Amazon (Reg. $18)</a>
-        <div class="flex items-end gap-2 mb-2 flex-wrap">
-          <div class="text-xl md:text-2xl font-black">$8.99</div>
-          <div class="text-zinc-500 line-through text-xs">$17.98</div>
-        </div>
-        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
-        <a href="/deal.html?asin=B0DJXVBNW8" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
-          Buy on Amazon →
-        </a>
-      </div>
-    </article>
-  
-    <article class="deal-card soft-card rounded-2xl overflow-hidden">
-      <a href="/deal.html?asin=B0DJY3V32T" class="block">
-        <img
-          src="https://hip2save.com/wp-content/uploads/2025/07/womens-rash-guard.jpg?w=912"
-          alt="Women’s UPF 50+ Rash Guards Just $8.99 on Amazon (Reg. $18)"
-          class="w-full h-44 md:h-52 object-cover bg-white"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0DJY3V32T.01.LZZZZZZZ.jpg'"
-        >
-      </a>
-      <div class="p-3">
-        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
-        <a href="/deal.html?asin=B0DJY3V32T" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Women’s UPF 50+ Rash Guards Just $8.99 on Amazon (Reg. $18)</a>
-        <div class="flex items-end gap-2 mb-2 flex-wrap">
-          <div class="text-xl md:text-2xl font-black">$8.99</div>
-          <div class="text-zinc-500 line-through text-xs">$17.98</div>
-        </div>
-        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
-        <a href="/deal.html?asin=B0DJY3V32T" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
-          Buy on Amazon →
-        </a>
-      </div>
-    </article>
-  
-    <article class="deal-card soft-card rounded-2xl overflow-hidden">
-      <a href="/deal.html?asin=B07STT71ZG" class="block">
-        <img
-          src="https://hip2save.com/wp-content/uploads/2026/03/Gladdon-Crossbody-Bag.jpg?w=912"
-          alt="Vegan Leather Crossbody Bags Only $9.99 on Amazon (Reg. $25)"
-          class="w-full h-44 md:h-52 object-cover bg-white"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07STT71ZG.01.LZZZZZZZ.jpg'"
-        >
-      </a>
-      <div class="p-3">
-        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
-        <a href="/deal.html?asin=B07STT71ZG" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Vegan Leather Crossbody Bags Only $9.99 on Amazon (Reg. $25)</a>
-        <div class="flex items-end gap-2 mb-2 flex-wrap">
-          <div class="text-xl md:text-2xl font-black">$9.99</div>
-          <div class="text-zinc-500 line-through text-xs">$19.98</div>
-        </div>
-        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
-        <a href="/deal.html?asin=B07STT71ZG" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
-          Buy on Amazon →
-        </a>
-      </div>
-    </article>
-  
-    <article class="deal-card soft-card rounded-2xl overflow-hidden">
-      <a href="/deal.html?asin=B07XRJB9Z9" class="block">
-        <img
-          src="https://hip2save.com/wp-content/uploads/2026/03/Gladdon-Crossbody-Bag.jpg?w=912"
-          alt="Vegan Leather Crossbody Bags Only $9.99 on Amazon (Reg. $25)"
-          class="w-full h-44 md:h-52 object-cover bg-white"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B07XRJB9Z9.01.LZZZZZZZ.jpg'"
-        >
-      </a>
-      <div class="p-3">
-        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
-        <a href="/deal.html?asin=B07XRJB9Z9" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Vegan Leather Crossbody Bags Only $9.99 on Amazon (Reg. $25)</a>
-        <div class="flex items-end gap-2 mb-2 flex-wrap">
-          <div class="text-xl md:text-2xl font-black">$9.99</div>
-          <div class="text-zinc-500 line-through text-xs">$19.98</div>
-        </div>
-        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
-        <a href="/deal.html?asin=B07XRJB9Z9" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
-          Buy on Amazon →
-        </a>
-      </div>
-    </article>
-  
-    <article class="deal-card soft-card rounded-2xl overflow-hidden">
-      <a href="/deal.html?asin=B0CY69ZBZY" class="block">
-        <img
-          src="https://hip2save.com/wp-content/uploads/2026/02/Fisher-Price-Picnic-Basket-Set.jpg?w=912"
-          alt="Up to 50% Off Fisher Price Toys on Amazon"
-          class="w-full h-44 md:h-52 object-cover bg-white"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='https://images-na.ssl-images-amazon.com/images/P/B0CY69ZBZY.01.LZZZZZZZ.jpg'"
-        >
-      </a>
-      <div class="p-3">
-        <div class="text-red-400 font-black text-[11px] mb-1">⭐ BEST SELLER</div>
-        <a href="/deal.html?asin=B0CY69ZBZY" class="block text-sm font-black line-clamp-2 mb-2 min-h-[40px]">Up to 50% Off Fisher Price Toys on Amazon</a>
-        <div class="flex items-end gap-2 mb-2 flex-wrap">
-          <div class="text-xl md:text-2xl font-black">$28.99</div>
-          <div class="text-zinc-500 line-through text-xs">$57.98</div>
-        </div>
-        <div class="text-[12px] text-orange-400 font-bold mb-3">👀 Popular with shoppers</div>
-        <a href="/deal.html?asin=B0CY69ZBZY" class="block text-center bg-[#ff9900] hover:bg-[#ffb84d] transition px-4 py-3 rounded-xl font-black text-sm text-black">
-          Buy on Amazon →
-        </a>
-      </div>
-    </article>
-  
-    </div>
-  </section>
-
-  <section style="margin-bottom:28px">
-    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px">
-      
-        <a href="/under-10.html" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
-          <div style="color:#4ade80;font-size:12px;font-weight:900;margin-bottom:8px">BUDGET</div>
-          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">Deals Under $10</h3>
-          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">Cheap Amazon finds with low buying friction.</p>
-        </a>
-      
-        <a href="/under-20.html" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
-          <div style="color:#4ade80;font-size:12px;font-weight:900;margin-bottom:8px">VALUE</div>
-          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">Deals Under $20</h3>
-          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">Low-cost picks that still feel useful.</p>
-        </a>
-      
-        <a href="/cheap-tech.html" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
-          <div style="color:#60a5fa;font-size:12px;font-weight:900;margin-bottom:8px">TECH</div>
-          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">Cheap Tech</h3>
-          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">Accessories, gadgets, chargers and more.</p>
-        </a>
-      
-        <a href="/best-gifts.html" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
-          <div style="color:#f472b6;font-size:12px;font-weight:900;margin-bottom:8px">GIFTS</div>
-          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">Best Gifts</h3>
-          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">Giftable finds that are easy to like.</p>
-        </a>
-      
-        <a href="/best-sellers.html" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
-          <div style="color:#facc15;font-size:12px;font-weight:900;margin-bottom:8px">POPULAR</div>
-          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">Best Sellers</h3>
-          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">Strong products people already buy.</p>
-        </a>
-      
-    </div>
-  </section>
-
-  <section style="margin-bottom:28px">
-    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
-      
-        <a href="/best-amazon-gadgets.html" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
-          <div style="color:#22d3ee;font-size:12px;font-weight:900;margin-bottom:8px">GADGETS</div>
-          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">Amazon Gadgets</h3>
-          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">Useful tech and impulse-friendly gadget picks.</p>
-        </a>
-      
-        <a href="/amazon-home-decor-deals.html" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
-          <div style="color:#fb923c;font-size:12px;font-weight:900;margin-bottom:8px">DECOR</div>
-          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">Home Decor Deals</h3>
-          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">Decorative finds, candles, lamps, blankets and more.</p>
-        </a>
-      
-        <a href="/best-amazon-gifts-for-women.html" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
-          <div style="color:#e879f9;font-size:12px;font-weight:900;margin-bottom:8px">GIFTS</div>
-          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">Gifts for Women</h3>
-          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">Beauty, jewelry, accessories and giftable finds.</p>
-        </a>
-      
-        <a href="/best-amazon-gifts-for-men.html" class="deal-card soft-card" style="border-radius:24px;padding:20px;display:block">
-          <div style="color:#38bdf8;font-size:12px;font-weight:900;margin-bottom:8px">GIFTS</div>
-          <h3 style="font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px">Gifts for Men</h3>
-          <p style="color:#a1a1aa;font-size:14px;line-height:1.7;margin:0">Gadgets, tools, gaming and practical gift ideas.</p>
-        </a>
-      
-    </div>
-  </section>
-
-  <section class="soft-card" style="border-radius:24px;padding:28px;margin-bottom:24px">
-    <h2 style="font-size:32px;font-weight:900;letter-spacing:-.03em;margin:0 0 12px">Best Amazon Deals Today</h2>
-    <p style="color:#a1a1aa;line-height:1.8;font-size:15px;margin:0 0 12px">
-      Looking for the best Amazon deals today? TrendPulse helps you discover strong discounts, popular products, budget-friendly finds, and trending Amazon deals across categories like tech, home, fashion, jewelry, kitchen, beauty, gaming, pets, and more.
-    </p>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:14px;font-weight:700">
-      <a href="/under-10.html" class="navlink">Deals Under $10</a>
-      <a href="/under-20.html" class="navlink">Deals Under $20</a>
-      <a href="/under-50.html" class="navlink">Deals Under $50</a>
-      <a href="/cheap-tech.html" class="navlink">Cheap Tech</a>
-      <a href="/best-gifts.html" class="navlink">Best Gifts</a>
-      <a href="/best-amazon-gadgets.html" class="navlink">Amazon Gadgets</a>
-      <a href="/amazon-home-decor-deals.html" class="navlink">Home Decor Deals</a>
-      <a href="/best-amazon-gifts-for-women.html" class="navlink">Gifts for Women</a>
-      <a href="/best-amazon-gifts-for-men.html" class="navlink">Gifts for Men</a>
-      <a href="/crazy-deals.html" class="navlink">Crazy Deals</a>
-    </div>
-  </section>
-  <!-- components/internal-links.html -->
-<div class="mt-12 border-t border-zinc-800 pt-8">
-
-  <h2 class="text-xl font-semibold text-white mb-4">
-    Explore More Deals
-  </h2>
-
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-
-    <a href="/best-tech-deals-under-50.html" class="block border border-zinc-800 p-3 rounded-xl hover:border-zinc-600">
-      Best Tech Under $50
-    </a>
-
-    <a href="/best-amazon-gifts.html" class="block border border-zinc-800 p-3 rounded-xl hover:border-zinc-600">
-      Best Gifts
-    </a>
-
-    <a href="/cheap-tech.html" class="block border border-zinc-800 p-3 rounded-xl hover:border-zinc-600">
-      Cheap Tech
-    </a>
-
-    <a href="/best-home-deals.html" class="block border border-zinc-800 p-3 rounded-xl hover:border-zinc-600">
-      Home Deals
-    </a>
-
-    <a href="/best-kitchen-deals-this-week.html" class="block border border-zinc-800 p-3 rounded-xl hover:border-zinc-600">
-      Kitchen Deals
-    </a>
-
-    <a href="/best-beauty-deals-on-amazon.html" class="block border border-zinc-800 p-3 rounded-xl hover:border-zinc-600">
-      Beauty Deals
-    </a>
-
-    <a href="/tech.html" class="block border border-zinc-800 p-3 rounded-xl hover:border-zinc-600">
-      Tech Category
-    </a>
-
-    <a href="/home.html" class="block border border-zinc-800 p-3 rounded-xl hover:border-zinc-600">
-      Home Category
-    </a>
-
-  </div>
-
-</div>
-  
-  <footer style="text-align:center;color:#71717a;font-size:14px;margin-top:40px;padding-bottom:24px">
-    © 2026 TrendPulse — Amazon Deals Tracker
   </footer>
-</div>
+
+  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-950/95 backdrop-blur md:hidden">
+    <div class="grid grid-cols-4">
+      <a href="/" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-white">
+        <span>Home</span>
+      </a>
+      <a href="/deals.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
+        <span>Deals</span>
+      </a>
+      <a href="/cheap-tech.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
+        <span>Tech</span>
+      </a>
+      <a href="/best-gifts.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
+        <span>Gifts</span>
+      </a>
+    </div>
+  </nav>
 </body>
-</html>
+            </html>
