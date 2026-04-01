@@ -55,6 +55,7 @@
     if (deal.badge === "Budget Find") score += 6;
 
     if (deal.price <= 10) score += 10;
+    else if (deal.price <= 15) score += 9;
     else if (deal.price <= 25) score += 8;
     else if (deal.price <= 50) score += 5;
 
@@ -72,6 +73,7 @@
     if (deal.badge === "Trending Deal") return "Trending";
     if (deal.badge === "Best Gift") return "Top Gift";
     if (deal.badge === "Cheap Tech") return "Budget Pick";
+    if (deal.badge === "Strong Value") return "Best Value";
     return "Popular";
   }
 
@@ -105,34 +107,32 @@
   }
 
   function productCard(deal) {
+    const isHot = Number(deal.price) <= 15 || deal.badge === "Trending Deal";
+
     return `
-      <article class="group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/60 transition hover:border-zinc-600">
+      <article class="group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/60 transition hover:border-zinc-500 hover:shadow-xl hover:shadow-black/30">
         <a href="/deal.html?asin=${encodeURIComponent(deal.asin)}" class="block">
           <div class="relative aspect-square overflow-hidden bg-zinc-950">
             <img
               src="${escapeHtml(deal.image)}"
               alt="${escapeHtml(deal.title)}"
-              class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]"
+              class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.05]"
               loading="lazy"
             />
-            <div class="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-black">
+
+            ${isHot ? `
+              <div class="absolute left-3 top-3 rounded-full bg-red-500 px-3 py-1 text-[11px] font-bold text-white">
+                🔥 HOT
+              </div>
+            ` : ""}
+
+            <div class="absolute right-3 top-3 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-black">
               ${escapeHtml(getHotLabel(deal))}
             </div>
           </div>
 
           <div class="p-4">
-            <div class="flex flex-wrap gap-2">
-              <span class="rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
-                ${escapeHtml(deal.badge || "Deal")}
-              </span>
-              ${deal.best_for ? `
-                <span class="rounded-full border border-zinc-800 bg-zinc-950 px-2.5 py-1 text-[11px] font-medium text-zinc-400">
-                  ${escapeHtml(deal.best_for)}
-                </span>
-              ` : ""}
-            </div>
-
-            <h3 class="mt-3 line-clamp-2 text-sm font-semibold leading-6 text-white">
+            <h3 class="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-white">
               ${escapeHtml(deal.title)}
             </h3>
 
@@ -140,9 +140,19 @@
               ${(deal.quick_points || []).slice(0, 2).map(point => `<li>• ${escapeHtml(point)}</li>`).join("")}
             </ul>
 
-            <div class="mt-3 flex items-center justify-between gap-3">
-              <span class="text-base font-bold text-green-400">$${Number(deal.price).toFixed(2)}</span>
-              <span class="text-sm font-medium text-zinc-300 transition group-hover:text-white">View →</span>
+            <div class="mt-4 flex items-center justify-between gap-3">
+              <div class="flex flex-col">
+                <span class="text-lg font-bold text-green-400">
+                  $${Number(deal.price).toFixed(2)}
+                </span>
+                <span class="text-[10px] text-zinc-500">
+                  Limited deal
+                </span>
+              </div>
+
+              <div class="rounded-lg bg-green-500 px-3 py-2 text-xs font-bold text-black">
+                View →
+              </div>
             </div>
           </div>
         </a>
@@ -166,8 +176,8 @@
     if (el) el.href = value;
   }
 
-  function renderByConfig(selector, config) {
-    renderGrid(selector, filterDeals(config).slice(0, 8));
+  function renderByConfig(selector, options) {
+    renderGrid(selector, filterDeals(options).slice(0, 8));
   }
 
   function renderHomeDeals() {
@@ -203,7 +213,7 @@
   }
 
   function renderGamingGrid() {
-    renderByConfig("#gaming-grid", { search: "creator tripod phone desk tech remote", sort: "score" });
+    renderByConfig("#gaming-grid", { search: "creator tripod phone desk tech remote gaming", sort: "score" });
   }
 
   function renderOutdoorGrid() {
@@ -219,7 +229,7 @@
   }
 
   function renderFashionGrid() {
-    renderByConfig("#fashion-grid", { search: "gift bottle cozy blanket travel", sort: "score" });
+    renderByConfig("#fashion-grid", { search: "gift bottle cozy blanket travel everyday", sort: "score" });
   }
 
   function renderJewelryGrid() {
@@ -285,7 +295,9 @@
       });
 
       grid.innerHTML = deals.map(productCard).join("");
-      if (results) results.textContent = `${deals.length} ${deals.length === 1 ? "deal" : "deals"}`;
+      if (results) {
+        results.textContent = `${deals.length} ${deals.length === 1 ? "deal" : "deals"}`;
+      }
     }
 
     if (searchInput) searchInput.addEventListener("input", run);
@@ -331,17 +343,19 @@
 
     const oldPrice = document.getElementById("product-old-price");
     if (oldPrice) {
-      const estimatedOld = Math.round((Number(deal.price) * 1.25) * 100) / 100;
+      const estimatedOld = Math.round(Number(deal.price) * 1.25 * 100) / 100;
       oldPrice.textContent = `$${estimatedOld.toFixed(2)}`;
     }
 
     const quickPoints = document.getElementById("deal-quick-points");
     if (quickPoints) {
-      quickPoints.innerHTML = (deal.quick_points || []).map(point => `<li>${escapeHtml(point)}</li>`).join("");
+      quickPoints.innerHTML = (deal.quick_points || [])
+        .map((point) => `<li>${escapeHtml(point)}</li>`)
+        .join("");
     }
 
     const related = filterDeals({ sort: "score" })
-      .filter(item => item.asin !== deal.asin)
+      .filter((item) => item.asin !== deal.asin)
       .slice(0, 4);
 
     renderGrid("#related-deals", related);
