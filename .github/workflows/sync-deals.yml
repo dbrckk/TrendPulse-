@@ -1,3 +1,5 @@
+# .github/workflows/sync-deals.yml
+
 name: Sync Deals
 
 on:
@@ -52,40 +54,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add \
-            index.html \
-            deal.html \
-            deals.html \
             sitemap.xml \
-            best-amazon-deals.html \
-            best-sellers.html \
-            crazy-deals.html \
-            under-10.html \
-            under-20.html \
-            under-50.html \
-            cheap-tech.html \
-            best-gifts.html \
-            best-amazon-gadgets.html \
-            amazon-home-decor-deals.html \
-            best-amazon-gifts-for-women.html \
-            best-amazon-gifts-for-men.html \
-            tech.html \
-            fashion.html \
-            jewelry.html \
-            shoes.html \
-            sports.html \
-            health.html \
-            baby.html \
-            pets.html \
-            office.html \
-            gaming.html \
-            outdoor.html \
-            home.html \
-            kitchen.html \
-            beauty.html || true
+            robots.txt \
+            tweet-state.json \
+            x-session.json || true
 
           if git diff --cached --quiet; then
             echo "No generated file changes to commit."
           else
-            git commit -m "Auto-update generated deal pages"
+            git commit -m "Auto-update generated metadata"
             git push
           fi
