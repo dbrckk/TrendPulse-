@@ -48,6 +48,11 @@
     if (deal.badge === "Strong Value") score += 8;
     if (deal.badge === "Giftable Pick") score += 8;
     if (deal.badge === "Cheap Tech") score += 7;
+    if (deal.badge === "Creator Pick") score += 7;
+    if (deal.badge === "Useful Tech") score += 7;
+    if (deal.badge === "Home Find") score += 6;
+    if (deal.badge === "Smart Utility") score += 6;
+    if (deal.badge === "Budget Find") score += 6;
 
     if (deal.price <= 10) score += 10;
     else if (deal.price <= 25) score += 8;
@@ -55,6 +60,7 @@
 
     if (deal.category === "tech") score += 3;
     if (deal.category === "gifts") score += 3;
+    if (deal.category === "home") score += 2;
     if (deal.best_for) score += 2;
     if ((deal.quick_points || []).length >= 2) score += 2;
 
@@ -160,6 +166,10 @@
     if (el) el.href = value;
   }
 
+  function renderByConfig(selector, config) {
+    renderGrid(selector, filterDeals(config).slice(0, 8));
+  }
+
   function renderHomeDeals() {
     renderGrid("#home-deals", filterDeals({ sort: "score" }).slice(0, 4));
   }
@@ -169,39 +179,83 @@
   }
 
   function renderCheapTechGrid() {
-    renderGrid("#cheap-tech-grid", filterDeals({ category: "tech", sort: "score" }).slice(0, 8));
+    renderByConfig("#cheap-tech-grid", { category: "tech", sort: "score" });
   }
 
   function renderGiftGrid() {
-    renderGrid("#best-gifts-grid", filterDeals({ category: "gifts", sort: "score" }).slice(0, 8));
+    renderByConfig("#best-gifts-grid", { category: "gifts", sort: "score" });
   }
 
   function renderHomeCategoryGrid() {
-    renderGrid("#home-grid", filterDeals({ category: "home", sort: "score" }).slice(0, 8));
+    renderByConfig("#home-grid", { category: "home", sort: "score" });
   }
 
   function renderKitchenGrid() {
-    renderGrid("#kitchen-grid", filterDeals({ category: "kitchen", sort: "score" }).slice(0, 8));
+    renderByConfig("#kitchen-grid", { category: "kitchen", sort: "score" });
   }
 
   function renderBeautyGrid() {
-    renderGrid("#beauty-grid", filterDeals({ search: "beauty skincare self-care", sort: "score" }).slice(0, 8));
+    renderByConfig("#beauty-grid", { search: "beauty skincare self-care gift cozy", sort: "score" });
   }
 
   function renderOfficeGrid() {
-    renderGrid("#office-grid", filterDeals({ search: "desk office usb lamp cable organizer", sort: "score" }).slice(0, 8));
+    renderByConfig("#office-grid", { search: "desk office usb lamp cable organizer tripod", sort: "score" });
   }
 
   function renderGamingGrid() {
-    renderGrid("#gaming-grid", filterDeals({ search: "creator tripod phone tech desk", sort: "score" }).slice(0, 8));
+    renderByConfig("#gaming-grid", { search: "creator tripod phone desk tech remote", sort: "score" });
   }
 
   function renderOutdoorGrid() {
-    renderGrid("#outdoor-grid", filterDeals({ search: "travel car bottle water outdoor", sort: "score" }).slice(0, 8));
+    renderByConfig("#outdoor-grid", { search: "travel car bottle water outdoor", sort: "score" });
   }
 
   function renderTravelGrid() {
-    renderGrid("#travel-grid", filterDeals({ search: "travel car sleep phone bottle", sort: "score" }).slice(0, 8));
+    renderByConfig("#travel-grid", { search: "travel car sleep phone bottle holder", sort: "score" });
+  }
+
+  function renderTechGrid() {
+    renderByConfig("#tech-grid", { category: "tech", sort: "score" });
+  }
+
+  function renderFashionGrid() {
+    renderByConfig("#fashion-grid", { search: "gift bottle cozy blanket travel", sort: "score" });
+  }
+
+  function renderJewelryGrid() {
+    renderByConfig("#jewelry-grid", { search: "gift women memory photo cozy", sort: "score" });
+  }
+
+  function renderBabyGrid() {
+    renderByConfig("#baby-grid", { search: "night light home cozy gift", sort: "score" });
+  }
+
+  function renderHealthGrid() {
+    renderByConfig("#health-grid", { search: "sleep water bottle home utility", sort: "score" });
+  }
+
+  function renderPetsGrid() {
+    renderByConfig("#pets-grid", { search: "home blanket utility gift", sort: "score" });
+  }
+
+  function renderShoesGrid() {
+    renderByConfig("#shoes-grid", { search: "travel gift useful everyday", sort: "score" });
+  }
+
+  function renderSportsGrid() {
+    renderByConfig("#sports-grid", { search: "water bottle tripod travel sleep", sort: "score" });
+  }
+
+  function renderUnder10Grid() {
+    renderByConfig("#under-10-grid", { maxPrice: 10, sort: "score" });
+  }
+
+  function renderUnder20Grid() {
+    renderByConfig("#under-20-grid", { maxPrice: 20, sort: "score" });
+  }
+
+  function renderUnder50Grid() {
+    renderByConfig("#under-50-grid", { maxPrice: 50, sort: "score" });
   }
 
   function renderDealsPage() {
@@ -307,6 +361,17 @@
     renderGamingGrid();
     renderOutdoorGrid();
     renderTravelGrid();
+    renderTechGrid();
+    renderFashionGrid();
+    renderJewelryGrid();
+    renderBabyGrid();
+    renderHealthGrid();
+    renderPetsGrid();
+    renderShoesGrid();
+    renderSportsGrid();
+    renderUnder10Grid();
+    renderUnder20Grid();
+    renderUnder50Grid();
     renderDealsPage();
     renderDealPage();
   });
