@@ -6,8 +6,11 @@
     affiliateTag: "Drackk-20"
   };
 
-  const FALLBACK_IMAGE = `${config.siteUrl}/og-image.jpg`;
-  const DISLIKED_STORAGE_KEY = "trendpulse_disliked_deals_v4";
+  const FALLBACK_IMAGE = "/fallback.jpg";
+  const DISLIKED_STORAGE_KEY = "trendpulse_disliked_deals_v5";
+
+  let cachedDeals = null;
+  let dealsPromise = null;
 
   function escapeHtml(value = "") {
     return String(value)
@@ -52,6 +55,18 @@
     }
   }
 
+  function proxyImage(url) {
+    const raw = String(url || "").trim();
+    if (!raw) return "";
+
+    try {
+      const parsed = new URL(raw);
+      return `https://images.weserv.nl/?url=${encodeURIComponent(parsed.host + parsed.pathname + parsed.search)}&w=1200&h=1200&fit=contain&bg=ffffff&output=jpg`;
+    } catch {
+      return "";
+    }
+  }
+
   function getDislikedDeals() {
     try {
       const raw = localStorage.getItem(DISLIKED_STORAGE_KEY);
@@ -80,165 +95,125 @@
     } catch {}
   }
 
-  function proxyImage(url) {
-    const raw = String(url || "").trim();
-    if (!raw) return "";
-
-    try {
-      const parsed = new URL(raw);
-
-      if (
-        parsed.hostname.includes("amazon.com") ||
-        parsed.hostname.includes("ssl-images-amazon.com") ||
-        parsed.hostname.includes("images-na.ssl-images-amazon.com") ||
-        parsed.hostname.includes("m.media-amazon.com")
-      ) {
-        return `https://images.weserv.nl/?url=${encodeURIComponent(parsed.host + parsed.pathname + parsed.search)}&w=1200&h=1200&fit=contain&bg=ffffff&output=jpg`;
-      }
-
-      return raw;
-    } catch {
-      return "";
-    }
+  function badgeFromRow(row) {
+    if (row.is_best_seller) return "Best Seller";
+    if (row.is_crazy_deal) return "Crazy Deal";
+    if (row.is_giftable) return "Giftable Pick";
+    if (safeNumber(row.discount_percentage || row.discount_percent, 0) >= 40) return "Strong Value";
+    return "Deal";
   }
 
-  function getCategoryPalette(category = "") {
-    const key = normalize(category);
+  function bestForFromRow(row) {
+    if (row.is_giftable) return "Gift";
+    if (normalize(row.category) === "tech") return "Tech";
+    if (normalize(row.category) === "home") return "Home";
+    if (normalize(row.category) === "kitchen") return "Kitchen";
+    return row.tagline || "Popular";
+  }
 
-    if (key === "tech") {
-      return {
-        bg1: "#0f172a",
-        bg2: "#1d4ed8",
-        accent: "#22d3ee",
-        badge: "#0b1220"
-      };
-    }
+  function sanitizeRow(row) {
+    const title = row.name || "Amazon Deal";
+    const asin = row.asin || row.id || slugify(title);
+    const proxied = proxyImage(row.image_url);
+    const rawImage = proxied || row.image_url || FALLBACK_IMAGE;
+    const price = safeNumber(row.price, 0);
+    const originalPrice = safeNumber(row.original_price, price ? price * 1.25 : 0);
+    const views = safeNumber(row.views, 0);
+    const clicks = safeNumber(row.clicks, 0);
+    const discount = safeNumber(row.discount_percentage ?? row.discount_percent, 0);
+    const badge = badgeFromRow(row);
+    const bestFor = bestForFromRow(row);
 
-    if (key === "gifts") {
-      return {
-        bg1: "#2a0f1f",
-        bg2: "#be185d",
-        accent: "#f9a8d4",
-        badge: "#220914"
-      };
-    }
-
-    if (key === "home" || key === "kitchen") {
-      return {
-        bg1: "#1f1b16",
-        bg2: "#a16207",
-        accent: "#fde68a",
-        badge: "#1a1409"
-      };
-    }
+    const quickPoints = [
+      row.tagline || `${badge} on Amazon`,
+      views > 0 ? `${views} views` : null,
+      clicks > 0 ? `${clicks} clicks` : null,
+      discount > 0 ? `${discount}% off` : null
+    ].filter(Boolean).slice(0, 3);
 
     return {
-      bg1: "#18181b",
-      bg2: "#3f3f46",
-      accent: "#f4f4f5",
-      badge: "#111113"
-    };
-  }
-
-  function buildInlinePoster(deal) {
-    const palette = getCategoryPalette(deal.category);
-    const title = String(deal.title || "Amazon Deal");
-    const titleLine1 = escapeHtml(title.slice(0, 26));
-    const titleLine2 = escapeHtml(title.length > 26 ? title.slice(26, 52) : "");
-    const badge = escapeHtml(deal.badge || "Deal");
-    const price = `$${safeNumber(deal.price, 0).toFixed(2)}`;
-    const initials = escapeHtml(initialsFromTitle(title));
-
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
-        <defs>
-          <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stop-color="${palette.bg1}" />
-            <stop offset="100%" stop-color="${palette.bg2}" />
-          </linearGradient>
-        </defs>
-        <rect width="1200" height="1200" fill="url(#g)" />
-        <circle cx="1040" cy="180" r="180" fill="${palette.accent}" opacity="0.15" />
-        <circle cx="180" cy="1040" r="220" fill="${palette.accent}" opacity="0.12" />
-        <rect x="72" y="72" rx="40" ry="40" width="260" height="92" fill="${palette.badge}" opacity="0.95" />
-        <text x="202" y="129" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#ffffff">${badge}</text>
-
-        <rect x="72" y="930" rx="40" ry="40" width="250" height="120" fill="${palette.badge}" opacity="0.95" />
-        <text x="197" y="1008" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="800" fill="#22c55e">${price}</text>
-
-        <text x="600" y="445" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="220" font-weight="800" fill="#ffffff" opacity="0.16">${initials}</text>
-
-        <text x="90" y="700" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="800" fill="#ffffff">${titleLine1}</text>
-        ${titleLine2 ? `<text x="90" y="790" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="800" fill="#ffffff">${titleLine2}</text>` : ""}
-
-        <text x="90" y="1110" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="600" fill="rgba(255,255,255,0.72)">TrendPulse • Amazon deal</text>
-      </svg>
-    `;
-
-    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
-  }
-
-  function sanitizeDeal(rawDeal) {
-    const title = rawDeal.title || "Amazon Deal";
-    const asin = rawDeal.asin || slugify(title);
-    const image = proxyImage(rawDeal.image);
-    const inlinePoster = buildInlinePoster(rawDeal);
-
-    return {
-      ...rawDeal,
+      id: row.id || asin,
       asin,
       title,
-      image,
-      inlinePoster,
-      price: safeNumber(rawDeal.price, 0),
-      badge: rawDeal.badge || "Deal",
-      category: normalize(rawDeal.category || "general") || "general",
-      tags: Array.isArray(rawDeal.tags) ? rawDeal.tags : [],
-      quick_points: Array.isArray(rawDeal.quick_points) ? rawDeal.quick_points : [],
-      best_for: rawDeal.best_for || "",
-      affiliate_link: ensureAffiliateTag(rawDeal.affiliate_link || "#")
+      description: row.description || row.tagline || "Amazon product selected by TrendPulse.",
+      price,
+      original_price: originalPrice,
+      image: rawImage,
+      affiliate_link: ensureAffiliateTag(row.affiliate_link || row.amazon_url || row.raw_amazon_url || "#"),
+      category: normalize(row.category || "general") || "general",
+      badge,
+      best_for: bestFor,
+      quick_points: quickPoints,
+      tags: [row.category, row.source_name, row.tagline].filter(Boolean),
+      score: safeNumber(row.score, 0),
+      views,
+      clicks,
+      is_active: row.is_active !== false
     };
   }
 
-  function getDeals() {
-    const rawDeals = Array.isArray(window.TRENDPULSE_DEALS) ? window.TRENDPULSE_DEALS : [];
-    const seen = new Set();
+  async function fetchDealsFromSupabase() {
+    if (!window.supabaseClient) {
+      console.error("Supabase client not initialized.");
+      return [];
+    }
 
-    return rawDeals
-      .filter((deal) => deal && (deal.asin || deal.title))
-      .map(sanitizeDeal)
-      .filter((deal) => {
-        const key = `${deal.asin}|${deal.title}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
+    const { data, error } = await window.supabaseClient
+      .from("products")
+      .select("*")
+      .eq("is_active", true)
+      .order("score", { ascending: false })
+      .order("updated_at", { ascending: false });
+
+    if (error) {
+      console.error("Supabase fetch error:", error);
+      return [];
+    }
+
+    return (data || []).map(sanitizeRow);
   }
 
-  function getDealByAsin(asin) {
-    return getDeals().find((deal) => deal.asin === asin) || null;
+  async function getDeals() {
+    if (cachedDeals) return cachedDeals;
+    if (dealsPromise) return dealsPromise;
+
+    dealsPromise = fetchDealsFromSupabase()
+      .then((rows) => {
+        cachedDeals = Array.isArray(rows) ? rows : [];
+        return cachedDeals;
+      })
+      .catch((error) => {
+        console.error("Deal loading failed:", error);
+        cachedDeals = [];
+        return cachedDeals;
+      });
+
+    return dealsPromise;
+  }
+
+  async function getDealByAsin(asin) {
+    const deals = await getDeals();
+    return deals.find((deal) => deal.asin === asin) || null;
   }
 
   function scoreDeal(deal) {
     let score = 0;
     const price = safeNumber(deal.price, 0);
 
-    if (deal.badge === "Best Gift") score += 12;
-    if (deal.badge === "Trending Deal") score += 10;
-    if (deal.badge === "Popular Pick") score += 9;
-    if (deal.badge === "Strong Value") score += 8;
+    if (deal.badge === "Best Seller") score += 12;
+    if (deal.badge === "Crazy Deal") score += 10;
     if (deal.badge === "Giftable Pick") score += 8;
-    if (deal.badge === "Cheap Tech") score += 7;
-    if (deal.badge === "Creator Pick") score += 7;
-    if (deal.badge === "Useful Tech") score += 7;
-    if (deal.badge === "Home Find") score += 6;
-    if (deal.badge === "Smart Utility") score += 6;
-    if (deal.badge === "Budget Find") score += 6;
+    if (deal.badge === "Strong Value") score += 7;
+    if (deal.badge === "Deal") score += 5;
 
     if (price <= 10) score += 10;
     else if (price <= 15) score += 9;
     else if (price <= 25) score += 8;
     else if (price <= 50) score += 5;
+
+    score += safeNumber(deal.score, 0);
+    score += Math.min(safeNumber(deal.clicks, 0), 20);
+    score += Math.min(Math.floor(safeNumber(deal.views, 0) / 10), 20);
 
     if (deal.category === "tech") score += 3;
     if (deal.category === "gifts") score += 3;
@@ -252,19 +227,20 @@
   function getHotLabel(deal) {
     const price = safeNumber(deal.price, 0);
 
+    if (deal.badge === "Best Seller") return "Best Seller";
+    if (deal.badge === "Crazy Deal") return "Hot Deal";
     if (price <= 10) return "Hot Price";
     if (price <= 20) return "Low Price";
-    if (deal.badge === "Trending Deal") return "Trending";
-    if (deal.badge === "Best Gift") return "Top Gift";
-    if (deal.badge === "Cheap Tech") return "Budget Pick";
+    if (deal.badge === "Giftable Pick") return "Top Gift";
     if (deal.badge === "Strong Value") return "Best Value";
     return "Popular";
   }
 
-  function filterDeals({ search = "", category = "all", maxPrice = null, sort = "score" } = {}) {
+  async function filterDeals({ search = "", category = "all", maxPrice = null, sort = "score" } = {}) {
     const query = normalize(search);
+    const allDeals = await getDeals();
 
-    let deals = getDeals().filter((deal) => {
+    let deals = allDeals.filter((deal) => {
       const haystack = [
         deal.title,
         deal.description,
@@ -273,9 +249,7 @@
         deal.best_for,
         ...(deal.tags || []),
         ...(deal.quick_points || [])
-      ]
-        .join(" ")
-        .toLowerCase();
+      ].join(" ").toLowerCase();
 
       const searchOk = !query || haystack.includes(query);
       const categoryOk = category === "all" || deal.category === normalize(category);
@@ -294,29 +268,28 @@
 
   function imageMarkup(deal, mode = "card") {
     const title = escapeHtml(deal.title || "Amazon Deal");
-    const fallback = escapeHtml(deal.inlinePoster || FALLBACK_IMAGE);
-    const external = escapeHtml(deal.image || "");
-
-    const imgClass =
+    const fallbackText = escapeHtml(initialsFromTitle(deal.title));
+    const external = deal.image ? escapeHtml(deal.image) : "";
+    const wrapperClass =
       mode === "detail"
-        ? "absolute inset-0 h-full w-full object-contain transition duration-300"
-        : "absolute inset-0 h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]";
+        ? "relative h-full w-full bg-white"
+        : "relative h-full w-full bg-white";
 
     return `
-      <div class="relative h-full w-full overflow-hidden">
-        <img
-          src="${fallback}"
-          alt="${title}"
-          class="absolute inset-0 h-full w-full object-cover"
-          loading="lazy"
-        />
+      <div class="${wrapperClass}">
+        <div class="absolute inset-0 flex items-center justify-center bg-zinc-100">
+          <div class="text-center">
+            <div class="text-4xl font-bold text-zinc-700">${fallbackText}</div>
+            <div class="mt-2 px-4 text-xs font-medium text-zinc-500">${title}</div>
+          </div>
+        </div>
         ${external ? `
           <img
             src="${external}"
             alt="${title}"
             loading="lazy"
             referrerpolicy="no-referrer"
-            class="${imgClass}"
+            class="relative z-10 h-full w-full object-contain"
             onerror="this.remove()"
           />
         ` : ""}
@@ -325,22 +298,27 @@
   }
 
   function productCard(deal) {
-    const isHot = safeNumber(deal.price, 0) <= 15 || deal.badge === "Trending Deal";
+    const isHot =
+      safeNumber(deal.price, 0) <= 15 ||
+      deal.badge === "Crazy Deal" ||
+      deal.badge === "Best Seller";
+
     const points = (deal.quick_points || []).slice(0, 2);
+    const price = `$${safeNumber(deal.price, 0).toFixed(2)}`;
 
     return `
       <article class="group h-full overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/70 transition hover:border-zinc-500 hover:shadow-xl hover:shadow-black/30">
         <a href="/deal.html?asin=${encodeURIComponent(deal.asin)}" class="flex h-full flex-col">
-          <div class="relative aspect-square overflow-hidden bg-white">
+          <div class="relative aspect-square overflow-hidden">
             ${imageMarkup(deal, "card")}
 
             ${isHot ? `
-              <div class="absolute left-3 top-3 z-10 rounded-full bg-red-500 px-3 py-1 text-[11px] font-bold text-white shadow">
+              <div class="absolute left-3 top-3 z-20 rounded-full bg-red-500 px-3 py-1 text-[11px] font-bold text-white shadow">
                 🔥 HOT
               </div>
             ` : ""}
 
-            <div class="absolute right-3 top-3 z-10 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
+            <div class="absolute right-3 top-3 z-20 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
               ${escapeHtml(getHotLabel(deal))}
             </div>
           </div>
@@ -367,7 +345,7 @@
 
             <div class="mt-auto flex items-end justify-between gap-3 pt-4">
               <div class="flex flex-col">
-                <span class="text-lg font-bold text-green-400">$${safeNumber(deal.price, 0).toFixed(2)}</span>
+                <span class="text-lg font-bold text-green-400">${price}</span>
                 <span class="text-[10px] text-zinc-500">Check on Amazon</span>
               </div>
 
@@ -397,99 +375,102 @@
     if (el) el.href = value;
   }
 
-  function renderByConfig(selector, options) {
-    renderGrid(selector, filterDeals(options).slice(0, 8));
+  async function renderByConfig(selector, options) {
+    const deals = await filterDeals(options);
+    renderGrid(selector, deals.slice(0, 8));
   }
 
-  function renderHomeDeals() {
-    renderGrid("#home-deals", filterDeals({ sort: "score" }).slice(0, 4));
+  async function renderHomeDeals() {
+    const deals = await filterDeals({ sort: "score" });
+    renderGrid("#home-deals", deals.slice(0, 4));
   }
 
-  function renderBestSellerGrid() {
-    renderGrid("#best-seller-grid", filterDeals({ sort: "score" }).slice(0, 8));
+  async function renderBestSellerGrid() {
+    const deals = await filterDeals({ sort: "score" });
+    renderGrid("#best-seller-grid", deals.filter((deal) => deal.badge === "Best Seller").slice(0, 8));
   }
 
-  function renderCheapTechGrid() {
-    renderByConfig("#cheap-tech-grid", { category: "tech", sort: "score" });
+  async function renderCheapTechGrid() {
+    await renderByConfig("#cheap-tech-grid", { category: "tech", sort: "score" });
   }
 
-  function renderGiftGrid() {
-    renderByConfig("#best-gifts-grid", { category: "gifts", sort: "score" });
+  async function renderGiftGrid() {
+    await renderByConfig("#best-gifts-grid", { category: "gifts", sort: "score" });
   }
 
-  function renderHomeCategoryGrid() {
-    renderByConfig("#home-grid", { category: "home", sort: "score" });
+  async function renderHomeCategoryGrid() {
+    await renderByConfig("#home-grid", { category: "home", sort: "score" });
   }
 
-  function renderKitchenGrid() {
-    renderByConfig("#kitchen-grid", { category: "kitchen", sort: "score" });
+  async function renderKitchenGrid() {
+    await renderByConfig("#kitchen-grid", { category: "kitchen", sort: "score" });
   }
 
-  function renderBeautyGrid() {
-    renderByConfig("#beauty-grid", { search: "beauty skincare self-care gift cozy", sort: "score" });
+  async function renderBeautyGrid() {
+    await renderByConfig("#beauty-grid", { search: "beauty self care gift", sort: "score" });
   }
 
-  function renderOfficeGrid() {
-    renderByConfig("#office-grid", { search: "desk office usb lamp cable organizer tripod", sort: "score" });
+  async function renderOfficeGrid() {
+    await renderByConfig("#office-grid", { search: "desk office organizer lamp", sort: "score" });
   }
 
-  function renderGamingGrid() {
-    renderByConfig("#gaming-grid", { search: "creator tripod phone desk tech remote gaming", sort: "score" });
+  async function renderGamingGrid() {
+    await renderByConfig("#gaming-grid", { search: "gaming creator phone tripod", sort: "score" });
   }
 
-  function renderOutdoorGrid() {
-    renderByConfig("#outdoor-grid", { search: "travel car bottle water outdoor", sort: "score" });
+  async function renderOutdoorGrid() {
+    await renderByConfig("#outdoor-grid", { search: "travel water outdoor car", sort: "score" });
   }
 
-  function renderTravelGrid() {
-    renderByConfig("#travel-grid", { search: "travel car sleep phone bottle holder", sort: "score" });
+  async function renderTravelGrid() {
+    await renderByConfig("#travel-grid", { search: "travel organizer car sleep", sort: "score" });
   }
 
-  function renderTechGrid() {
-    renderByConfig("#tech-grid", { category: "tech", sort: "score" });
+  async function renderTechGrid() {
+    await renderByConfig("#tech-grid", { category: "tech", sort: "score" });
   }
 
-  function renderFashionGrid() {
-    renderByConfig("#fashion-grid", { search: "gift bottle cozy blanket travel everyday", sort: "score" });
+  async function renderFashionGrid() {
+    await renderByConfig("#fashion-grid", { search: "gift cozy everyday", sort: "score" });
   }
 
-  function renderJewelryGrid() {
-    renderByConfig("#jewelry-grid", { search: "gift women memory photo cozy", sort: "score" });
+  async function renderJewelryGrid() {
+    await renderByConfig("#jewelry-grid", { search: "gift women memory photo", sort: "score" });
   }
 
-  function renderBabyGrid() {
-    renderByConfig("#baby-grid", { search: "night light home cozy gift", sort: "score" });
+  async function renderBabyGrid() {
+    await renderByConfig("#baby-grid", { search: "gift home cozy light", sort: "score" });
   }
 
-  function renderHealthGrid() {
-    renderByConfig("#health-grid", { search: "sleep water bottle home utility", sort: "score" });
+  async function renderHealthGrid() {
+    await renderByConfig("#health-grid", { search: "sleep hydration wellness", sort: "score" });
   }
 
-  function renderPetsGrid() {
-    renderByConfig("#pets-grid", { search: "home blanket utility gift", sort: "score" });
+  async function renderPetsGrid() {
+    await renderByConfig("#pets-grid", { search: "home gift useful", sort: "score" });
   }
 
-  function renderShoesGrid() {
-    renderByConfig("#shoes-grid", { search: "travel gift useful everyday", sort: "score" });
+  async function renderShoesGrid() {
+    await renderByConfig("#shoes-grid", { search: "everyday travel useful", sort: "score" });
   }
 
-  function renderSportsGrid() {
-    renderByConfig("#sports-grid", { search: "water bottle tripod travel sleep", sort: "score" });
+  async function renderSportsGrid() {
+    await renderByConfig("#sports-grid", { search: "water sports travel", sort: "score" });
   }
 
-  function renderUnder10Grid() {
-    renderByConfig("#under-10-grid", { maxPrice: 10, sort: "score" });
+  async function renderUnder10Grid() {
+    await renderByConfig("#under-10-grid", { maxPrice: 10, sort: "score" });
   }
 
-  function renderUnder20Grid() {
-    renderByConfig("#under-20-grid", { maxPrice: 20, sort: "score" });
+  async function renderUnder20Grid() {
+    await renderByConfig("#under-20-grid", { maxPrice: 20, sort: "score" });
   }
 
-  function renderUnder50Grid() {
-    renderByConfig("#under-50-grid", { maxPrice: 50, sort: "score" });
+  async function renderUnder50Grid() {
+    await renderByConfig("#under-50-grid", { maxPrice: 50, sort: "score" });
   }
 
-  function renderDealsPage() {
+  async function renderDealsPage() {
     const searchInput = document.getElementById("searchInput");
     const categoryFilter = document.getElementById("categoryFilter");
     const sortFilter = document.getElementById("sortFilter");
@@ -507,8 +488,8 @@
       return null;
     }
 
-    function run() {
-      const deals = filterDeals({
+    async function run() {
+      const deals = await filterDeals({
         search: searchInput ? searchInput.value : "",
         category: categoryFilter ? categoryFilter.value : "all",
         maxPrice: parseMaxPrice(),
@@ -526,7 +507,10 @@
     if (sortFilter) sortFilter.addEventListener("change", run);
     if (priceFilter) priceFilter.addEventListener("change", run);
 
-    run();
+    const urlQuery = new URLSearchParams(window.location.search).get("q");
+    if (urlQuery && searchInput) searchInput.value = urlQuery;
+
+    await run();
   }
 
   function updateMetaForDeal(deal) {
@@ -551,10 +535,10 @@
     if (ogTitle) ogTitle.setAttribute("content", title);
     if (ogDescription) ogDescription.setAttribute("content", description);
     if (ogUrl) ogUrl.setAttribute("content", pageUrl);
-    if (ogImage) ogImage.setAttribute("content", deal.inlinePoster || FALLBACK_IMAGE);
+    if (ogImage) ogImage.setAttribute("content", deal.image || FALLBACK_IMAGE);
     if (twitterTitle) twitterTitle.setAttribute("content", title);
     if (twitterDescription) twitterDescription.setAttribute("content", description);
-    if (twitterImage) twitterImage.setAttribute("content", deal.inlinePoster || FALLBACK_IMAGE);
+    if (twitterImage) twitterImage.setAttribute("content", deal.image || FALLBACK_IMAGE);
   }
 
   function renderDetailImage(containerId, deal) {
@@ -566,9 +550,25 @@
     return true;
   }
 
-  function renderDealPage() {
+  async function trackView(deal) {
+    if (!window.supabaseClient || !deal?.id) return;
+    try {
+      await window.supabaseClient.rpc("increment_views", { product_id: deal.id });
+    } catch {}
+  }
+
+  async function trackClick(deal) {
+    if (!window.supabaseClient || !deal?.id) return;
+    try {
+      await window.supabaseClient.rpc("increment_clicks", { product_id: deal.id });
+    } catch {}
+  }
+
+  async function renderDealPage() {
     const asin = new URLSearchParams(window.location.search).get("asin");
-    const deal = getDealByAsin(asin) || getDeals()[0];
+    if (!asin && !document.getElementById("deal-title")) return;
+
+    const deal = (await getDealByAsin(asin)) || (await getDeals())[0];
     if (!deal) return;
 
     const finalLink = ensureAffiliateTag(deal.affiliate_link);
@@ -576,4 +576,345 @@
     const detailWrapper = document.getElementById("deal-image-wrapper");
     if (detailWrapper) {
       renderDetailImage("deal-image-wrapper", deal);
-    
+    }
+
+    setText("product-title", deal.title);
+    setText("deal-title", deal.title);
+    setText("product-description", deal.description);
+    setText("deal-description", deal.description);
+    setText("product-price", `$${safeNumber(deal.price).toFixed(2)}`);
+    setText("deal-price", `$${safeNumber(deal.price).toFixed(2)}`);
+    setText("deal-badge", deal.badge || "Deal");
+    setText("deal-best-for", deal.best_for || "Useful pick");
+    setText("deal-market", "US Market");
+    setText("deal-market-card", "US Amazon");
+    setText("deal-type-card", deal.badge || "Deal");
+    setText("breadcrumb-product-name", deal.title);
+    setText("sticky-deal-title", deal.title);
+    setText("sticky-deal-price", `$${safeNumber(deal.price).toFixed(2)}`);
+
+    setHref("buy-btn", finalLink);
+    setHref("buy-btn-2", finalLink);
+    setHref("amazon-button", finalLink);
+    setHref("sticky-amazon-button", finalLink);
+
+    const oldPrice = document.getElementById("product-old-price");
+    if (oldPrice) {
+      oldPrice.textContent = `$${safeNumber(deal.original_price, safeNumber(deal.price) * 1.25).toFixed(2)}`;
+    }
+
+    const quickPoints = document.getElementById("deal-quick-points");
+    if (quickPoints) {
+      quickPoints.innerHTML = (deal.quick_points || [])
+        .map((point) => `<li>${escapeHtml(point)}</li>`)
+        .join("");
+    }
+
+    const related = (await filterDeals({ sort: "score" }))
+      .filter((item) => item.asin !== deal.asin)
+      .slice(0, 4);
+
+    renderGrid("#related-deals", related);
+    updateMetaForDeal(deal);
+    trackView(deal);
+
+    ["amazon-button", "sticky-amazon-button", "buy-btn", "buy-btn-2"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("click", function () {
+          trackClick(deal);
+        });
+      }
+    });
+  }
+
+  async function getSwipeDeals() {
+    let disliked = new Set(getDislikedDeals());
+    let deals = (await filterDeals({ sort: "score" })).filter((deal) => !disliked.has(deal.asin));
+
+    if (!deals.length) {
+      clearDislikedDeals();
+      disliked = new Set();
+      deals = await filterDeals({ sort: "score" });
+    }
+
+    return deals;
+  }
+
+  function swipeCardMarkup(deal, offset) {
+    const price = `$${safeNumber(deal.price).toFixed(2)}`;
+    const points = (deal.quick_points || []).slice(0, 3);
+
+    return `
+      <article
+        class="swipe-card absolute inset-0 overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30"
+        data-asin="${escapeHtml(deal.asin)}"
+        style="transform: translateY(${offset * 10}px) scale(${1 - offset * 0.04}); z-index: ${30 - offset};"
+      >
+        <div class="relative h-full">
+          <div class="absolute left-4 top-4 z-20 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+            ${escapeHtml(getHotLabel(deal))}
+          </div>
+
+          <div class="h-[58%] overflow-hidden bg-white">
+            ${imageMarkup(deal, "detail")}
+          </div>
+
+          <div class="flex h-[42%] flex-col bg-zinc-950 p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="inline-flex rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-medium text-zinc-300">
+                  ${escapeHtml(deal.badge)}
+                </div>
+                <h2 class="mt-3 text-2xl font-bold leading-tight text-white">
+                  ${escapeHtml(deal.title)}
+                </h2>
+              </div>
+              <div class="text-right">
+                <div class="text-3xl font-bold text-green-400">${price}</div>
+                <div class="mt-1 text-xs text-zinc-500">Amazon deal</div>
+              </div>
+            </div>
+
+            <ul class="mt-4 space-y-2 text-sm text-zinc-300">
+              ${points.map((point) => `<li>• ${escapeHtml(point)}</li>`).join("")}
+            </ul>
+
+            <div class="mt-auto flex gap-3 pt-5">
+              <button
+                type="button"
+                class="swipe-dislike inline-flex flex-1 items-center justify-center rounded-full border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300"
+              >
+                Dislike
+              </button>
+              <a
+                href="${escapeHtml(deal.affiliate_link)}"
+                target="_blank"
+                rel="nofollow sponsored noopener"
+                class="swipe-buy inline-flex flex-1 items-center justify-center rounded-full bg-green-500 px-4 py-3 text-sm font-semibold text-black"
+              >
+                Buy on Amazon
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  async function renderSwipeHome() {
+    const stack = document.getElementById("swipe-stack");
+    if (!stack) return;
+
+    const emptyState = document.getElementById("swipe-empty-state");
+    const dislikeBtn = document.getElementById("swipe-dislike-btn");
+    const likeBtn = document.getElementById("swipe-like-btn");
+    const resetBtn = document.getElementById("reset-disliked-deals");
+
+    let deals = await getSwipeDeals();
+
+    function topDeal() {
+      return deals[0] || null;
+    }
+
+    function updateButtons() {
+      const current = topDeal();
+      const disabled = !current;
+
+      if (dislikeBtn) {
+        dislikeBtn.disabled = disabled;
+        dislikeBtn.classList.toggle("opacity-50", disabled);
+      }
+
+      if (likeBtn) {
+        likeBtn.disabled = disabled;
+        likeBtn.classList.toggle("opacity-50", disabled);
+      }
+    }
+
+    function render() {
+      const visible = deals.slice(0, 3);
+      stack.innerHTML = visible
+        .map((deal, index) => swipeCardMarkup(deal, index))
+        .reverse()
+        .join("");
+
+      if (emptyState) {
+        emptyState.classList.toggle("hidden", deals.length > 0);
+      }
+
+      stack.classList.toggle("hidden", deals.length === 0);
+      updateButtons();
+      bindSwipeCards();
+    }
+
+    async function buyTopDeal() {
+      const current = topDeal();
+      if (!current) return;
+      addDislikedDeal(current.asin);
+      deals = deals.filter((deal) => deal.asin !== current.asin);
+      trackClick(current);
+      window.open(current.affiliate_link, "_blank", "noopener,noreferrer");
+      render();
+    }
+
+    async function dislikeTopDeal() {
+      const current = topDeal();
+      if (!current) return;
+      addDislikedDeal(current.asin);
+      deals = deals.filter((deal) => deal.asin !== current.asin);
+      render();
+    }
+
+    function animateOut(card, direction, callback) {
+      if (!card) {
+        callback();
+        return;
+      }
+
+      card.style.transition = "transform 220ms ease, opacity 220ms ease";
+      card.style.transform = `translateX(${direction * 120}%) rotate(${direction * 14}deg)`;
+      card.style.opacity = "0";
+
+      window.setTimeout(callback, 220);
+    }
+
+    function bindSwipeCards() {
+      const topCard = stack.querySelector(".swipe-card:last-child");
+      if (!topCard) return;
+
+      const dislikeAction = topCard.querySelector(".swipe-dislike");
+      const buyAction = topCard.querySelector(".swipe-buy");
+
+      if (dislikeAction) {
+        dislikeAction.addEventListener("click", function (event) {
+          event.preventDefault();
+          animateOut(topCard, -1, dislikeTopDeal);
+        });
+      }
+
+      if (buyAction) {
+        buyAction.addEventListener("click", function () {
+          const current = topDeal();
+          if (!current) return;
+          addDislikedDeal(current.asin);
+          deals = deals.filter((deal) => deal.asin !== current.asin);
+          trackClick(current);
+          window.setTimeout(render, 50);
+        });
+      }
+
+      let startX = 0;
+      let currentX = 0;
+      let dragging = false;
+
+      function onPointerMove(clientX) {
+        if (!dragging) return;
+        currentX = clientX - startX;
+        topCard.style.transition = "none";
+        topCard.style.transform = `translateX(${currentX}px) rotate(${currentX / 18}deg)`;
+      }
+
+      function onPointerEnd() {
+        if (!dragging) return;
+        dragging = false;
+
+        if (currentX < -100) {
+          animateOut(topCard, -1, dislikeTopDeal);
+        } else if (currentX > 100) {
+          animateOut(topCard, 1, buyTopDeal);
+        } else {
+          topCard.style.transition = "transform 180ms ease";
+          topCard.style.transform = "";
+        }
+      }
+
+      topCard.addEventListener("touchstart", function (event) {
+        dragging = true;
+        startX = event.touches[0].clientX;
+        currentX = 0;
+      }, { passive: true });
+
+      topCard.addEventListener("touchmove", function (event) {
+        onPointerMove(event.touches[0].clientX);
+      }, { passive: true });
+
+      topCard.addEventListener("touchend", onPointerEnd, { passive: true });
+
+      topCard.addEventListener("mousedown", function (event) {
+        dragging = true;
+        startX = event.clientX;
+        currentX = 0;
+
+        function moveHandler(moveEvent) {
+          onPointerMove(moveEvent.clientX);
+        }
+
+        function upHandler() {
+          document.removeEventListener("mousemove", moveHandler);
+          document.removeEventListener("mouseup", upHandler);
+          onPointerEnd();
+        }
+
+        document.addEventListener("mousemove", moveHandler);
+        document.addEventListener("mouseup", upHandler);
+      });
+    }
+
+    if (dislikeBtn) {
+      dislikeBtn.addEventListener("click", function () {
+        const card = stack.querySelector(".swipe-card:last-child");
+        animateOut(card, -1, dislikeTopDeal);
+      });
+    }
+
+    if (likeBtn) {
+      likeBtn.addEventListener("click", function () {
+        const card = stack.querySelector(".swipe-card:last-child");
+        animateOut(card, 1, buyTopDeal);
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", async function () {
+        clearDislikedDeals();
+        deals = await getSwipeDeals();
+        render();
+      });
+    }
+
+    render();
+  }
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    await getDeals();
+
+    await Promise.all([
+      renderHomeDeals(),
+      renderBestSellerGrid(),
+      renderCheapTechGrid(),
+      renderGiftGrid(),
+      renderHomeCategoryGrid(),
+      renderKitchenGrid(),
+      renderBeautyGrid(),
+      renderOfficeGrid(),
+      renderGamingGrid(),
+      renderOutdoorGrid(),
+      renderTravelGrid(),
+      renderTechGrid(),
+      renderFashionGrid(),
+      renderJewelryGrid(),
+      renderBabyGrid(),
+      renderHealthGrid(),
+      renderPetsGrid(),
+      renderShoesGrid(),
+      renderSportsGrid(),
+      renderUnder10Grid(),
+      renderUnder20Grid(),
+      renderUnder50Grid(),
+      renderDealsPage(),
+      renderDealPage(),
+      renderSwipeHome()
+    ]);
+  });
+})();
