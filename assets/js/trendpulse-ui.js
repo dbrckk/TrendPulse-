@@ -7,7 +7,7 @@
   };
 
   const FALLBACK_IMAGE = `${config.siteUrl}/og-image.jpg`;
-  const DISLIKED_STORAGE_KEY = "trendpulse_disliked_deals_v1";
+  const DISLIKED_STORAGE_KEY = "trendpulse_disliked_deals_v2";
 
   function escapeHtml(value = "") {
     return String(value)
@@ -80,6 +80,23 @@
     } catch {}
   }
 
+  function getDisplayImage(url) {
+    const raw = String(url || "").trim();
+    if (!raw) return FALLBACK_IMAGE;
+
+    try {
+      const parsed = new URL(raw);
+
+      if (parsed.hostname.includes("amazon")) {
+        return `https://images.weserv.nl/?url=${encodeURIComponent(parsed.host + parsed.pathname + parsed.search)}&w=900&h=900&fit=contain&bg=ffffff&output=jpg`;
+      }
+
+      return raw;
+    } catch {
+      return FALLBACK_IMAGE;
+    }
+  }
+
   function getDeals() {
     const rawDeals = Array.isArray(window.TRENDPULSE_DEALS) ? window.TRENDPULSE_DEALS : [];
     const seen = new Set();
@@ -100,7 +117,8 @@
           ...deal,
           asin,
           title,
-          image: deal.image || FALLBACK_IMAGE,
+          image: getDisplayImage(deal.image),
+          raw_image: deal.image || "",
           price,
           badge,
           category,
@@ -224,10 +242,15 @@
           referrerpolicy="no-referrer"
           class="${imgClass}"
           onerror="
+            if(!this.dataset.fallbackTried){
+              this.dataset.fallbackTried='1';
+              this.src='${escapeHtml(FALLBACK_IMAGE)}';
+              return;
+            }
             this.onerror=null;
             this.style.display='none';
             var fallback=this.parentElement.querySelector('[data-fallback]');
-            if(fallback){fallback.classList.remove('hidden'); fallback.classList.add('flex');}
+            if(fallback){fallback.classList.remove('hidden');fallback.classList.add('flex');}
           "
         />
         <div data-fallback class="absolute inset-0 hidden items-center justify-center bg-zinc-100 text-center">
@@ -496,6 +519,11 @@
         imageEl.alt = deal.title;
         imageEl.referrerPolicy = "no-referrer";
         imageEl.onerror = function () {
+          if (!this.dataset.fallbackTried) {
+            this.dataset.fallbackTried = "1";
+            this.src = FALLBACK_IMAGE;
+            return;
+          }
           this.onerror = null;
           this.style.display = "none";
           const fallback = document.createElement("div");
@@ -569,7 +597,6 @@
       <article
         class="swipe-card absolute inset-0 overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30"
         data-asin="${escapeHtml(deal.asin)}"
-        data-link="${escapeHtml(deal.affiliate_link)}"
         style="transform: translateY(${offset * 10}px) scale(${1 - offset * 0.04}); z-index: ${30 - offset};"
       >
         <div class="relative h-full">
@@ -584,7 +611,7 @@
           <div class="flex h-[42%] flex-col bg-zinc-950 p-5">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <div class="rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-medium text-zinc-300 inline-flex">
+                <div class="inline-flex rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-medium text-zinc-300">
                   ${escapeHtml(deal.badge)}
                 </div>
                 <h2 class="mt-3 text-2xl font-bold leading-tight text-white">
@@ -642,15 +669,14 @@
       const current = topDeal();
       const disabled = !current;
 
-      if (dislikeBtn) dislikeBtn.disabled = disabled;
-      if (likeBtn) likeBtn.disabled = disabled;
+      if (dislikeBtn) {
+        dislikeBtn.disabled = disabled;
+        dislikeBtn.classList.toggle("opacity-50", disabled);
+      }
 
-      if (disabled) {
-        dislikeBtn && dislikeBtn.classList.add("opacity-50");
-        likeBtn && likeBtn.classList.add("opacity-50");
-      } else {
-        dislikeBtn && dislikeBtn.classList.remove("opacity-50");
-        likeBtn && likeBtn.classList.remove("opacity-50");
+      if (likeBtn) {
+        likeBtn.disabled = disabled;
+        likeBtn.classList.toggle("opacity-50", disabled);
       }
     }
 
@@ -673,7 +699,10 @@
     function buyTopDeal() {
       const current = topDeal();
       if (!current) return;
+      addDislikedDeal(current.asin);
+      deals = deals.filter((deal) => deal.asin !== current.asin);
       window.open(current.affiliate_link, "_blank", "noopener,noreferrer");
+      render();
     }
 
     function dislikeTopDeal() {
@@ -778,21 +807,27 @@
       });
     }
 
-    dislikeBtn && dislikeBtn.addEventListener("click", function () {
-      const card = stack.querySelector(".swipe-card:last-child");
-      animateOut(card, -1, dislikeTopDeal);
-    });
+    if (dislikeBtn) {
+      dislikeBtn.addEventListener("click", function () {
+        const card = stack.querySelector(".swipe-card:last-child");
+        animateOut(card, -1, dislikeTopDeal);
+      });
+    }
 
-    likeBtn && likeBtn.addEventListener("click", function () {
-      const card = stack.querySelector(".swipe-card:last-child");
-      animateOut(card, 1, buyTopDeal);
-    });
+    if (likeBtn) {
+      likeBtn.addEventListener("click", function () {
+        const card = stack.querySelector(".swipe-card:last-child");
+        animateOut(card, 1, buyTopDeal);
+      });
+    }
 
-    resetBtn && resetBtn.addEventListener("click", function () {
-      clearDislikedDeals();
-      deals = getSwipeDeals();
-      render();
-    });
+    if (resetBtn) {
+      resetBtn.addEventListener("click", function () {
+        clearDislikedDeals();
+        deals = getSwipeDeals();
+        render();
+      });
+    }
 
     render();
   }
