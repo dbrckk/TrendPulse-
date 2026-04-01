@@ -6,8 +6,8 @@
     affiliateTag: "Drackk-20"
   };
 
-  const FALLBACK_IMAGE = "/fallback.jpg";
-  const DISLIKED_STORAGE_KEY = "trendpulse_disliked_deals_v5";
+  const DISLIKED_STORAGE_KEY = "trendpulse_disliked_deals_v6";
+  const IMAGE_PROXY_BASE = "https://images.weserv.nl/?url=";
 
   let cachedDeals = null;
   let dealsPromise = null;
@@ -26,8 +26,8 @@
   }
 
   function safeNumber(value, fallback = 0) {
-    const num = Number(value);
-    return Number.isFinite(num) ? num : fallback;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
   }
 
   function slugify(value = "") {
@@ -52,18 +52,6 @@
       return parsed.toString();
     } catch {
       return url || "#";
-    }
-  }
-
-  function proxyImage(url) {
-    const raw = String(url || "").trim();
-    if (!raw) return "";
-
-    try {
-      const parsed = new URL(raw);
-      return `https://images.weserv.nl/?url=${encodeURIComponent(parsed.host + parsed.pathname + parsed.search)}&w=1200&h=1200&fit=contain&bg=ffffff&output=jpg`;
-    } catch {
-      return "";
     }
   }
 
@@ -95,6 +83,69 @@
     } catch {}
   }
 
+  function proxyImage(url) {
+    const raw = String(url || "").trim();
+    if (!raw) return "";
+
+    try {
+      const parsed = new URL(raw);
+      return `${IMAGE_PROXY_BASE}${encodeURIComponent(
+        parsed.host + parsed.pathname + parsed.search
+      )}&w=1200&h=1200&fit=contain&bg=ffffff&output=jpg`;
+    } catch {
+      return "";
+    }
+  }
+
+  function buildSvgPlaceholder(deal) {
+    const title = String(deal.title || "Amazon Deal");
+    const badge = String(deal.badge || "Deal");
+    const price = `$${safeNumber(deal.price, 0).toFixed(2)}`;
+    const initials = initialsFromTitle(title);
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#18181b"/>
+            <stop offset="100%" stop-color="#3f3f46"/>
+          </linearGradient>
+        </defs>
+        <rect width="800" height="800" fill="url(#g)"/>
+        <circle cx="665" cy="135" r="110" fill="#ffffff" opacity="0.07"/>
+        <circle cx="130" cy="680" r="150" fill="#ffffff" opacity="0.05"/>
+        <rect x="40" y="40" rx="24" ry="24" width="180" height="56" fill="#09090b" opacity="0.95"/>
+        <text x="130" y="76" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff">${escapeXml(
+          badge
+        )}</text>
+        <text x="400" y="370" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="170" font-weight="800" fill="#ffffff" opacity="0.12">${escapeXml(
+          initials
+        )}</text>
+        <text x="50" y="560" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="800" fill="#ffffff">${escapeXml(
+          title.slice(0, 26)
+        )}</text>
+        <text x="50" y="625" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="800" fill="#ffffff">${escapeXml(
+          title.slice(26, 52)
+        )}</text>
+        <rect x="40" y="690" rx="24" ry="24" width="180" height="70" fill="#09090b" opacity="0.95"/>
+        <text x="130" y="736" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" fill="#22c55e">${escapeXml(
+          price
+        )}</text>
+      </svg>
+    `;
+
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  }
+
+  function escapeXml(value = "") {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
   function badgeFromRow(row) {
     if (row.is_best_seller) return "Best Seller";
     if (row.is_crazy_deal) return "Crazy Deal";
@@ -104,6 +155,7 @@
   }
 
   function bestForFromRow(row) {
+    if (row.best_for) return row.best_for;
     if (row.is_giftable) return "Gift";
     if (normalize(row.category) === "tech") return "Tech";
     if (normalize(row.category) === "home") return "Home";
@@ -112,37 +164,39 @@
   }
 
   function sanitizeRow(row) {
-    const title = row.name || "Amazon Deal";
+    const title = row.name || row.title || "Amazon Deal";
     const asin = row.asin || row.id || slugify(title);
-    const proxied = proxyImage(row.image_url);
-    const rawImage = proxied || row.image_url || FALLBACK_IMAGE;
     const price = safeNumber(row.price, 0);
-    const originalPrice = safeNumber(row.original_price, price ? price * 1.25 : 0);
+    const originalPrice = safeNumber(row.original_price, price > 0 ? price * 1.25 : 0);
     const views = safeNumber(row.views, 0);
     const clicks = safeNumber(row.clicks, 0);
     const discount = safeNumber(row.discount_percentage ?? row.discount_percent, 0);
     const badge = badgeFromRow(row);
-    const bestFor = bestForFromRow(row);
-
+    const image = proxyImage(row.image_url || row.image || "");
     const quickPoints = [
       row.tagline || `${badge} on Amazon`,
+      discount > 0 ? `${discount}% off` : null,
       views > 0 ? `${views} views` : null,
-      clicks > 0 ? `${clicks} clicks` : null,
-      discount > 0 ? `${discount}% off` : null
-    ].filter(Boolean).slice(0, 3);
+      clicks > 0 ? `${clicks} clicks` : null
+    ]
+      .filter(Boolean)
+      .slice(0, 3);
 
-    return {
+    const deal = {
       id: row.id || asin,
       asin,
       title,
       description: row.description || row.tagline || "Amazon product selected by TrendPulse.",
       price,
       original_price: originalPrice,
-      image: rawImage,
-      affiliate_link: ensureAffiliateTag(row.affiliate_link || row.amazon_url || row.raw_amazon_url || "#"),
+      image,
+      image_url: row.image_url || row.image || "",
+      affiliate_link: ensureAffiliateTag(
+        row.affiliate_link || row.amazon_url || row.raw_amazon_url || "#"
+      ),
       category: normalize(row.category || "general") || "general",
       badge,
-      best_for: bestFor,
+      best_for: bestForFromRow(row),
       quick_points: quickPoints,
       tags: [row.category, row.source_name, row.tagline].filter(Boolean),
       score: safeNumber(row.score, 0),
@@ -150,6 +204,9 @@
       clicks,
       is_active: row.is_active !== false
     };
+
+    deal.placeholder = buildSvgPlaceholder(deal);
+    return deal;
   }
 
   async function fetchDealsFromSupabase() {
@@ -249,7 +306,9 @@
         deal.best_for,
         ...(deal.tags || []),
         ...(deal.quick_points || [])
-      ].join(" ").toLowerCase();
+      ]
+        .join(" ")
+        .toLowerCase();
 
       const searchOk = !query || haystack.includes(query);
       const categoryOk = category === "all" || deal.category === normalize(category);
@@ -268,31 +327,33 @@
 
   function imageMarkup(deal, mode = "card") {
     const title = escapeHtml(deal.title || "Amazon Deal");
-    const fallbackText = escapeHtml(initialsFromTitle(deal.title));
-    const external = deal.image ? escapeHtml(deal.image) : "";
-    const wrapperClass =
+    const imgClass =
       mode === "detail"
-        ? "relative h-full w-full bg-white"
-        : "relative h-full w-full bg-white";
+        ? "absolute inset-0 z-10 h-full w-full object-contain"
+        : "absolute inset-0 z-10 h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]";
 
     return `
-      <div class="${wrapperClass}">
-        <div class="absolute inset-0 flex items-center justify-center bg-zinc-100">
-          <div class="text-center">
-            <div class="text-4xl font-bold text-zinc-700">${fallbackText}</div>
-            <div class="mt-2 px-4 text-xs font-medium text-zinc-500">${title}</div>
-          </div>
-        </div>
-        ${external ? `
+      <div class="relative h-full w-full overflow-hidden bg-white">
+        <img
+          src="${escapeHtml(deal.placeholder)}"
+          alt="${title}"
+          class="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
+        ${
+          deal.image
+            ? `
           <img
-            src="${external}"
+            src="${escapeHtml(deal.image)}"
             alt="${title}"
             loading="lazy"
             referrerpolicy="no-referrer"
-            class="relative z-10 h-full w-full object-contain"
+            class="${imgClass}"
             onerror="this.remove()"
           />
-        ` : ""}
+        `
+            : ""
+        }
       </div>
     `;
   }
@@ -304,7 +365,6 @@
       deal.badge === "Best Seller";
 
     const points = (deal.quick_points || []).slice(0, 2);
-    const price = `$${safeNumber(deal.price, 0).toFixed(2)}`;
 
     return `
       <article class="group h-full overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/70 transition hover:border-zinc-500 hover:shadow-xl hover:shadow-black/30">
@@ -312,11 +372,15 @@
           <div class="relative aspect-square overflow-hidden">
             ${imageMarkup(deal, "card")}
 
-            ${isHot ? `
+            ${
+              isHot
+                ? `
               <div class="absolute left-3 top-3 z-20 rounded-full bg-red-500 px-3 py-1 text-[11px] font-bold text-white shadow">
                 🔥 HOT
               </div>
-            ` : ""}
+            `
+                : ""
+            }
 
             <div class="absolute right-3 top-3 z-20 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
               ${escapeHtml(getHotLabel(deal))}
@@ -328,11 +392,15 @@
               <span class="rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
                 ${escapeHtml(deal.badge || "Deal")}
               </span>
-              ${deal.best_for ? `
+              ${
+                deal.best_for
+                  ? `
                 <span class="rounded-full border border-zinc-800 bg-zinc-950 px-2.5 py-1 text-[11px] font-medium text-zinc-400">
                   ${escapeHtml(deal.best_for)}
                 </span>
-              ` : ""}
+              `
+                  : ""
+              }
             </div>
 
             <h3 class="min-h-[3rem] text-sm font-semibold leading-6 text-white">
@@ -345,7 +413,7 @@
 
             <div class="mt-auto flex items-end justify-between gap-3 pt-4">
               <div class="flex flex-col">
-                <span class="text-lg font-bold text-green-400">${price}</span>
+                <span class="text-lg font-bold text-green-400">$${safeNumber(deal.price, 0).toFixed(2)}</span>
                 <span class="text-[10px] text-zinc-500">Check on Amazon</span>
               </div>
 
@@ -387,7 +455,10 @@
 
   async function renderBestSellerGrid() {
     const deals = await filterDeals({ sort: "score" });
-    renderGrid("#best-seller-grid", deals.filter((deal) => deal.badge === "Best Seller").slice(0, 8));
+    renderGrid(
+      "#best-seller-grid",
+      deals.filter((deal) => deal.badge === "Best Seller").slice(0, 8)
+    );
   }
 
   async function renderCheapTechGrid() {
@@ -535,10 +606,10 @@
     if (ogTitle) ogTitle.setAttribute("content", title);
     if (ogDescription) ogDescription.setAttribute("content", description);
     if (ogUrl) ogUrl.setAttribute("content", pageUrl);
-    if (ogImage) ogImage.setAttribute("content", deal.image || FALLBACK_IMAGE);
+    if (ogImage) ogImage.setAttribute("content", deal.image || deal.placeholder);
     if (twitterTitle) twitterTitle.setAttribute("content", title);
     if (twitterDescription) twitterDescription.setAttribute("content", description);
-    if (twitterImage) twitterImage.setAttribute("content", deal.image || FALLBACK_IMAGE);
+    if (twitterImage) twitterImage.setAttribute("content", deal.image || deal.placeholder);
   }
 
   function renderDetailImage(containerId, deal) {
@@ -552,15 +623,23 @@
 
   async function trackView(deal) {
     if (!window.supabaseClient || !deal?.id) return;
+
     try {
-      await window.supabaseClient.rpc("increment_views", { product_id: deal.id });
+      await window.supabaseClient
+        .from("products")
+        .update({ views: safeNumber(deal.views, 0) + 1 })
+        .eq("id", deal.id);
     } catch {}
   }
 
   async function trackClick(deal) {
     if (!window.supabaseClient || !deal?.id) return;
+
     try {
-      await window.supabaseClient.rpc("increment_clicks", { product_id: deal.id });
+      await window.supabaseClient
+        .from("products")
+        .update({ clicks: safeNumber(deal.clicks, 0) + 1 })
+        .eq("id", deal.id);
     } catch {}
   }
 
@@ -573,10 +652,7 @@
 
     const finalLink = ensureAffiliateTag(deal.affiliate_link);
 
-    const detailWrapper = document.getElementById("deal-image-wrapper");
-    if (detailWrapper) {
-      renderDetailImage("deal-image-wrapper", deal);
-    }
+    renderDetailImage("deal-image-wrapper", deal);
 
     setText("product-title", deal.title);
     setText("deal-title", deal.title);
@@ -600,7 +676,10 @@
 
     const oldPrice = document.getElementById("product-old-price");
     if (oldPrice) {
-      oldPrice.textContent = `$${safeNumber(deal.original_price, safeNumber(deal.price) * 1.25).toFixed(2)}`;
+      oldPrice.textContent = `$${safeNumber(
+        deal.original_price,
+        safeNumber(deal.price) * 1.25
+      ).toFixed(2)}`;
     }
 
     const quickPoints = document.getElementById("deal-quick-points");
@@ -829,15 +908,23 @@
         }
       }
 
-      topCard.addEventListener("touchstart", function (event) {
-        dragging = true;
-        startX = event.touches[0].clientX;
-        currentX = 0;
-      }, { passive: true });
+      topCard.addEventListener(
+        "touchstart",
+        function (event) {
+          dragging = true;
+          startX = event.touches[0].clientX;
+          currentX = 0;
+        },
+        { passive: true }
+      );
 
-      topCard.addEventListener("touchmove", function (event) {
-        onPointerMove(event.touches[0].clientX);
-      }, { passive: true });
+      topCard.addEventListener(
+        "touchmove",
+        function (event) {
+          onPointerMove(event.touches[0].clientX);
+        },
+        { passive: true }
+      );
 
       topCard.addEventListener("touchend", onPointerEnd, { passive: true });
 
