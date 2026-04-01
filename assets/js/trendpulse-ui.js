@@ -33,6 +33,12 @@
       .replace(/^-+|-+$/g, "");
   }
 
+  function initialsFromTitle(title = "") {
+    const words = String(title).trim().split(/\s+/).filter(Boolean).slice(0, 2);
+    if (!words.length) return "TP";
+    return words.map((w) => w[0]).join("").toUpperCase();
+  }
+
   function getDeals() {
     const raw = Array.isArray(window.TRENDPULSE_DEALS) ? window.TRENDPULSE_DEALS : [];
     const seen = new Set();
@@ -162,6 +168,45 @@
     return deals;
   }
 
+  function imageMarkup(deal, mode = "card") {
+    const imageClass =
+      mode === "detail"
+        ? "h-full w-full object-contain transition duration-300"
+        : "h-full w-full object-contain transition duration-300 group-hover:scale-[1.03]";
+
+    const fallbackText =
+      mode === "detail"
+        ? `<div class="text-center">
+             <div class="text-4xl font-bold text-zinc-700">${escapeHtml(initialsFromTitle(deal.title))}</div>
+             <div class="mt-2 px-4 text-sm font-medium text-zinc-500">${escapeHtml(deal.title)}</div>
+           </div>`
+        : `<div class="text-center">
+             <div class="text-2xl font-bold text-zinc-700">${escapeHtml(initialsFromTitle(deal.title))}</div>
+             <div class="mt-2 px-3 text-xs font-medium text-zinc-500">${escapeHtml(deal.badge || "Deal")}</div>
+           </div>`;
+
+    return `
+      <div class="relative h-full w-full">
+        <img
+          src="${escapeHtml(deal.image || FALLBACK_IMAGE)}"
+          alt=""
+          loading="lazy"
+          referrerpolicy="no-referrer"
+          class="${imageClass}"
+          onerror="
+            this.onerror=null;
+            this.style.display='none';
+            const fallback=this.parentElement.querySelector('[data-fallback]');
+            if(fallback){fallback.classList.remove('hidden');}
+          "
+        />
+        <div data-fallback class="absolute inset-0 hidden items-center justify-center bg-zinc-100">
+          ${fallbackText}
+        </div>
+      </div>
+    `;
+  }
+
   function productCard(deal) {
     const isHot = safeNumber(deal.price) <= 15 || deal.badge === "Trending Deal";
     const points = (deal.quick_points || []).slice(0, 2);
@@ -170,21 +215,15 @@
       <article class="group h-full overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/70 transition hover:-translate-y-0.5 hover:border-zinc-500 hover:shadow-xl hover:shadow-black/30">
         <a href="/deal.html?asin=${encodeURIComponent(deal.asin)}" class="flex h-full flex-col">
           <div class="relative aspect-square overflow-hidden bg-white p-4">
-            <img
-              src="${escapeHtml(deal.image)}"
-              alt="${escapeHtml(deal.title)}"
-              loading="lazy"
-              onerror="this.onerror=null;this.src='${escapeHtml(FALLBACK_IMAGE)}';"
-              class="h-full w-full object-contain transition duration-300 group-hover:scale-[1.03]"
-            />
+            ${imageMarkup(deal, "card")}
 
             ${isHot ? `
-              <div class="absolute left-3 top-3 rounded-full bg-red-500 px-3 py-1 text-[11px] font-bold text-white shadow">
+              <div class="absolute left-3 top-3 z-10 rounded-full bg-red-500 px-3 py-1 text-[11px] font-bold text-white shadow">
                 🔥 HOT
               </div>
             ` : ""}
 
-            <div class="absolute right-3 top-3 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
+            <div class="absolute right-3 top-3 z-10 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
               ${escapeHtml(getHotLabel(deal))}
             </div>
           </div>
@@ -405,6 +444,15 @@
     if (twitterImage) twitterImage.setAttribute("content", deal.image || FALLBACK_IMAGE);
   }
 
+  function renderDetailImage(containerId, deal) {
+    const container = document.getElementById(containerId);
+    if (!container) return false;
+
+    container.classList.add("bg-white", "p-4", "overflow-hidden");
+    container.innerHTML = imageMarkup(deal, "detail");
+    return true;
+  }
+
   function renderDealPage() {
     const asin = new URLSearchParams(window.location.search).get("asin");
     const deal = getDealByAsin(asin) || getDeals()[0];
@@ -412,17 +460,32 @@
 
     const finalLink = ensureAffiliateTag(deal.affiliate_link);
 
-    const imageEl = document.getElementById("product-image") || document.getElementById("deal-image");
-    if (imageEl) {
-      imageEl.src = deal.image || FALLBACK_IMAGE;
-      imageEl.alt = deal.title;
-      imageEl.onerror = function () {
-        this.onerror = null;
-        this.src = FALLBACK_IMAGE;
-      };
-      imageEl.classList.add("object-contain");
-      if (imageEl.parentElement) {
-        imageEl.parentElement.classList.add("bg-white", "p-4");
+    const detailWrapper = document.getElementById("deal-image-wrapper");
+    if (detailWrapper) {
+      renderDetailImage("deal-image-wrapper", deal);
+    } else {
+      const imageEl = document.getElementById("product-image") || document.getElementById("deal-image");
+      if (imageEl) {
+        imageEl.src = deal.image || FALLBACK_IMAGE;
+        imageEl.alt = "";
+        imageEl.referrerPolicy = "no-referrer";
+        imageEl.onerror = function () {
+          this.onerror = null;
+          this.style.display = "none";
+          const fallback = document.createElement("div");
+          fallback.className = "flex h-full w-full items-center justify-center bg-zinc-100";
+          fallback.innerHTML = `
+            <div class="text-center">
+              <div class="text-4xl font-bold text-zinc-700">${escapeHtml(initialsFromTitle(deal.title))}</div>
+              <div class="mt-2 px-4 text-sm font-medium text-zinc-500">${escapeHtml(deal.title)}</div>
+            </div>
+          `;
+          this.parentElement.appendChild(fallback);
+        };
+        imageEl.classList.add("object-contain");
+        if (imageEl.parentElement) {
+          imageEl.parentElement.classList.add("bg-white", "p-4");
+        }
       }
     }
 
