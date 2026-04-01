@@ -1,4 +1,4 @@
-// update assets/js/trendpulse-ui.js (FULL FILE REPLACEMENT with conversion optimization)
+// assets/js/trendpulse-ui.js
 
 (function () {
   const config = window.TRENDPULSE_CONFIG || {
@@ -16,11 +16,11 @@
   }
 
   function getDeals() {
-    return window.TRENDPULSE_DEALS || [];
+    return Array.isArray(window.TRENDPULSE_DEALS) ? window.TRENDPULSE_DEALS : [];
   }
 
   function getDealByAsin(asin) {
-    return getDeals().find(d => d.asin === asin);
+    return getDeals().find((d) => d.asin === asin);
   }
 
   function ensureAffiliateTag(url) {
@@ -31,43 +31,112 @@
       }
       return u.toString();
     } catch {
-      return url;
+      return url || "#";
     }
   }
 
-  function urgencyBadge(deal) {
-    if (deal.price <= 10) return "🔥 Low Price";
-    if (deal.badge === "Trending Deal") return "🔥 Trending";
-    if (deal.badge === "Best Gift") return "🎁 Popular Gift";
-    return deal.badge;
+  function normalize(str = "") {
+    return String(str).trim().toLowerCase();
   }
 
-  function cardTemplate(deal) {
+  function scoreDeal(deal) {
+    let score = 0;
+
+    if (deal.badge === "Best Gift") score += 12;
+    if (deal.badge === "Trending Deal") score += 10;
+    if (deal.badge === "Popular Pick") score += 9;
+    if (deal.badge === "Strong Value") score += 8;
+    if (deal.badge === "Giftable Pick") score += 8;
+    if (deal.badge === "Cheap Tech") score += 7;
+
+    if (deal.price <= 10) score += 10;
+    else if (deal.price <= 25) score += 8;
+    else if (deal.price <= 50) score += 5;
+
+    if (deal.category === "tech") score += 3;
+    if (deal.category === "gifts") score += 3;
+    if (deal.best_for) score += 2;
+    if ((deal.quick_points || []).length >= 2) score += 2;
+
+    return score;
+  }
+
+  function getHotLabel(deal) {
+    if (deal.price <= 10) return "Hot Price";
+    if (deal.badge === "Trending Deal") return "Trending";
+    if (deal.badge === "Best Gift") return "Top Gift";
+    if (deal.badge === "Cheap Tech") return "Budget Pick";
+    return "Popular";
+  }
+
+  function filterDeals({ search = "", category = "all", maxPrice = null, sort = "score" } = {}) {
+    const q = normalize(search);
+
+    let deals = getDeals().filter((deal) => {
+      const haystack = [
+        deal.title,
+        deal.description,
+        deal.badge,
+        deal.category,
+        deal.best_for,
+        ...(deal.tags || []),
+        ...(deal.quick_points || [])
+      ].join(" ").toLowerCase();
+
+      const searchOk = !q || haystack.includes(q);
+      const categoryOk = category === "all" || deal.category === category;
+      const priceOk = maxPrice == null || Number(deal.price) <= maxPrice;
+
+      return searchOk && categoryOk && priceOk;
+    });
+
+    if (sort === "low") deals.sort((a, b) => a.price - b.price);
+    else if (sort === "high") deals.sort((a, b) => b.price - a.price);
+    else if (sort === "title") deals.sort((a, b) => a.title.localeCompare(b.title));
+    else deals.sort((a, b) => scoreDeal(b) - scoreDeal(a));
+
+    return deals;
+  }
+
+  function productCard(deal) {
     return `
-      <article class="group rounded-3xl border border-zinc-800 bg-zinc-900/60 overflow-hidden hover:border-zinc-600 transition">
-        <a href="/deal.html?asin=${deal.asin}">
-          <div class="aspect-square bg-zinc-950">
-            <img src="${deal.image}" alt="${escapeHtml(deal.title)}"
-              class="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy"/>
+      <article class="group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/60 transition hover:border-zinc-600">
+        <a href="/deal.html?asin=${encodeURIComponent(deal.asin)}" class="block">
+          <div class="relative aspect-square overflow-hidden bg-zinc-950">
+            <img
+              src="${escapeHtml(deal.image)}"
+              alt="${escapeHtml(deal.title)}"
+              class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]"
+              loading="lazy"
+            />
+            <div class="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-black">
+              ${escapeHtml(getHotLabel(deal))}
+            </div>
           </div>
 
           <div class="p-4">
-            <div class="flex gap-2 flex-wrap text-[11px]">
-              <span class="px-2 py-1 border border-zinc-700 rounded-full text-zinc-300">
-                ${urgencyBadge(deal)}
+            <div class="flex flex-wrap gap-2">
+              <span class="rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+                ${escapeHtml(deal.badge || "Deal")}
               </span>
-              <span class="px-2 py-1 bg-zinc-950 border border-zinc-800 rounded-full text-zinc-400">
-                ${deal.best_for || "Popular"}
-              </span>
+              ${deal.best_for ? `
+                <span class="rounded-full border border-zinc-800 bg-zinc-950 px-2.5 py-1 text-[11px] font-medium text-zinc-400">
+                  ${escapeHtml(deal.best_for)}
+                </span>
+              ` : ""}
             </div>
 
-            <h3 class="mt-2 text-sm font-semibold text-white line-clamp-2">
+            <h3 class="mt-3 line-clamp-2 text-sm font-semibold leading-6 text-white">
               ${escapeHtml(deal.title)}
             </h3>
 
-            <div class="mt-3 flex justify-between items-center">
-              <span class="text-white font-bold">$${deal.price}</span>
-              <span class="text-zinc-300 text-sm">View →</span>
+            <ul class="mt-2 space-y-1 text-[11px] text-zinc-400">
+              ${(deal.quick_points || []).slice(0, 2).map(point => `<li>• ${escapeHtml(point)}</li>`).join("")}
+            </ul>
+
+            <div class="mt-3 flex items-center justify-between gap-3">
+              <span class="text-base font-bold text-green-400">$${Number(deal.price).toFixed(2)}</span>
+              <span class="text-sm font-medium text-zinc-300 transition group-hover:text-white">View →</span>
             </div>
           </div>
         </a>
@@ -75,94 +144,170 @@
     `;
   }
 
-  function renderGrid(id, deals) {
-    const el = document.querySelector(id);
+  function renderGrid(selector, deals) {
+    const el = document.querySelector(selector);
     if (!el) return;
-    el.innerHTML = deals.map(cardTemplate).join("");
+    el.innerHTML = deals.map(productCard).join("");
   }
 
-  function filterDeals(opts = {}) {
-    let deals = getDeals();
-
-    if (opts.category && opts.category !== "all") {
-      deals = deals.filter(d => d.category === opts.category);
-    }
-
-    if (opts.search) {
-      const s = opts.search.toLowerCase();
-      deals = deals.filter(d =>
-        (d.title + d.description + d.tags.join(" ")).toLowerCase().includes(s)
-      );
-    }
-
-    deals.sort((a, b) => a.price - b.price);
-
-    return deals;
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
   }
 
-  function renderDealsPage() {
-    const input = document.getElementById("searchInput");
-    const category = document.getElementById("categoryFilter");
-
-    if (!input || !category) return;
-
-    function update() {
-      const deals = filterDeals({
-        search: input.value,
-        category: category.value
-      });
-
-      renderGrid("#deals-grid", deals);
-    }
-
-    input.addEventListener("input", update);
-    category.addEventListener("change", update);
-
-    update();
+  function setHref(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.href = value;
   }
 
   function renderHomeDeals() {
-    renderGrid("#home-deals", getDeals().slice(0, 4));
+    renderGrid("#home-deals", filterDeals({ sort: "score" }).slice(0, 4));
   }
 
-  function renderCategory(selector, category) {
-    renderGrid(selector, filterDeals({ category }).slice(0, 8));
+  function renderBestSellerGrid() {
+    renderGrid("#best-seller-grid", filterDeals({ sort: "score" }).slice(0, 8));
+  }
+
+  function renderCheapTechGrid() {
+    renderGrid("#cheap-tech-grid", filterDeals({ category: "tech", sort: "score" }).slice(0, 8));
+  }
+
+  function renderGiftGrid() {
+    renderGrid("#best-gifts-grid", filterDeals({ category: "gifts", sort: "score" }).slice(0, 8));
+  }
+
+  function renderHomeCategoryGrid() {
+    renderGrid("#home-grid", filterDeals({ category: "home", sort: "score" }).slice(0, 8));
+  }
+
+  function renderKitchenGrid() {
+    renderGrid("#kitchen-grid", filterDeals({ category: "kitchen", sort: "score" }).slice(0, 8));
+  }
+
+  function renderBeautyGrid() {
+    renderGrid("#beauty-grid", filterDeals({ search: "beauty skincare self-care", sort: "score" }).slice(0, 8));
+  }
+
+  function renderOfficeGrid() {
+    renderGrid("#office-grid", filterDeals({ search: "desk office usb lamp cable organizer", sort: "score" }).slice(0, 8));
+  }
+
+  function renderGamingGrid() {
+    renderGrid("#gaming-grid", filterDeals({ search: "creator tripod phone tech desk", sort: "score" }).slice(0, 8));
+  }
+
+  function renderOutdoorGrid() {
+    renderGrid("#outdoor-grid", filterDeals({ search: "travel car bottle water outdoor", sort: "score" }).slice(0, 8));
+  }
+
+  function renderTravelGrid() {
+    renderGrid("#travel-grid", filterDeals({ search: "travel car sleep phone bottle", sort: "score" }).slice(0, 8));
+  }
+
+  function renderDealsPage() {
+    const searchInput = document.getElementById("searchInput");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const sortFilter = document.getElementById("sortFilter");
+    const priceFilter = document.getElementById("priceFilter");
+    const results = document.getElementById("resultCount");
+    const grid = document.getElementById("deals-grid");
+
+    if (!grid) return;
+
+    function parseMaxPrice() {
+      if (!priceFilter) return null;
+      if (priceFilter.value === "under-10") return 10;
+      if (priceFilter.value === "under-25") return 25;
+      if (priceFilter.value === "under-50") return 50;
+      return null;
+    }
+
+    function run() {
+      const deals = filterDeals({
+        search: searchInput ? searchInput.value : "",
+        category: categoryFilter ? categoryFilter.value : "all",
+        maxPrice: parseMaxPrice(),
+        sort: sortFilter ? sortFilter.value : "score"
+      });
+
+      grid.innerHTML = deals.map(productCard).join("");
+      if (results) results.textContent = `${deals.length} ${deals.length === 1 ? "deal" : "deals"}`;
+    }
+
+    if (searchInput) searchInput.addEventListener("input", run);
+    if (categoryFilter) categoryFilter.addEventListener("change", run);
+    if (sortFilter) sortFilter.addEventListener("change", run);
+    if (priceFilter) priceFilter.addEventListener("change", run);
+
+    run();
   }
 
   function renderDealPage() {
-    const asin = new URLSearchParams(location.search).get("asin");
+    const asin = new URLSearchParams(window.location.search).get("asin");
     const deal = getDealByAsin(asin) || getDeals()[0];
     if (!deal) return;
 
-    const set = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = val;
-    };
+    const finalLink = ensureAffiliateTag(deal.affiliate_link);
 
-    document.getElementById("deal-image").src = deal.image;
+    const imageEl = document.getElementById("product-image") || document.getElementById("deal-image");
+    if (imageEl) {
+      imageEl.src = deal.image;
+      imageEl.alt = deal.title;
+    }
 
-    set("deal-title", deal.title);
-    set("deal-description", deal.description);
-    set("deal-price", `$${deal.price}`);
-    set("deal-best-for", deal.best_for);
+    setText("product-title", deal.title);
+    setText("deal-title", deal.title);
+    setText("product-description", deal.description);
+    setText("deal-description", deal.description);
+    setText("product-price", `$${Number(deal.price).toFixed(2)}`);
+    setText("deal-price", `$${Number(deal.price).toFixed(2)}`);
+    setText("deal-badge", deal.badge || "Deal");
+    setText("deal-best-for", deal.best_for || "Useful pick");
+    setText("deal-market", "US Market");
+    setText("deal-market-card", "US Amazon");
+    setText("deal-type-card", deal.badge || "Deal");
+    setText("breadcrumb-product-name", deal.title);
+    setText("sticky-deal-title", deal.title);
+    setText("sticky-deal-price", `$${Number(deal.price).toFixed(2)}`);
 
-    const link = ensureAffiliateTag(deal.affiliate_link);
+    setHref("buy-btn", finalLink);
+    setHref("buy-btn-2", finalLink);
+    setHref("amazon-button", finalLink);
+    setHref("sticky-amazon-button", finalLink);
 
-    document.getElementById("amazon-button").href = link;
-    document.getElementById("sticky-amazon-button").href = link;
+    const oldPrice = document.getElementById("product-old-price");
+    if (oldPrice) {
+      const estimatedOld = Math.round((Number(deal.price) * 1.25) * 100) / 100;
+      oldPrice.textContent = `$${estimatedOld.toFixed(2)}`;
+    }
 
-    // 🔥 CONVERSION BOOST (auto scroll CTA)
-    setTimeout(() => {
-      document.getElementById("sticky-amazon-button").classList.add("animate-pulse");
-    }, 2000);
+    const quickPoints = document.getElementById("deal-quick-points");
+    if (quickPoints) {
+      quickPoints.innerHTML = (deal.quick_points || []).map(point => `<li>${escapeHtml(point)}</li>`).join("");
+    }
+
+    const related = filterDeals({ sort: "score" })
+      .filter(item => item.asin !== deal.asin)
+      .slice(0, 4);
+
+    renderGrid("#related-deals", related);
+
+    document.title = `${deal.title} | TrendPulse`;
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", function () {
     renderHomeDeals();
-    renderCategory("#cheap-tech-grid", "tech");
-    renderCategory("#best-gifts-grid", "gifts");
+    renderBestSellerGrid();
+    renderCheapTechGrid();
+    renderGiftGrid();
+    renderHomeCategoryGrid();
+    renderKitchenGrid();
+    renderBeautyGrid();
+    renderOfficeGrid();
+    renderGamingGrid();
+    renderOutdoorGrid();
+    renderTravelGrid();
     renderDealsPage();
     renderDealPage();
   });
-
 })();
