@@ -4,315 +4,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Amazon Deal | TrendPulse</title>
-  <meta
-    name="description"
-    content="Explore this Amazon deal on TrendPulse. View product details, check current pricing, and continue to Amazon."
-  />
+  <title>Deal | TrendPulse</title>
+
+  <meta name="description" content="View product details and get the best deal on Amazon." />
   <meta name="robots" content="index,follow" />
-  <link rel="canonical" href="https://www.trend-pulse.shop/deal.html" />
-  <meta property="og:type" content="product" />
-  <meta property="og:title" content="Amazon Deal | TrendPulse" />
-  <meta
-    property="og:description"
-    content="Explore this Amazon deal on TrendPulse. View product details, check current pricing, and continue to Amazon."
-  />
-  <meta property="og:url" content="https://www.trend-pulse.shop/deal.html" />
-  <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Amazon Deal | TrendPulse" />
-  <meta
-    name="twitter:description"
-    content="Explore this Amazon deal on TrendPulse. View product details, check current pricing, and continue to Amazon."
-  />
-  <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#09090b" />
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/assets/js/trendpulse-data.js" defer></script>
   <script src="/assets/js/trendpulse-ui.js" defer></script>
-
-  <script type="application/ld+json" id="deal-schema">
-  {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": "Amazon Deal",
-    "image": ["https://www.trend-pulse.shop/og-image.jpg"],
-    "sku": "",
-    "offers": {
-      "@type": "Offer",
-      "priceCurrency": "USD",
-      "price": "",
-      "availability": "https://schema.org/InStock",
-      "url": "https://www.trend-pulse.shop/deal.html"
-    }
-  }
-  </script>
-
-  <script type="application/ld+json" id="deal-breadcrumb-schema">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://www.trend-pulse.shop/"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Deals",
-        "item": "https://www.trend-pulse.shop/deals.html"
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": "Product",
-        "item": "https://www.trend-pulse.shop/deal.html"
-      }
-    ]
-  }
-  </script>
 </head>
-  <!-- add this script in ALL pages before </body> -->
-<script src="/assets/js/trendpulse-analytics.js" defer></script>
-<body class="bg-zinc-950 pb-28 text-zinc-100 antialiased md:pb-0">
-  <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/85 backdrop-blur">
-    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-      <a href="/" class="text-xl font-bold tracking-tight text-white">TrendPulse</a>
 
-      <nav class="hidden items-center gap-5 text-sm text-zinc-300 md:flex">
-        <a href="/" class="hover:text-white">Home</a>
-        <a href="/best-sellers.html" class="hover:text-white">Best Sellers</a>
-        <a href="/deals.html" class="hover:text-white">Deals</a>
-        <a href="/cheap-tech.html" class="hover:text-white">Cheap Tech</a>
-        <a href="/best-gifts.html" class="hover:text-white">Best Gifts</a>
-      </nav>
+<body class="bg-zinc-950 text-zinc-100">
 
-      <a
-        href="/deals.html"
-        class="inline-flex items-center justify-center rounded-2xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
-      >
-        Browse Deals
-      </a>
-    </div>
-  </header>
+<main class="max-w-2xl mx-auto px-4 py-8">
 
-  <main class="mx-auto max-w-6xl px-4 py-8 sm:py-10">
-    <nav class="mb-6 text-sm text-zinc-400">
-      <a href="/" class="hover:text-white">Home</a>
-      <span class="mx-2">/</span>
-      <a href="/deals.html" class="hover:text-white">Deals</a>
-      <span class="mx-2">/</span>
-      <span id="breadcrumb-product-name" class="text-zinc-200">Product</span>
-    </nav>
+  <!-- IMAGE -->
+  <img id="product-image" class="w-full rounded-xl" />
 
-    <section class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-      <div class="space-y-4">
-        <div class="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/60">
-          <div class="aspect-square bg-zinc-950">
-            <img
-              id="deal-image"
-              src="https://www.trend-pulse.shop/og-image.jpg"
-              alt="Amazon deal"
-              class="h-full w-full object-cover"
-            />
-          </div>
-        </div>
+  <!-- TITLE -->
+  <h1 id="product-title" class="text-xl font-bold mt-4"></h1>
 
-        <div class="grid grid-cols-3 gap-3">
-          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
-            <div class="text-xs uppercase tracking-[0.18em] text-zinc-500">Market</div>
-            <div id="deal-market-card" class="mt-2 text-sm font-semibold text-white">US Amazon</div>
-          </div>
-          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
-            <div class="text-xs uppercase tracking-[0.18em] text-zinc-500">Type</div>
-            <div id="deal-type-card" class="mt-2 text-sm font-semibold text-white">Trending Deal</div>
-          </div>
-          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
-            <div class="text-xs uppercase tracking-[0.18em] text-zinc-500">Best For</div>
-            <div id="deal-best-for" class="mt-2 text-sm font-semibold text-white">Everyday value</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6 sm:p-8">
-        <div class="flex flex-wrap items-center gap-2">
-          <div id="deal-badge" class="inline-flex rounded-full border border-zinc-700 px-3 py-1 text-xs font-medium text-zinc-300">
-            Trending Deal
-          </div>
-          <div class="inline-flex rounded-full border border-zinc-800 bg-zinc-950 px-3 py-1 text-xs font-medium text-zinc-400">
-            Fast Choice Page
-          </div>
-        </div>
-
-        <h1 id="deal-title" class="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-          Amazon Deal
-        </h1>
-
-        <p id="deal-description" class="mt-4 text-base leading-7 text-zinc-300">
-          Explore this product detail page on TrendPulse, then continue to Amazon to view the latest price and availability.
-        </p>
-
-        <div class="mt-6 flex items-end gap-4">
-          <span id="deal-price" class="text-3xl font-bold text-white">$0.00</span>
-          <span id="deal-market" class="rounded-full border border-zinc-700 px-3 py-1 text-xs font-medium text-zinc-300">US Market</span>
-        </div>
-
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-          <a
-            id="amazon-button"
-            href="#"
-            rel="nofollow sponsored noopener"
-            target="_blank"
-            class="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-          >
-            Buy on Amazon →
-          </a>
-
-          <a
-            href="/deals.html"
-            class="inline-flex items-center justify-center rounded-2xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:text-white"
-          >
-            Back to Deals
-          </a>
-        </div>
-
-        <p class="mt-3 text-xs text-zinc-500">
-          Affiliate disclosure: TrendPulse may earn from qualifying purchases.
-        </p>
-
-        <div class="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 text-sm text-zinc-300 space-y-2">
-          <p><strong class="text-white">Why this deal stands out:</strong> solid value, useful category, and good price-to-appeal ratio.</p>
-          <p><strong class="text-white">Market:</strong> US Amazon prioritized.</p>
-          <p><strong class="text-white">Note:</strong> Amazon prices and availability can change quickly.</p>
-          <p><strong class="text-white">Disclosure:</strong> TrendPulse may earn from qualifying purchases.</p>
-        </div>
-
-        <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-5">
-          <h2 class="text-lg font-semibold text-white">Why you might choose this</h2>
-          <ul id="deal-quick-points" class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-zinc-300">
-            <li>Simple product-first layout built for mobile scrolling.</li>
-            <li>Fast path from discovery page to Amazon product page.</li>
-            <li>Useful for gift browsing, budget shopping, and quick comparisons.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="mt-10 grid gap-4 lg:grid-cols-2">
-      <div class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6">
-        <h2 class="text-xl font-semibold text-white">Why this Amazon deal stands out</h2>
-        <p class="mt-3 text-zinc-300 leading-7">
-          TrendPulse highlights products that combine stronger value, broad appeal, and lower buying friction.
-          We prioritize offers that look useful, giftable, practical, or unusually well-priced for the US Amazon market.
-        </p>
-      </div>
-
-      <div class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6">
-        <h2 class="text-xl font-semibold text-white">Before you click through</h2>
-        <ul class="mt-3 space-y-3 text-sm leading-7 text-zinc-300">
-          <li>Final pricing lives on Amazon and may change quickly.</li>
-          <li>TrendPulse does not process payments or ship products.</li>
-          <li>The product link opens Amazon in a new tab for easier comparison browsing.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="mt-12 rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
-      <h2 class="text-xl font-semibold text-white">FAQ</h2>
-      <div class="mt-5 space-y-5 text-zinc-300">
-        <div>
-          <h3 class="font-medium text-white">Does TrendPulse sell this product directly?</h3>
-          <p class="mt-2 leading-7">
-            No. TrendPulse is a discovery layer. You continue to Amazon to view the full product page and buy there.
-          </p>
-        </div>
-        <div>
-          <h3 class="font-medium text-white">Is the displayed price guaranteed?</h3>
-          <p class="mt-2 leading-7">
-            No. Prices and availability can change quickly on Amazon after a deal is published.
-          </p>
-        </div>
-        <div>
-          <h3 class="font-medium text-white">What marketplace is prioritized?</h3>
-          <p class="mt-2 leading-7">
-            TrendPulse mainly prioritizes the US Amazon marketplace.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="mt-12">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-xl font-semibold text-white">More Deals</h2>
-          <p class="mt-1 text-sm text-zinc-400">Similar live offers you may also want to check.</p>
-        </div>
-        <a href="/deals.html" class="text-sm text-zinc-300 hover:text-white">See all</a>
-      </div>
-      <div id="related-deals" class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4"></div>
-    </section>
-  </main>
-
-  <footer class="border-t border-zinc-800 mt-16">
-    <div class="max-w-6xl mx-auto px-4 py-10 text-sm text-zinc-400">
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <div>
-          <div class="text-white font-semibold text-base">TrendPulse</div>
-          <p class="mt-3 leading-6">
-            Mobile-first Amazon deal discovery focused on the US market.
-            We highlight strong discounts, popular picks, and budget-friendly finds.
-          </p>
-        </div>
-
-        <div>
-          <div class="text-white font-semibold mb-3">Quick Links</div>
-          <ul class="space-y-2">
-            <li><a class="hover:text-white" href="/best-sellers.html">Best Sellers</a></li>
-            <li><a class="hover:text-white" href="/deals.html">All Deals</a></li>
-            <li><a class="hover:text-white" href="/cheap-tech.html">Cheap Tech</a></li>
-            <li><a class="hover:text-white" href="/best-gifts.html">Best Gifts</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <div class="text-white font-semibold mb-3">Legal</div>
-          <ul class="space-y-2">
-            <li><a class="hover:text-white" href="/affiliate-disclosure.html">Affiliate Disclosure</a></li>
-            <li><a class="hover:text-white" href="/privacy.html">Privacy Policy</a></li>
-            <li><a class="hover:text-white" href="/terms.html">Terms</a></li>
-            <li><a class="hover:text-white" href="/contact.html">Contact</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="mt-8 pt-6 border-t border-zinc-800 space-y-2">
-        <p>As an Amazon Associate, TrendPulse earns from qualifying purchases.</p>
-        <p>Prices and availability can change at any time on Amazon.</p>
-        <p>© 2026 TrendPulse — Amazon Deals Tracker</p>
-      </div>
-    </div>
-  </footer>
-
-  <div class="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-950/95 backdrop-blur">
-    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-      <div class="min-w-0">
-        <div id="sticky-deal-title" class="truncate text-sm font-semibold text-white">Amazon Deal</div>
-        <div id="sticky-deal-price" class="text-xs text-zinc-400">$0.00</div>
-      </div>
-      <a
-        id="sticky-amazon-button"
-        href="#"
-        rel="nofollow sponsored noopener"
-        target="_blank"
-        class="inline-flex shrink-0 items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-      >
-        Buy on Amazon
-      </a>
-    </div>
+  <!-- PRICE -->
+  <div class="flex items-center gap-2 mt-2">
+    <span id="product-price" class="text-2xl font-bold text-green-400"></span>
+    <span id="product-old-price" class="text-sm line-through text-zinc-500"></span>
   </div>
+
+  <!-- TRUST BADGES -->
+  <div class="mt-3 text-xs text-zinc-400 space-y-1">
+    <div>✔ Fast shipping on Amazon</div>
+    <div>✔ Easy returns</div>
+    <div>✔ Secure checkout</div>
+  </div>
+
+  <!-- CTA -->
+  <a
+    id="buy-btn"
+    target="_blank"
+    class="block mt-6 bg-green-500 text-black font-bold text-center py-4 rounded-xl text-lg"
+  >
+    View on Amazon →
+  </a>
+
+  <!-- SECOND CTA -->
+  <a
+    id="buy-btn-2"
+    target="_blank"
+    class="block mt-3 border border-zinc-700 text-center py-3 rounded-xl text-sm"
+  >
+    Check price on Amazon
+  </a>
+
+  <!-- URGENCY -->
+  <p class="mt-4 text-xs text-zinc-500">
+    ⚠ Prices can change quickly. Check availability on Amazon.
+  </p>
+
+  <!-- DESCRIPTION -->
+  <div class="mt-6 text-sm text-zinc-300 space-y-3">
+    <p id="product-description"></p>
+  </div>
+
+  <!-- BENEFITS -->
+  <div class="mt-6 bg-zinc-900 p-4 rounded-xl">
+    <h2 class="font-semibold mb-2">Why people buy this</h2>
+    <ul class="text-sm text-zinc-400 space-y-1">
+      <li>• Simple and useful product</li>
+      <li>• Good price for value</li>
+      <li>• Popular choice on Amazon</li>
+    </ul>
+  </div>
+
+</main>
+
 </body>
-        </html>
+</html>
