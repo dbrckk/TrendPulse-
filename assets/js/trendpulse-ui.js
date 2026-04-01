@@ -10,11 +10,11 @@
 
   function escapeHtml(value = "") {
     return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   function normalize(value = "") {
@@ -22,8 +22,8 @@
   }
 
   function safeNumber(value, fallback = 0) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : fallback;
+    const num = Number(value);
+    return Number.isFinite(num) ? num : fallback;
   }
 
   function slugify(value = "") {
@@ -36,50 +36,7 @@
   function initialsFromTitle(title = "") {
     const words = String(title).trim().split(/\s+/).filter(Boolean).slice(0, 2);
     if (!words.length) return "TP";
-    return words.map((w) => w[0]).join("").toUpperCase();
-  }
-
-  function getDeals() {
-    const raw = Array.isArray(window.TRENDPULSE_DEALS) ? window.TRENDPULSE_DEALS : [];
-    const seen = new Set();
-
-    return raw
-      .filter((deal) => deal && (deal.asin || deal.title))
-      .map((deal) => {
-        const price = safeNumber(deal.price, 0);
-        const title = deal.title || "Amazon Deal";
-        const image = deal.image || FALLBACK_IMAGE;
-        const affiliateLink = ensureAffiliateTag(deal.affiliate_link || "#");
-        const category = normalize(deal.category || "general") || "general";
-        const badge = deal.badge || "Deal";
-        const tags = Array.isArray(deal.tags) ? deal.tags : [];
-        const quickPoints = Array.isArray(deal.quick_points) ? deal.quick_points : [];
-
-        return {
-          ...deal,
-          asin: deal.asin || slugify(title),
-          title,
-          image,
-          price,
-          affiliate_link: affiliateLink,
-          category,
-          badge,
-          tags,
-          quick_points: quickPoints,
-          best_for: deal.best_for || ""
-        };
-      })
-      .filter((deal) => {
-        const key = `${deal.asin}|${deal.title}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-  }
-
-  function getDealByAsin(asin) {
-    const deals = getDeals();
-    return deals.find((deal) => deal.asin === asin) || null;
+    return words.map((word) => word[0]).join("").toUpperCase();
   }
 
   function ensureAffiliateTag(url) {
@@ -94,9 +51,50 @@
     }
   }
 
+  function getDeals() {
+    const rawDeals = Array.isArray(window.TRENDPULSE_DEALS) ? window.TRENDPULSE_DEALS : [];
+    const seen = new Set();
+
+    return rawDeals
+      .filter((deal) => deal && (deal.asin || deal.title))
+      .map((deal) => {
+        const title = deal.title || "Amazon Deal";
+        const asin = deal.asin || slugify(title);
+        const price = safeNumber(deal.price, 0);
+        const badge = deal.badge || "Deal";
+        const category = normalize(deal.category || "general") || "general";
+        const tags = Array.isArray(deal.tags) ? deal.tags : [];
+        const quickPoints = Array.isArray(deal.quick_points) ? deal.quick_points : [];
+        const affiliateLink = ensureAffiliateTag(deal.affiliate_link || "#");
+
+        return {
+          ...deal,
+          asin,
+          title,
+          image: deal.image || FALLBACK_IMAGE,
+          price,
+          badge,
+          category,
+          tags,
+          quick_points: quickPoints,
+          best_for: deal.best_for || "",
+          affiliate_link: affiliateLink
+        };
+      })
+      .filter((deal) => {
+        const key = `${deal.asin}|${deal.title}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }
+
+  function getDealByAsin(asin) {
+    return getDeals().find((deal) => deal.asin === asin) || null;
+  }
+
   function scoreDeal(deal) {
     let score = 0;
-
     const price = safeNumber(deal.price, 0);
 
     if (deal.badge === "Best Gift") score += 12;
@@ -169,46 +167,41 @@
   }
 
   function imageMarkup(deal, mode = "card") {
-    const imageClass =
+    const title = escapeHtml(deal.title || "Amazon Deal");
+    const badge = escapeHtml(deal.badge || "Deal");
+    const initials = escapeHtml(initialsFromTitle(deal.title));
+    const imgClass =
       mode === "detail"
         ? "h-full w-full object-contain transition duration-300"
         : "h-full w-full object-contain transition duration-300 group-hover:scale-[1.03]";
-
-    const fallbackText =
-      mode === "detail"
-        ? `<div class="text-center">
-             <div class="text-4xl font-bold text-zinc-700">${escapeHtml(initialsFromTitle(deal.title))}</div>
-             <div class="mt-2 px-4 text-sm font-medium text-zinc-500">${escapeHtml(deal.title)}</div>
-           </div>`
-        : `<div class="text-center">
-             <div class="text-2xl font-bold text-zinc-700">${escapeHtml(initialsFromTitle(deal.title))}</div>
-             <div class="mt-2 px-3 text-xs font-medium text-zinc-500">${escapeHtml(deal.badge || "Deal")}</div>
-           </div>`;
 
     return `
       <div class="relative h-full w-full">
         <img
           src="${escapeHtml(deal.image || FALLBACK_IMAGE)}"
-          alt=""
+          alt="${title}"
           loading="lazy"
           referrerpolicy="no-referrer"
-          class="${imageClass}"
+          class="${imgClass}"
           onerror="
             this.onerror=null;
             this.style.display='none';
-            const fallback=this.parentElement.querySelector('[data-fallback]');
-            if(fallback){fallback.classList.remove('hidden');}
+            var fallback=this.parentElement.querySelector('[data-fallback]');
+            if(fallback){fallback.classList.remove('hidden'); fallback.classList.add('flex');}
           "
         />
-        <div data-fallback class="absolute inset-0 hidden items-center justify-center bg-zinc-100">
-          ${fallbackText}
+        <div data-fallback class="absolute inset-0 hidden items-center justify-center bg-zinc-100 text-center">
+          <div>
+            <div class="text-3xl font-bold text-zinc-700">${initials}</div>
+            <div class="mt-2 px-4 text-xs font-medium text-zinc-500">${badge}</div>
+          </div>
         </div>
       </div>
     `;
   }
 
   function productCard(deal) {
-    const isHot = safeNumber(deal.price) <= 15 || deal.badge === "Trending Deal";
+    const isHot = safeNumber(deal.price, 0) <= 15 || deal.badge === "Trending Deal";
     const points = (deal.quick_points || []).slice(0, 2);
 
     return `
@@ -250,12 +243,8 @@
 
             <div class="mt-auto flex items-end justify-between gap-3 pt-4">
               <div class="flex flex-col">
-                <span class="text-lg font-bold text-green-400">
-                  $${safeNumber(deal.price).toFixed(2)}
-                </span>
-                <span class="text-[10px] text-zinc-500">
-                  Check on Amazon
-                </span>
+                <span class="text-lg font-bold text-green-400">$${safeNumber(deal.price, 0).toFixed(2)}</span>
+                <span class="text-[10px] text-zinc-500">Check on Amazon</span>
               </div>
 
               <div class="rounded-lg bg-green-500 px-3 py-2 text-xs font-bold text-black">
@@ -467,15 +456,15 @@
       const imageEl = document.getElementById("product-image") || document.getElementById("deal-image");
       if (imageEl) {
         imageEl.src = deal.image || FALLBACK_IMAGE;
-        imageEl.alt = "";
+        imageEl.alt = deal.title;
         imageEl.referrerPolicy = "no-referrer";
         imageEl.onerror = function () {
           this.onerror = null;
           this.style.display = "none";
           const fallback = document.createElement("div");
-          fallback.className = "flex h-full w-full items-center justify-center bg-zinc-100";
+          fallback.className = "flex h-full w-full items-center justify-center bg-zinc-100 text-center";
           fallback.innerHTML = `
-            <div class="text-center">
+            <div>
               <div class="text-4xl font-bold text-zinc-700">${escapeHtml(initialsFromTitle(deal.title))}</div>
               <div class="mt-2 px-4 text-sm font-medium text-zinc-500">${escapeHtml(deal.title)}</div>
             </div>
