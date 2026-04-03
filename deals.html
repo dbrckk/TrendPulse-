@@ -11,6 +11,7 @@
   />
   <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://www.trend-pulse.shop/deals.html" />
+
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Amazon Deals Today | TrendPulse" />
   <meta
@@ -19,6 +20,7 @@
   />
   <meta property="og:url" content="https://www.trend-pulse.shop/deals.html" />
   <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
+
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Amazon Deals Today | TrendPulse" />
   <meta
@@ -26,11 +28,13 @@
     content="Browse Amazon deals today on TrendPulse. Discover trending products, gift ideas, cheap tech, and budget-friendly finds with fast mobile filtering."
   />
   <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
+
   <meta name="theme-color" content="#09090b" />
   <link rel="manifest" href="/manifest.json" />
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/assets/js/trendpulse-data.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/supabase.js" defer></script>
   <script src="/assets/js/trendpulse-ui.js" defer></script>
 
   <script type="application/ld+json">
@@ -52,7 +56,7 @@
         <a href="/" class="hover:text-white">Home</a>
         <a href="/best-sellers.html" class="hover:text-white">Best Sellers</a>
         <a href="/deals.html" class="text-white">Deals</a>
-        <a href="/cheap-tech.html" class="hover:text-white">Cheap Tech</a>
+        <a href="/catalog.html" class="hover:text-white">Catalog</a>
         <a href="/best-gifts.html" class="hover:text-white">Best Gifts</a>
       </nav>
 
@@ -103,9 +107,15 @@
         >
           <option value="all">All categories</option>
           <option value="tech">Tech</option>
-          <option value="gifts">Gifts</option>
           <option value="home">Home</option>
           <option value="kitchen">Kitchen</option>
+          <option value="beauty">Beauty</option>
+          <option value="travel">Travel</option>
+          <option value="sports">Sports</option>
+          <option value="health">Health</option>
+          <option value="women">Women</option>
+          <option value="men">Men</option>
+          <option value="jewelry">Jewelry</option>
         </select>
       </div>
 
@@ -141,7 +151,7 @@
         <a href="/cheap-tech.html" class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Cheap Tech</a>
         <a href="/best-gifts.html" class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Best Gifts</a>
         <a href="/best-sellers.html" class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Best Sellers</a>
-        <a href="/under-20.html" class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Under $20</a>
+        <a href="/catalog.html" class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white">Catalog</a>
       </div>
       <div id="resultCount" class="text-sm font-medium text-zinc-400">0 deals</div>
     </section>
@@ -159,8 +169,8 @@
       <a href="/deals.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-white">
         <span>Deals</span>
       </a>
-      <a href="/cheap-tech.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
-        <span>Tech</span>
+      <a href="/catalog.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
+        <span>Catalog</span>
       </a>
       <a href="/best-gifts.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
         <span>Gifts</span>
@@ -168,4 +178,4 @@
     </div>
   </nav>
 </body>
-</html>
+    </html>
