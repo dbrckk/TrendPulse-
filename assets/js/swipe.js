@@ -1,8 +1,8 @@
 // assets/js/swipe.js
 
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!window.supabaseClient) {
-    console.error("Supabase client missing");
+  if (!window.supabaseClient || !window.TrendPulseUI) {
+    console.error("Supabase or TrendPulseUI missing");
     return;
   }
 
@@ -12,10 +12,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const likeBtn = document.getElementById("swipe-like-btn");
   const resetBtn = document.getElementById("reset-disliked-deals");
 
+  if (!stack) return;
+
   let products = [];
   let index = 0;
 
-  const STORAGE_KEY = "trendpulse_disliked";
+  const STORAGE_KEY = "trendpulse_disliked_v2";
 
   function getDisliked() {
     try {
@@ -42,159 +44,272 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function escapeHtml(str = "") {
-    return str
+    return String(str)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
   }
 
-  function proxyImage(url) {
-    if (!url) return "";
-    try {
-      const parsed = new URL(url);
-      return `https://images.weserv.nl/?url=${encodeURIComponent(
-        parsed.host + parsed.pathname
-      )}&w=800&h=800&fit=contain`;
-    } catch {
-      return "";
-    }
+  function safeNumber(value, fallback = 0) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
   }
 
-  function buildCard(p) {
-    const img = proxyImage(p.image_url || p.image || "");
+  function formatPrice(value) {
+    return `$${safeNumber(value).toFixed(2)}`;
+  }
+
+  function productUrl(product) {
+    if (product.slug) {
+      return `/product.html?slug=${encodeURIComponent(product.slug)}`;
+    }
+    return `/product.html?asin=${encodeURIComponent(product.asin || "")}`;
+  }
+
+  function buildCard(product) {
+    const proxied = window.TrendPulseUI.proxyImage(product.image_url || product.image || "");
+    const placeholder = window.TrendPulseUI.buildPlaceholder(product);
+    const rating = safeNumber(product.amazon_rating, 0);
+    const reviews = safeNumber(product.amazon_review_count, 0);
 
     return `
-      <div class="swipe-card absolute inset-0 rounded-3xl border border-zinc-800 bg-zinc-900 overflow-hidden shadow-xl">
-        <div class="h-[65%] bg-white flex items-center justify-center">
-          <img src="${img}" class="max-h-full object-contain" />
-        </div>
-
-        <div class="p-4">
-          <h2 class="text-lg font-bold text-white line-clamp-2">
-            ${escapeHtml(p.name)}
-          </h2>
-
-          <div class="mt-2 text-sm text-zinc-400">
-            ⭐ ${p.amazon_rating || "—"} (${p.amazon_review_count || 0})
+      <article class="swipe-card absolute inset-0 overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30">
+        <div class="relative h-full">
+          <div class="absolute left-4 top-4 z-20 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+            ${escapeHtml(product.is_best_seller ? "Best Seller" : product.is_crazy_deal ? "Hot Deal" : "Deal")}
           </div>
 
-          <div class="mt-3 flex justify-between items-center">
-            <span class="text-green-400 text-xl font-bold">
-              $${Number(p.price || 0).toFixed(2)}
-            </span>
+          <div class="h-[58%] overflow-hidden bg-white relative">
+            <img
+              src="${placeholder}"
+              alt="${escapeHtml(product.name || "Product")}"
+              class="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+            />
+            ${
+              proxied
+                ? `
+              <img
+                src="${proxied}"
+                alt="${escapeHtml(product.name || "Product")}"
+                class="relative z-10 h-full w-full object-contain"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                onerror="this.remove()"
+              />
+            `
+                : ""
+            }
+          </div>
 
-            <span class="text-xs text-zinc-500">
-              Swipe →
-            </span>
+          <div class="flex h-[42%] flex-col bg-zinc-950 p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="inline-flex rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-medium text-zinc-300">
+                  ${escapeHtml(product.category || "deal")}
+                </div>
+                <h2 class="mt-3 text-2xl font-bold leading-tight text-white">
+                  ${escapeHtml(product.name || "Product")}
+                </h2>
+              </div>
+              <div class="text-right">
+                <div class="text-3xl font-bold text-green-400">${formatPrice(product.price)}</div>
+                <div class="mt-1 text-xs text-zinc-500">Amazon deal</div>
+              </div>
+            </div>
+
+            <ul class="mt-4 space-y-2 text-sm text-zinc-300">
+              <li>⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})</li>
+              <li>${product.discount_percentage > 0 ? `${product.discount_percentage}% off` : "Active deal"}</li>
+              <li>${product.brand ? `Brand: ${escapeHtml(product.brand)}` : "View full details"}</li>
+            </ul>
+
+            <div class="mt-auto flex gap-3 pt-5">
+              <button
+                type="button"
+                class="swipe-dislike inline-flex flex-1 items-center justify-center rounded-full border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300"
+              >
+                Dislike
+              </button>
+              <a
+                href="${escapeHtml(product.affiliate_link || "#")}"
+                data-product-url="${escapeHtml(productUrl(product))}"
+                target="_blank"
+                rel="nofollow sponsored noopener"
+                class="swipe-buy inline-flex flex-1 items-center justify-center rounded-full bg-green-500 px-4 py-3 text-sm font-semibold text-black"
+              >
+                Buy on Amazon
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+      </article>
     `;
   }
 
   async function fetchDeals() {
-    const { data, error } = await window.supabaseClient
-      .from("products")
-      .select("*")
-      .eq("type", "deal")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false })
-      .limit(100);
+    const allProducts = await window.TrendPulseUI.fetchProducts();
+    return allProducts
+      .filter((p) => p.type === "deal")
+      .sort((a, b) => {
+        if ((b.priority || 0) !== (a.priority || 0)) return (b.priority || 0) - (a.priority || 0);
+        if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+        return safeNumber(b.created_at) - safeNumber(a.created_at);
+      });
+  }
 
-    if (error) {
-      console.error(error);
-      return [];
+  async function trackRpc(fnName, productId) {
+    try {
+      await window.supabaseClient.rpc(fnName, { product_id: productId });
+    } catch {
+      // ignore
     }
+  }
 
-    return data || [];
+  function currentProduct() {
+    return products[index] || null;
   }
 
   function renderStack() {
-    if (!stack) return;
-
-    stack.innerHTML = "";
-
-    const current = products[index];
+    const current = currentProduct();
 
     if (!current) {
+      stack.innerHTML = "";
       emptyState?.classList.remove("hidden");
       return;
     }
 
     emptyState?.classList.add("hidden");
-
     stack.innerHTML = buildCard(current);
 
-    attachSwipe(stack.firstElementChild);
+    const card = stack.firstElementChild;
+    attachSwipe(card);
+
+    const dislikeAction = card.querySelector(".swipe-dislike");
+    const buyAction = card.querySelector(".swipe-buy");
+
+    dislikeAction?.addEventListener("click", () => {
+      addDisliked(current.id);
+      trackRpc("increment_product_swipe_left", current.id);
+      next();
+    });
+
+    buyAction?.addEventListener("click", () => {
+      trackRpc("increment_product_swipe_right", current.id);
+      trackRpc("increment_product_clicks", current.id);
+    });
   }
 
   function next() {
-    index++;
+    index += 1;
     renderStack();
   }
 
-  function openAmazon(p) {
-    const url = p.affiliate_link || p.amazon_url || "#";
-    window.open(url, "_blank");
+  function openAmazon(product) {
+    if (!product) return;
+    trackRpc("increment_product_swipe_right", product.id);
+    trackRpc("increment_product_clicks", product.id);
+    window.open(product.affiliate_link || "#", "_blank", "noopener,noreferrer");
   }
 
   function attachSwipe(card) {
+    if (!card) return;
+
     let startX = 0;
     let currentX = 0;
-    let isDragging = false;
+    let dragging = false;
 
-    card.addEventListener("touchstart", (e) => {
-      startX = e.touches[0].clientX;
-      isDragging = true;
-    });
+    function onMove(clientX) {
+      if (!dragging) return;
+      currentX = clientX - startX;
+      card.style.transition = "none";
+      card.style.transform = `translateX(${currentX}px) rotate(${currentX / 15}deg)`;
+    }
 
-    card.addEventListener("touchmove", (e) => {
-      if (!isDragging) return;
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
 
-      currentX = e.touches[0].clientX - startX;
-
-      card.style.transform = `translateX(${currentX}px) rotate(${currentX / 10}deg)`;
-    });
-
-    card.addEventListener("touchend", () => {
-      isDragging = false;
+      const product = currentProduct();
+      if (!product) return;
 
       if (currentX > 120) {
-        openAmazon(products[index]);
-        next();
+        card.style.transition = "transform 220ms ease, opacity 220ms ease";
+        card.style.transform = "translateX(120%) rotate(14deg)";
+        card.style.opacity = "0";
+        setTimeout(() => {
+          openAmazon(product);
+          next();
+        }, 220);
       } else if (currentX < -120) {
-        addDisliked(products[index].id);
-        next();
+        card.style.transition = "transform 220ms ease, opacity 220ms ease";
+        card.style.transform = "translateX(-120%) rotate(-14deg)";
+        card.style.opacity = "0";
+        setTimeout(() => {
+          addDisliked(product.id);
+          trackRpc("increment_product_swipe_left", product.id);
+          next();
+        }, 220);
       } else {
+        card.style.transition = "transform 180ms ease";
         card.style.transform = "";
       }
+    }
+
+    card.addEventListener("touchstart", (e) => {
+      dragging = true;
+      startX = e.touches[0].clientX;
+      currentX = 0;
+    }, { passive: true });
+
+    card.addEventListener("touchmove", (e) => {
+      onMove(e.touches[0].clientX);
+    }, { passive: true });
+
+    card.addEventListener("touchend", onEnd, { passive: true });
+
+    card.addEventListener("mousedown", (e) => {
+      dragging = true;
+      startX = e.clientX;
+      currentX = 0;
+
+      const moveHandler = (moveEvent) => onMove(moveEvent.clientX);
+      const upHandler = () => {
+        document.removeEventListener("mousemove", moveHandler);
+        document.removeEventListener("mouseup", upHandler);
+        onEnd();
+      };
+
+      document.addEventListener("mousemove", moveHandler);
+      document.addEventListener("mouseup", upHandler);
     });
   }
 
   dislikeBtn?.addEventListener("click", () => {
-    addDisliked(products[index].id);
+    const product = currentProduct();
+    if (!product) return;
+    addDisliked(product.id);
+    trackRpc("increment_product_swipe_left", product.id);
     next();
   });
 
   likeBtn?.addEventListener("click", () => {
-    openAmazon(products[index]);
+    const product = currentProduct();
+    if (!product) return;
+    openAmazon(product);
     next();
   });
 
-  resetBtn?.addEventListener("click", () => {
+  resetBtn?.addEventListener("click", async () => {
     resetDisliked();
-    init();
+    await init();
   });
 
   async function init() {
     const disliked = getDisliked();
-
     const all = await fetchDeals();
-
     products = all.filter((p) => !disliked.includes(p.id));
-
     index = 0;
-
     renderStack();
   }
 
