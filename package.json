@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "sync:deals": "node sync-deals.js",
-    "build": "echo \"Static site build complete\""
+    "build": "echo \"No build step needed\"",
+    "sync:deals": "node sync-deals.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
-    "rss-parser": "^3.13.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "rss-parser": "^3.13.0"
   }
 }
