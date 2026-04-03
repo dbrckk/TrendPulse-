@@ -1,21 +1,15 @@
-
-
 {
   "name": "trendpulse",
   "version": "1.0.0",
   "private": true,
-  "description": "TrendPulse mobile-first Amazon deal site focused on the US market.",
+  "type": "module",
   "scripts": {
-    "check": "node scripts/check-site.js",
-    "sync": "node scripts/sync.mjs",
-    "score": "node scripts/score.mjs",
-    "tweet": "node scripts/tweet.mjs"
+    "sync:deals": "node sync-deals.js",
+    "build": "echo \"Static site build complete\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
-    "cheerio": "^1.0.0",
-    "dotenv": "^16.4.7",
-    "puppeteer": "^24.7.1",
-    "rss-parser": "^3.13.0"
+    "rss-parser": "^3.13.0",
+    "node-fetch": "^3.3.2"
   }
 }
