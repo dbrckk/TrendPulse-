@@ -1,0 +1,196 @@
+<!-- catalog.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amazon Catalog by Category | TrendPulse</title>
+  <meta
+    name="description"
+    content="Browse Amazon products by category on TrendPulse. Explore Tech, Women, Men, Jewelry, Sports, Health, Home, Kitchen and more."
+  />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://www.trend-pulse.shop/catalog.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Amazon Catalog by Category | TrendPulse" />
+  <meta
+    property="og:description"
+    content="Browse Amazon products by category on TrendPulse. Explore top categories and discover popular products fast."
+  />
+  <meta property="og:url" content="https://www.trend-pulse.shop/catalog.html" />
+  <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Amazon Catalog by Category | TrendPulse" />
+  <meta
+    name="twitter:description"
+    content="Browse Amazon products by category on TrendPulse. Explore top categories and discover popular products fast."
+  />
+  <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
+  <meta name="theme-color" content="#09090b" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/supabase.js" defer></script>
+  <script src="/assets/js/trendpulse-data.js" defer></script>
+  <script src="/assets/js/trendpulse-ui.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Amazon Catalog by Category | TrendPulse",
+    "url": "https://www.trend-pulse.shop/catalog.html",
+    "description": "Browse Amazon products by category on TrendPulse."
+  }
+  </script>
+</head>
+<body class="bg-zinc-950 pb-24 text-zinc-100 antialiased md:pb-0">
+  <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+      <a href="/" class="text-xl font-bold tracking-tight text-white">TrendPulse</a>
+
+      <nav class="hidden items-center gap-5 text-sm text-zinc-300 md:flex">
+        <a href="/" class="hover:text-white">Home</a>
+        <a href="/deals.html" class="hover:text-white">Deals</a>
+        <a href="/catalog.html" class="text-white">Catalog</a>
+        <a href="/best-sellers.html" class="hover:text-white">Best Sellers</a>
+        <a href="/best-gifts.html" class="hover:text-white">Best Gifts</a>
+      </nav>
+
+      <a
+        href="/"
+        class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
+      >
+        Swipe Home
+      </a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+    <nav class="mb-5 text-sm text-zinc-400">
+      <a href="/" class="hover:text-white">Home</a>
+      <span class="mx-2">/</span>
+      <span class="text-zinc-200">Catalog</span>
+    </nav>
+
+    <section class="rounded-[2rem] border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 shadow-2xl shadow-black/20 sm:p-8">
+      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Category Catalog</p>
+      <h1 class="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">Browse Amazon products by category</h1>
+      <p class="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
+        Explore stable, high-intent product categories designed for SEO and easy browsing.
+        Choose a category to discover popular products with strong buying signals.
+      </p>
+      <p class="mt-4 text-xs text-zinc-500">
+        Affiliate disclosure: TrendPulse may earn from qualifying purchases.
+      </p>
+    </section>
+
+    <section class="mt-8">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Top Categories</p>
+          <h2 class="mt-2 text-2xl font-bold tracking-tight text-white">Choose your catalog</h2>
+        </div>
+      </div>
+
+      <div class="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <a href="/catalog-category.html?category=women" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Women</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Fashion, beauty, gift ideas, and popular products.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=men" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Men</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Daily essentials, accessories, gifts, and practical picks.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=jewelry" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Jewelry</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Giftable jewelry picks, accessories, and trending items.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=tech" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Tech</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Gadgets, accessories, useful electronics, and popular tech.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=sports" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Sports</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Fitness gear, outdoor items, hydration, and active products.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=health" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Health</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Wellness, sleep, comfort, and routine-focused products.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=home" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Home</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Household upgrades, cozy finds, and practical home products.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=kitchen" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Kitchen</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Cooking tools, kitchen accessories, and useful essentials.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=beauty" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Beauty</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Beauty tools, skincare products, and self-care favorites.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=travel" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Travel</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Travel accessories, organizers, and useful trip products.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=baby" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Baby</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Nursery items, baby gifts, and practical family products.</p>
+        </a>
+
+        <a href="/catalog-category.html?category=pets" class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5 transition hover:border-zinc-600 hover:bg-zinc-900">
+          <h3 class="text-lg font-semibold text-white">Pets</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Popular pet products, daily essentials, and giftable pet picks.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="mt-10 rounded-[2rem] border border-zinc-800 bg-zinc-900/50 p-6">
+      <h2 class="text-xl font-semibold text-white">Why this catalog matters</h2>
+      <div class="mt-5 grid gap-4 md:grid-cols-3">
+        <div class="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
+          <h3 class="font-medium text-white">Better SEO</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Stable category pages help target evergreen search traffic.</p>
+        </div>
+        <div class="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
+          <h3 class="font-medium text-white">Safer products</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Catalog pages focus on strong buying signals, not only temporary deals.</p>
+        </div>
+        <div class="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
+          <h3 class="font-medium text-white">More monetization</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-300">Users can explore categories, compare products, then click to Amazon.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-950/98 backdrop-blur md:hidden">
+    <div class="grid grid-cols-4">
+      <a href="/" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
+        <span>Home</span>
+      </a>
+      <a href="/deals.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
+        <span>Deals</span>
+      </a>
+      <a href="/catalog.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-white">
+        <span>Catalog</span>
+      </a>
+      <a href="/best-gifts.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
+        <span>Gifts</span>
+      </a>
+    </div>
+  </nav>
+</body>
+    </html>
