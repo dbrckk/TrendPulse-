@@ -30,11 +30,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     return raw;
   }
 
+  function productUrl(product) {
+    if (product.slug) {
+      return `/product.html?slug=${encodeURIComponent(product.slug)}`;
+    }
+    return `/product.html?asin=${encodeURIComponent(product.asin || "")}`;
+  }
+
+  function productCard(product) {
+    return `
+      <a href="${productUrl(product)}" class="block rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-600">
+        <img
+          src="${proxyImage(product.image_url)}"
+          alt="${escapeHtml(product.name || "Product")}"
+          class="h-40 w-full rounded-xl bg-white object-contain"
+          loading="lazy"
+          onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
+        />
+        <h3 class="mt-3 text-sm font-semibold text-white">${escapeHtml(product.name || "Product")}</h3>
+        <div class="mt-2 text-green-400 font-bold">$${safeNumber(product.price).toFixed(2)}</div>
+      </a>
+    `;
+  }
+
   try {
-    let query = window.supabaseClient
-      .from("products")
-      .select("*")
-      .limit(1);
+    let query = window.supabaseClient.from("products").select("*").limit(1);
 
     if (slug) {
       query = query.eq("slug", slug);
@@ -50,7 +70,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const product = data[0];
-
     const title = product.name || "Amazon Product";
     const description =
       product.short_description ||
@@ -61,12 +80,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const price = safeNumber(product.price);
     const rating = safeNumber(product.amazon_rating);
     const reviews = safeNumber(product.amazon_review_count);
+    const category = (product.category || "general").toLowerCase();
 
     const url = product.slug
       ? `https://www.trend-pulse.shop/product.html?slug=${encodeURIComponent(product.slug)}`
       : `https://www.trend-pulse.shop/product.html?asin=${encodeURIComponent(product.asin || "")}`;
 
-    // DOM elements
     const elTitle = document.getElementById("product-title");
     const elImage = document.getElementById("product-image");
     const elPrice = document.getElementById("product-price");
@@ -75,28 +94,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     const elCategory = document.getElementById("product-category");
     const elBuy = document.getElementById("product-buy-link");
     const elBreadcrumb = document.getElementById("product-breadcrumb");
+    const relatedProductsEl = document.getElementById("related-products");
+    const relatedCategoriesEl = document.getElementById("related-product-categories");
 
-    // Inject content
     if (elTitle) elTitle.textContent = title;
     if (elImage) {
       elImage.src = image;
       elImage.alt = title;
     }
-
     if (elPrice) elPrice.textContent = `$${price.toFixed(2)}`;
     if (elDesc) elDesc.textContent = description;
-
     if (elRating) {
       elRating.textContent = `⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})`;
     }
-
     if (elCategory) elCategory.textContent = product.category || "General";
     if (elBuy) elBuy.href = product.affiliate_link || product.amazon_url || "#";
     if (elBreadcrumb) elBreadcrumb.textContent = title;
-
-    // =====================
-    // SEO META
-    // =====================
 
     document.title = `${title} | TrendPulse`;
 
@@ -126,10 +139,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const twitterImage = document.querySelector('meta[name="twitter:image"]');
     if (twitterImage) twitterImage.setAttribute("content", image);
-
-    // =====================
-    // SCHEMA PRODUCT (SEO ++)
-    // =====================
 
     const schema = {
       "@context": "https://schema.org",
@@ -170,6 +179,49 @@ document.addEventListener("DOMContentLoaded", async () => {
     script.textContent = JSON.stringify(schema);
     document.head.appendChild(script);
 
+    const { data: relatedProducts } = await window.supabaseClient
+      .from("products")
+      .select("*")
+      .eq("category", category)
+      .neq("asin", product.asin)
+      .limit(4);
+
+    if (relatedProductsEl) {
+      relatedProductsEl.innerHTML = (relatedProducts || []).map(productCard).join("");
+    }
+
+    const relatedCategoryMap = {
+      tech: ["home", "travel", "general", "men"],
+      home: ["kitchen", "beauty", "general", "pets"],
+      kitchen: ["home", "health", "general", "beauty"],
+      beauty: ["health", "women", "general", "home"],
+      sports: ["health", "men", "women", "general"],
+      health: ["sports", "beauty", "general", "kitchen"],
+      travel: ["tech", "men", "women", "general"],
+      women: ["beauty", "jewelry", "general", "travel"],
+      men: ["tech", "sports", "general", "travel"],
+      jewelry: ["women", "beauty", "general", "men"],
+      baby: ["home", "health", "general", "pets"],
+      pets: ["home", "general", "health", "baby"],
+      general: ["tech", "home", "beauty", "kitchen"]
+    };
+
+    const relatedCategories = relatedCategoryMap[category] || ["general"];
+
+    if (relatedCategoriesEl) {
+      relatedCategoriesEl.innerHTML = relatedCategories
+        .map(
+          (item) => `
+            <a
+              href="/catalog-category.html?category=${encodeURIComponent(item)}"
+              class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+            >
+              ${escapeHtml(item.charAt(0).toUpperCase() + item.slice(1))}
+            </a>
+          `
+        )
+        .join("");
+    }
   } catch (err) {
     console.error("Product page error:", err);
   }
