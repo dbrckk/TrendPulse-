@@ -1,0 +1,846 @@
+[
+  {
+    "slug": "best-tech-products",
+    "title": "Best Tech Products",
+    "description": "Discover the best tech products frequently bought on Amazon.",
+    "category": "tech",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best tech products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-tech-products",
+    "title": "Top Tech Products",
+    "description": "Explore top tech products with strong Amazon buying frequency.",
+    "category": "tech",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top tech products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-tech-products",
+    "title": "Popular Tech Products",
+    "description": "Browse popular tech products trending with Amazon buyers.",
+    "category": "tech",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular tech products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-tech-products",
+    "title": "Cheap Tech Products",
+    "description": "Find cheap tech products and affordable Amazon picks.",
+    "category": "tech",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable tech products with strong value on Amazon."
+  },
+  {
+    "slug": "best-tech-products-under-25",
+    "title": "Best Tech Products Under $25",
+    "description": "Discover the best tech products under $25 on Amazon.",
+    "category": "tech",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best tech products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-tech-products-under-50",
+    "title": "Best Tech Products Under $50",
+    "description": "Discover the best tech products under $50 on Amazon.",
+    "category": "tech",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best tech products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "tech-essentials",
+    "title": "Tech Essentials",
+    "description": "Browse essential tech products frequently bought on Amazon.",
+    "category": "tech",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential tech products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-home-products",
+    "title": "Best Home Products",
+    "description": "Discover the best home products frequently bought on Amazon.",
+    "category": "home",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best home products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-home-products",
+    "title": "Top Home Products",
+    "description": "Explore top home products with strong Amazon buying frequency.",
+    "category": "home",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top home products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-home-products",
+    "title": "Popular Home Products",
+    "description": "Browse popular home products trending with Amazon buyers.",
+    "category": "home",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular home products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-home-products",
+    "title": "Cheap Home Products",
+    "description": "Find cheap home products and affordable Amazon picks.",
+    "category": "home",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable home products with strong value on Amazon."
+  },
+  {
+    "slug": "best-home-products-under-25",
+    "title": "Best Home Products Under $25",
+    "description": "Discover the best home products under $25 on Amazon.",
+    "category": "home",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best home products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-home-products-under-50",
+    "title": "Best Home Products Under $50",
+    "description": "Discover the best home products under $50 on Amazon.",
+    "category": "home",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best home products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "home-essentials",
+    "title": "Home Essentials",
+    "description": "Browse essential home products frequently bought on Amazon.",
+    "category": "home",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential home products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-kitchen-products",
+    "title": "Best Kitchen Products",
+    "description": "Discover the best kitchen products frequently bought on Amazon.",
+    "category": "kitchen",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best kitchen products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-kitchen-products",
+    "title": "Top Kitchen Products",
+    "description": "Explore top kitchen products with strong Amazon buying frequency.",
+    "category": "kitchen",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top kitchen products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-kitchen-products",
+    "title": "Popular Kitchen Products",
+    "description": "Browse popular kitchen products trending with Amazon buyers.",
+    "category": "kitchen",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular kitchen products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-kitchen-products",
+    "title": "Cheap Kitchen Products",
+    "description": "Find cheap kitchen products and affordable Amazon picks.",
+    "category": "kitchen",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable kitchen products with strong value on Amazon."
+  },
+  {
+    "slug": "best-kitchen-products-under-25",
+    "title": "Best Kitchen Products Under $25",
+    "description": "Discover the best kitchen products under $25 on Amazon.",
+    "category": "kitchen",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best kitchen products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-kitchen-products-under-50",
+    "title": "Best Kitchen Products Under $50",
+    "description": "Discover the best kitchen products under $50 on Amazon.",
+    "category": "kitchen",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best kitchen products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "kitchen-essentials",
+    "title": "Kitchen Essentials",
+    "description": "Browse essential kitchen products frequently bought on Amazon.",
+    "category": "kitchen",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential kitchen products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-beauty-products",
+    "title": "Best Beauty Products",
+    "description": "Discover the best beauty products frequently bought on Amazon.",
+    "category": "beauty",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best beauty products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-beauty-products",
+    "title": "Top Beauty Products",
+    "description": "Explore top beauty products with strong Amazon buying frequency.",
+    "category": "beauty",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top beauty products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-beauty-products",
+    "title": "Popular Beauty Products",
+    "description": "Browse popular beauty products trending with Amazon buyers.",
+    "category": "beauty",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular beauty products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-beauty-products",
+    "title": "Cheap Beauty Products",
+    "description": "Find cheap beauty products and affordable Amazon picks.",
+    "category": "beauty",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable beauty products with strong value on Amazon."
+  },
+  {
+    "slug": "best-beauty-products-under-25",
+    "title": "Best Beauty Products Under $25",
+    "description": "Discover the best beauty products under $25 on Amazon.",
+    "category": "beauty",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best beauty products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-beauty-products-under-50",
+    "title": "Best Beauty Products Under $50",
+    "description": "Discover the best beauty products under $50 on Amazon.",
+    "category": "beauty",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best beauty products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "beauty-essentials",
+    "title": "Beauty Essentials",
+    "description": "Browse essential beauty products frequently bought on Amazon.",
+    "category": "beauty",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential beauty products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-health-products",
+    "title": "Best Health Products",
+    "description": "Discover the best health products frequently bought on Amazon.",
+    "category": "health",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best health products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-health-products",
+    "title": "Top Health Products",
+    "description": "Explore top health products with strong Amazon buying frequency.",
+    "category": "health",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top health products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-health-products",
+    "title": "Popular Health Products",
+    "description": "Browse popular health products trending with Amazon buyers.",
+    "category": "health",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular health products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-health-products",
+    "title": "Cheap Health Products",
+    "description": "Find cheap health products and affordable Amazon picks.",
+    "category": "health",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable health products with strong value on Amazon."
+  },
+  {
+    "slug": "best-health-products-under-25",
+    "title": "Best Health Products Under $25",
+    "description": "Discover the best health products under $25 on Amazon.",
+    "category": "health",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best health products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-health-products-under-50",
+    "title": "Best Health Products Under $50",
+    "description": "Discover the best health products under $50 on Amazon.",
+    "category": "health",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best health products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "health-essentials",
+    "title": "Health Essentials",
+    "description": "Browse essential health products frequently bought on Amazon.",
+    "category": "health",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential health products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-sports-products",
+    "title": "Best Sports Products",
+    "description": "Discover the best sports products frequently bought on Amazon.",
+    "category": "sports",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best sports products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-sports-products",
+    "title": "Top Sports Products",
+    "description": "Explore top sports products with strong Amazon buying frequency.",
+    "category": "sports",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top sports products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-sports-products",
+    "title": "Popular Sports Products",
+    "description": "Browse popular sports products trending with Amazon buyers.",
+    "category": "sports",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular sports products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-sports-products",
+    "title": "Cheap Sports Products",
+    "description": "Find cheap sports products and affordable Amazon picks.",
+    "category": "sports",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable sports products with strong value on Amazon."
+  },
+  {
+    "slug": "best-sports-products-under-25",
+    "title": "Best Sports Products Under $25",
+    "description": "Discover the best sports products under $25 on Amazon.",
+    "category": "sports",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best sports products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-sports-products-under-50",
+    "title": "Best Sports Products Under $50",
+    "description": "Discover the best sports products under $50 on Amazon.",
+    "category": "sports",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best sports products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "sports-essentials",
+    "title": "Sports Essentials",
+    "description": "Browse essential sports products frequently bought on Amazon.",
+    "category": "sports",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential sports products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-travel-products",
+    "title": "Best Travel Products",
+    "description": "Discover the best travel products frequently bought on Amazon.",
+    "category": "travel",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best travel products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-travel-products",
+    "title": "Top Travel Products",
+    "description": "Explore top travel products with strong Amazon buying frequency.",
+    "category": "travel",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top travel products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-travel-products",
+    "title": "Popular Travel Products",
+    "description": "Browse popular travel products trending with Amazon buyers.",
+    "category": "travel",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular travel products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-travel-products",
+    "title": "Cheap Travel Products",
+    "description": "Find cheap travel products and affordable Amazon picks.",
+    "category": "travel",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable travel products with strong value on Amazon."
+  },
+  {
+    "slug": "best-travel-products-under-25",
+    "title": "Best Travel Products Under $25",
+    "description": "Discover the best travel products under $25 on Amazon.",
+    "category": "travel",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best travel products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-travel-products-under-50",
+    "title": "Best Travel Products Under $50",
+    "description": "Discover the best travel products under $50 on Amazon.",
+    "category": "travel",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best travel products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "travel-essentials",
+    "title": "Travel Essentials",
+    "description": "Browse essential travel products frequently bought on Amazon.",
+    "category": "travel",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential travel products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-fashion-products",
+    "title": "Best Fashion Products",
+    "description": "Discover the best fashion products frequently bought on Amazon.",
+    "category": "fashion",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best fashion products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-fashion-products",
+    "title": "Top Fashion Products",
+    "description": "Explore top fashion products with strong Amazon buying frequency.",
+    "category": "fashion",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top fashion products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-fashion-products",
+    "title": "Popular Fashion Products",
+    "description": "Browse popular fashion products trending with Amazon buyers.",
+    "category": "fashion",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular fashion products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-fashion-products",
+    "title": "Cheap Fashion Products",
+    "description": "Find cheap fashion products and affordable Amazon picks.",
+    "category": "fashion",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable fashion products with strong value on Amazon."
+  },
+  {
+    "slug": "best-fashion-products-under-25",
+    "title": "Best Fashion Products Under $25",
+    "description": "Discover the best fashion products under $25 on Amazon.",
+    "category": "fashion",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best fashion products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-fashion-products-under-50",
+    "title": "Best Fashion Products Under $50",
+    "description": "Discover the best fashion products under $50 on Amazon.",
+    "category": "fashion",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best fashion products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "fashion-essentials",
+    "title": "Fashion Essentials",
+    "description": "Browse essential fashion products frequently bought on Amazon.",
+    "category": "fashion",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential fashion products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-family-products",
+    "title": "Best Family Products",
+    "description": "Discover the best family products frequently bought on Amazon.",
+    "category": "family",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best family products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-family-products",
+    "title": "Top Family Products",
+    "description": "Explore top family products with strong Amazon buying frequency.",
+    "category": "family",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top family products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-family-products",
+    "title": "Popular Family Products",
+    "description": "Browse popular family products trending with Amazon buyers.",
+    "category": "family",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular family products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-family-products",
+    "title": "Cheap Family Products",
+    "description": "Find cheap family products and affordable Amazon picks.",
+    "category": "family",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable family products with strong value on Amazon."
+  },
+  {
+    "slug": "best-family-products-under-25",
+    "title": "Best Family Products Under $25",
+    "description": "Discover the best family products under $25 on Amazon.",
+    "category": "family",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best family products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-family-products-under-50",
+    "title": "Best Family Products Under $50",
+    "description": "Discover the best family products under $50 on Amazon.",
+    "category": "family",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best family products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "family-essentials",
+    "title": "Family Essentials",
+    "description": "Browse essential family products frequently bought on Amazon.",
+    "category": "family",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential family products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-general-products",
+    "title": "Best General Products",
+    "description": "Discover the best general products frequently bought on Amazon.",
+    "category": "general",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page highlights the best general products with strong ongoing demand on Amazon."
+  },
+  {
+    "slug": "top-general-products",
+    "title": "Top General Products",
+    "description": "Explore top general products with strong Amazon buying frequency.",
+    "category": "general",
+    "mode": "category",
+    "sort": "reviews",
+    "filter": null,
+    "seoText": "This page focuses on top general products that consistently attract buyers on Amazon."
+  },
+  {
+    "slug": "popular-general-products",
+    "title": "Popular General Products",
+    "description": "Browse popular general products trending with Amazon buyers.",
+    "category": "general",
+    "mode": "category",
+    "sort": "rating",
+    "filter": null,
+    "seoText": "This page collects popular general products with long-term Amazon demand."
+  },
+  {
+    "slug": "cheap-general-products",
+    "title": "Cheap General Products",
+    "description": "Find cheap general products and affordable Amazon picks.",
+    "category": "general",
+    "mode": "category",
+    "sort": "price-low",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights affordable general products with strong value on Amazon."
+  },
+  {
+    "slug": "best-general-products-under-25",
+    "title": "Best General Products Under $25",
+    "description": "Discover the best general products under $25 on Amazon.",
+    "category": "general",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 25
+    },
+    "seoText": "This page highlights the best general products under $25 with strong demand on Amazon."
+  },
+  {
+    "slug": "best-general-products-under-50",
+    "title": "Best General Products Under $50",
+    "description": "Discover the best general products under $50 on Amazon.",
+    "category": "general",
+    "mode": "category",
+    "sort": "score",
+    "filter": {
+      "maxPrice": 50
+    },
+    "seoText": "This page highlights the best general products under $50 with strong long-term demand on Amazon."
+  },
+  {
+    "slug": "general-essentials",
+    "title": "General Essentials",
+    "description": "Browse essential general products frequently bought on Amazon.",
+    "category": "general",
+    "mode": "category",
+    "sort": "score",
+    "filter": null,
+    "seoText": "This page focuses on essential general products that people buy regularly on Amazon."
+  },
+  {
+    "slug": "best-gifts-for-men",
+    "title": "Best Gifts for Men",
+    "description": "Discover popular Amazon gift ideas for men.",
+    "category": "fashion",
+    "mode": "keyword",
+    "sort": "score",
+    "filter": {
+      "query": "men"
+    },
+    "seoText": "This page highlights gift ideas for men using popular Amazon products with strong buying frequency."
+  },
+  {
+    "slug": "best-gifts-for-women",
+    "title": "Best Gifts for Women",
+    "description": "Discover popular Amazon gift ideas for women.",
+    "category": "fashion",
+    "mode": "keyword",
+    "sort": "score",
+    "filter": {
+      "query": "women"
+    },
+    "seoText": "This page highlights gift ideas for women using popular Amazon products with strong buying frequency."
+  },
+  {
+    "slug": "best-gifts-for-travelers",
+    "title": "Best Gifts for Travelers",
+    "description": "Discover popular Amazon gift ideas for travelers.",
+    "category": "travel",
+    "mode": "keyword",
+    "sort": "score",
+    "filter": {
+      "query": "travel"
+    },
+    "seoText": "This page highlights gift ideas for travelers using popular Amazon products with strong buying frequency."
+  },
+  {
+    "slug": "best-gifts-for-gamers",
+    "title": "Best Gifts for Gamers",
+    "description": "Discover popular Amazon gift ideas for gamers.",
+    "category": "tech",
+    "mode": "keyword",
+    "sort": "score",
+    "filter": {
+      "query": "gaming"
+    },
+    "seoText": "This page highlights gift ideas for gamers using popular Amazon products with strong demand."
+  },
+  {
+    "slug": "best-gifts-for-home-lovers",
+    "title": "Best Gifts for Home Lovers",
+    "description": "Discover popular Amazon gift ideas for home lovers.",
+    "category": "home",
+    "mode": "keyword",
+    "sort": "score",
+    "filter": {
+      "query": "home"
+    },
+    "seoText": "This page highlights gift ideas for home lovers using popular Amazon products with strong long-term demand."
+  },
+  {
+    "slug": "popular-products-for-men",
+    "title": "Popular Products for Men",
+    "description": "Discover popular Amazon products for men.",
+    "category": "fashion",
+    "mode": "keyword",
+    "sort": "reviews",
+    "filter": {
+      "query": "men"
+    },
+    "seoText": "This page collects frequently bought Amazon products relevant to men across fashion and daily-use categories."
+  },
+  {
+    "slug": "popular-products-for-women",
+    "title": "Popular Products for Women",
+    "description": "Discover popular Amazon products for women.",
+    "category": "fashion",
+    "mode": "keyword",
+    "sort": "reviews",
+    "filter": {
+      "query": "women"
+    },
+    "seoText": "This page collects frequently bought Amazon products relevant to women across fashion and daily-use categories."
+  }
+]
