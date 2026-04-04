@@ -179,7 +179,7 @@
       } else if (sortValue === "title") {
         items.sort((a, b) => a.name.localeCompare(b.name));
       } else {
-        items.sort((a, b) => (safeNumber(b.score) - safeNumber(a.score)));
+        items.sort((a, b) => safeNumber(b.score) - safeNumber(a.score));
       }
 
       grid.innerHTML = items.map(productCard).join("");
@@ -197,9 +197,7 @@
     await run();
   }
 
-  window.TrendPulseUI = {
-    fetchProducts
-  };
+  window.TrendPulseUI = { fetchProducts };
 
   document.addEventListener("DOMContentLoaded", async function () {
     await renderDealsPage();
