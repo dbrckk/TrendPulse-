@@ -1,173 +1,156 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  if (!window.supabaseClient) return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  const pathParts = window.location.pathname.split("/").filter(Boolean);
-  const slug = pathParts[0] === "collections" && pathParts[1]
-    ? pathParts[1].toLowerCase()
-    : null;
+  <title>Best Amazon Products | TrendPulse</title>
+  <meta
+    name="description"
+    content="Discover popular Amazon products on TrendPulse with curated category collections and evergreen product pages."
+  />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://www.trend-pulse.shop/collections/best-tech-products" />
 
-  if (!slug) return;
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Best Amazon Products | TrendPulse" />
+  <meta
+    property="og:description"
+    content="Discover popular Amazon products on TrendPulse with curated category collections."
+  />
+  <meta property="og:url" content="https://www.trend-pulse.shop/collections/best-tech-products" />
+  <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
 
-  const titleEl = document.getElementById("collection-title");
-  const descriptionEl = document.getElementById("collection-description");
-  const countEl = document.getElementById("collection-count");
-  const gridEl = document.getElementById("collection-grid");
-  const seoTextEl = document.getElementById("collection-seo-text");
-  const relatedLinksEl = document.getElementById("collection-related-links");
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Best Amazon Products | TrendPulse" />
+  <meta
+    name="twitter:description"
+    content="Discover popular Amazon products on TrendPulse with curated category collections."
+  />
+  <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
 
-  function safeNumber(value, fallback = 0) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : fallback;
+  <meta name="theme-color" content="#09090b" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/supabase.js?v=20260404-6" defer></script>
+  <script src="/assets/js/programmatic-seo.js?v=20260404-6" defer></script>
+
+  <script type="application/ld+json" id="collection-schema">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Best Amazon Products | TrendPulse",
+    "url": "https://www.trend-pulse.shop/collections/best-tech-products",
+    "description": "Discover popular Amazon products on TrendPulse with curated category collections."
   }
+  </script>
+</head>
 
-  function escapeHtml(value = "") {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-  }
+<body class="bg-zinc-950 text-zinc-100 antialiased pb-24 md:pb-0">
 
-  function formatPrice(value) {
-    return `$${safeNumber(value).toFixed(2)}`;
-  }
+  <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+      <a href="/" class="text-xl font-bold text-white">TrendPulse</a>
 
-  function productUrl(product) {
-    if (product.slug) return `/product/${encodeURIComponent(product.slug)}`;
-    return `/product/${encodeURIComponent(product.asin || "")}`;
-  }
+      <nav class="hidden md:flex gap-5 text-sm text-zinc-300">
+        <a href="/" class="hover:text-white">Home</a>
+        <a href="/deals" class="hover:text-white">Deals</a>
+        <a href="/catalog" class="hover:text-white">Catalog</a>
+      </nav>
 
-  function proxyImage(url = "") {
-    const raw = String(url).trim();
-    if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
-      return "https://via.placeholder.com/600x600?text=No+Image";
-    }
-    return raw;
-  }
-
-  function card(product) {
-    return `
-      <a href="${productUrl(product)}" class="block rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4 transition hover:border-zinc-600">
-        <img
-          src="${proxyImage(product.image_url)}"
-          alt="${escapeHtml(product.name || "Product")}"
-          class="h-40 w-full rounded-xl bg-white object-contain"
-          loading="lazy"
-          onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
-        />
-        <h3 class="mt-3 text-sm font-semibold text-white">${escapeHtml(product.name || "Product")}</h3>
-        <div class="mt-2 text-xs text-zinc-400">
-          ⭐ ${safeNumber(product.amazon_rating) > 0 ? safeNumber(product.amazon_rating).toFixed(1) : "—"} (${safeNumber(product.amazon_review_count)})
-        </div>
-        <div class="mt-2 font-bold text-green-400">${formatPrice(product.price)}</div>
-      </a>
-    `;
-  }
-
-  let pages = [];
-  try {
-    const response = await fetch("/programmatic-pages.json");
-    pages = await response.json();
-  } catch (error) {
-    console.error("Failed to load programmatic pages config", error);
-    return;
-  }
-
-  const config = pages.find((page) => page.slug === slug);
-  if (!config) return;
-
-  let query = window.supabaseClient
-    .from("catalog_products")
-    .select("*")
-    .eq("category", config.category)
-    .limit(48);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  let products = [...(data || [])];
-
-  if (config.filter?.query) {
-    const needle = String(config.filter.query).toLowerCase();
-    products = products.filter((product) => {
-      const haystack = [
-        product.name,
-        product.brand,
-        product.description,
-        product.short_description,
-        product.category
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      return haystack.includes(needle);
-    });
-  }
-
-  if (config.filter?.maxPrice != null) {
-    products = products.filter(
-      (product) => safeNumber(product.price, 999999) <= safeNumber(config.filter.maxPrice, 999999)
-    );
-  }
-
-  if (config.sort === "reviews") {
-    products.sort((a, b) => safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count));
-  } else if (config.sort === "rating") {
-    products.sort((a, b) => safeNumber(b.amazon_rating) - safeNumber(a.amazon_rating));
-  } else if (config.sort === "price-low") {
-    products.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
-  } else {
-    products.sort((a, b) => {
-      if (safeNumber(a.source_rank, 999999) !== safeNumber(b.source_rank, 999999)) {
-        return safeNumber(a.source_rank, 999999) - safeNumber(b.source_rank, 999999);
-      }
-      return safeNumber(b.score) - safeNumber(a.score);
-    });
-  }
-
-  products = products.slice(0, 24);
-
-  if (titleEl) titleEl.textContent = config.title;
-  if (descriptionEl) descriptionEl.textContent = config.description;
-  if (countEl) countEl.textContent = `${products.length} ${products.length === 1 ? "product" : "products"}`;
-  if (gridEl) gridEl.innerHTML = products.map(card).join("");
-  if (seoTextEl) seoTextEl.textContent = config.seoText || config.description;
-
-  document.title = `${config.title} | TrendPulse`;
-
-  const canonicalUrl = `https://www.trend-pulse.shop/collections/${slug}`;
-
-  const metaDescription = document.querySelector('meta[name="description"]');
-  if (metaDescription) metaDescription.setAttribute("content", config.description);
-
-  const canonical = document.querySelector('link[rel="canonical"]');
-  if (canonical) canonical.setAttribute("href", canonicalUrl);
-
-  const ogTitle = document.querySelector('meta[property="og:title"]');
-  if (ogTitle) ogTitle.setAttribute("content", `${config.title} | TrendPulse`);
-
-  const ogDescription = document.querySelector('meta[property="og:description"]');
-  if (ogDescription) ogDescription.setAttribute("content", config.description);
-
-  const ogUrl = document.querySelector('meta[property="og:url"]');
-  if (ogUrl) ogUrl.setAttribute("content", canonicalUrl);
-
-  const related = pages
-    .filter((page) => page.slug !== slug && page.category === config.category)
-    .slice(0, 6);
-
-  if (relatedLinksEl) {
-    relatedLinksEl.innerHTML = related.map((page) => `
       <a
-        href="/collections/${page.slug}"
-        class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+        href="/catalog"
+        class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
       >
-        ${escapeHtml(page.title)}
+        Browse Catalog
       </a>
-    `).join("");
-  }
-});
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+
+    <nav class="mb-5 text-sm text-zinc-400">
+      <a href="/" class="hover:text-white">Home</a>
+      <span class="mx-2">/</span>
+      <span class="text-zinc-200">Collections</span>
+    </nav>
+
+    <section class="rounded-[2rem] border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 shadow-2xl shadow-black/20 sm:p-8">
+      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Collection</p>
+
+      <h1 id="collection-title" class="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+        Best Products
+      </h1>
+
+      <p id="collection-description" class="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
+        Browse a curated list of popular Amazon products.
+      </p>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a
+          href="/catalog"
+          class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+        >
+          Browse Categories
+        </a>
+
+        <a
+          href="/deals"
+          class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:text-white"
+        >
+          View Live Deals
+        </a>
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-2xl font-bold tracking-tight text-white">Selected products</h2>
+          <p id="collection-count" class="mt-2 text-sm text-zinc-400">0 products</p>
+        </div>
+      </div>
+
+      <div id="collection-grid" class="grid grid-cols-2 gap-4 xl:grid-cols-4"></div>
+
+      <div id="collection-empty-state" class="hidden mt-8 rounded-[2rem] border border-zinc-800 bg-zinc-900/50 p-8 text-center">
+        <h3 class="text-lg font-semibold text-white">No products found</h3>
+        <p class="mt-2 text-sm leading-6 text-zinc-300">
+          This collection currently has no matching products.
+        </p>
+        <a
+          href="/catalog"
+          class="mt-4 inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+        >
+          Browse Catalog
+        </a>
+      </div>
+    </section>
+
+    <section class="mt-10 grid gap-4 lg:grid-cols-2">
+      <div class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6">
+        <h2 class="text-lg font-semibold text-white">Why this page exists</h2>
+        <p id="collection-seo-text" class="mt-3 text-sm leading-7 text-zinc-300">
+          This page groups popular Amazon products around a specific theme using strong-demand catalog data.
+        </p>
+      </div>
+
+      <div class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6">
+        <h2 class="text-lg font-semibold text-white">Explore more collections</h2>
+        <div id="collection-related-links" class="mt-4 flex flex-wrap gap-2"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-950/98 backdrop-blur md:hidden">
+    <div class="grid grid-cols-3">
+      <a href="/" class="py-3 text-center text-zinc-400">Home</a>
+      <a href="/deals" class="py-3 text-center text-zinc-400">Deals</a>
+      <a href="/catalog" class="py-3 text-center text-white">Catalog</a>
+    </div>
+  </nav>
+
+</body>
+</html>
