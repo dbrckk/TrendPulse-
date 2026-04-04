@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const titleEl = document.getElementById("catalog-category-title");
   const breadcrumbEl = document.getElementById("catalog-category-breadcrumb");
   const descriptionEl = document.getElementById("catalog-category-description");
+  const seoTextEl = document.getElementById("catalog-seo-text");
+  const relatedCategoriesEl = document.getElementById("related-categories");
 
   if (!grid) return;
 
@@ -21,56 +23,85 @@ document.addEventListener("DOMContentLoaded", async () => {
   const categoryMeta = {
     tech: {
       title: "Tech Catalog",
-      description: "Popular tech products with strong buying frequency on Amazon."
+      description: "Popular tech products with strong buying frequency on Amazon.",
+      seo: "This tech catalog highlights frequently bought Amazon products across gadgets, accessories, electronics, and everyday devices. It is designed for long-term product discovery rather than short-term promotions."
     },
     home: {
       title: "Home Catalog",
-      description: "Popular home products with strong buying frequency on Amazon."
+      description: "Popular home products with strong buying frequency on Amazon.",
+      seo: "This home catalog focuses on frequently bought Amazon products for comfort, storage, organization, and daily home improvement. It helps users discover evergreen household favorites."
     },
     kitchen: {
       title: "Kitchen Catalog",
-      description: "Popular kitchen products with strong buying frequency on Amazon."
+      description: "Popular kitchen products with strong buying frequency on Amazon.",
+      seo: "This kitchen catalog highlights popular Amazon cooking tools, appliances, cookware, and prep essentials that people buy regularly."
     },
     beauty: {
       title: "Beauty Catalog",
-      description: "Popular beauty products with strong buying frequency on Amazon."
+      description: "Popular beauty products with strong buying frequency on Amazon.",
+      seo: "This beauty catalog gathers frequently purchased skincare, self-care, and beauty products that remain popular beyond temporary deals."
     },
     sports: {
       title: "Sports Catalog",
-      description: "Popular sports products with strong buying frequency on Amazon."
+      description: "Popular sports products with strong buying frequency on Amazon.",
+      seo: "This sports catalog covers frequently bought fitness accessories, training gear, and athletic essentials with strong ongoing demand."
     },
     health: {
       title: "Health Catalog",
-      description: "Popular health products with strong buying frequency on Amazon."
+      description: "Popular health products with strong buying frequency on Amazon.",
+      seo: "This health catalog features wellness products, supplements, and support items that people buy consistently on Amazon."
     },
     travel: {
       title: "Travel Catalog",
-      description: "Popular travel products with strong buying frequency on Amazon."
+      description: "Popular travel products with strong buying frequency on Amazon.",
+      seo: "This travel catalog helps users discover frequently purchased luggage, travel accessories, organizers, and mobility essentials."
     },
     women: {
       title: "Women Catalog",
-      description: "Popular products for women with strong buying frequency on Amazon."
+      description: "Popular products for women with strong buying frequency on Amazon.",
+      seo: "This women catalog highlights frequently bought fashion accessories, personal items, and everyday products popular on Amazon."
     },
     men: {
       title: "Men Catalog",
-      description: "Popular products for men with strong buying frequency on Amazon."
+      description: "Popular products for men with strong buying frequency on Amazon.",
+      seo: "This men catalog focuses on frequently bought accessories, grooming products, and daily essentials with strong Amazon demand."
     },
     jewelry: {
       title: "Jewelry Catalog",
-      description: "Popular jewelry products with strong buying frequency on Amazon."
+      description: "Popular jewelry products with strong buying frequency on Amazon.",
+      seo: "This jewelry catalog highlights frequently purchased rings, bracelets, necklaces, and related accessories on Amazon."
     },
     baby: {
       title: "Baby Catalog",
-      description: "Popular baby products with strong buying frequency on Amazon."
+      description: "Popular baby products with strong buying frequency on Amazon.",
+      seo: "This baby catalog features frequently bought products for care, feeding, nursery use, and daily family needs."
     },
     pets: {
       title: "Pets Catalog",
-      description: "Popular pet products with strong buying frequency on Amazon."
+      description: "Popular pet products with strong buying frequency on Amazon.",
+      seo: "This pets catalog highlights frequently bought dog, cat, and pet care products that remain consistently popular."
     },
     general: {
       title: "General Catalog",
-      description: "Popular Amazon products with strong buying frequency."
+      description: "Popular Amazon products with strong buying frequency.",
+      seo: "This general catalog brings together frequently bought Amazon products across categories, useful for broad evergreen product discovery."
     }
+  };
+
+  const relatedCategoryMap = {
+    tech: ["home", "kitchen", "general", "travel"],
+    home: ["kitchen", "beauty", "general", "tech"],
+    kitchen: ["home", "health", "general", "beauty"],
+    beauty: ["health", "women", "general", "home"],
+    sports: ["health", "men", "women", "general"],
+    health: ["sports", "beauty", "general", "kitchen"],
+    travel: ["tech", "general", "men", "women"],
+    women: ["beauty", "jewelry", "general", "travel"],
+    men: ["tech", "sports", "general", "travel"],
+    jewelry: ["women", "general", "beauty", "men"],
+    baby: ["home", "health", "general", "pets"],
+    pets: ["home", "general", "health", "baby"],
+    general: ["tech", "home", "beauty", "kitchen"]
   };
 
   function escapeHtml(value = "") {
@@ -113,12 +144,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   function updatePageMeta() {
     const meta = categoryMeta[category] || {
       title: `${capitalize(category)} Catalog`,
-      description: `Popular Amazon products in ${capitalize(category)}.`
+      description: `Popular Amazon products in ${capitalize(category)}.`,
+      seo: `Browse frequently bought Amazon products in ${capitalize(category)}.`
     };
 
     if (titleEl) titleEl.textContent = meta.title;
     if (breadcrumbEl) breadcrumbEl.textContent = capitalize(category);
     if (descriptionEl) descriptionEl.textContent = meta.description;
+    if (seoTextEl) seoTextEl.textContent = meta.seo;
 
     document.title = `${meta.title} | TrendPulse`;
 
@@ -132,6 +165,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         `https://www.trend-pulse.shop/catalog-category.html?category=${encodeURIComponent(category)}`
       );
     }
+  }
+
+  function renderRelatedCategories() {
+    if (!relatedCategoriesEl) return;
+    const related = relatedCategoryMap[category] || ["general"];
+
+    relatedCategoriesEl.innerHTML = related
+      .map(
+        (item) => `
+          <a
+            href="/catalog-category.html?category=${encodeURIComponent(item)}"
+            class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+          >
+            ${escapeHtml(capitalize(item))}
+          </a>
+        `
+      )
+      .join("");
   }
 
   function productCard(product) {
@@ -169,11 +220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               </span>
               ${
                 product.is_best_seller
-                  ? `
-                <span class="rounded-full bg-green-500/15 px-2.5 py-1 text-[11px] font-medium text-green-300">
-                  Best Seller
-                </span>
-              `
+                  ? `<span class="rounded-full bg-green-500/15 px-2.5 py-1 text-[11px] font-medium text-green-300">Best Seller</span>`
                   : ""
               }
             </div>
@@ -279,15 +326,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (emptyState) {
-      if (filtered.length === 0) {
-        emptyState.classList.remove("hidden");
-      } else {
-        emptyState.classList.add("hidden");
-      }
+      emptyState.classList.toggle("hidden", filtered.length !== 0);
     }
   }
 
   updatePageMeta();
+  renderRelatedCategories();
 
   const products = await fetchCatalogProducts();
   applyFilters(products);
