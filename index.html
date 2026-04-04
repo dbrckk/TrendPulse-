@@ -3,147 +3,172 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TrendPulse | Swipe Amazon Deals Fast</title>
+
+  <title>TrendPulse | Swipe Amazon Deals</title>
+
   <meta
     name="description"
-    content="Swipe Amazon deals like Tinder. Fast mobile-first product discovery focused on the US market. Skip what you do not want and buy what you like."
+    content="Swipe Amazon deals like Tinder. Discover trending products instantly and buy fast."
   />
-  <meta name="robots" content="index,follow" />
+
   <link rel="canonical" href="https://www.trend-pulse.shop/" />
 
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="TrendPulse | Swipe Amazon Deals Fast" />
-  <meta
-    property="og:description"
-    content="Swipe Amazon deals like Tinder. Fast mobile-first product discovery focused on the US market."
-  />
+  <meta property="og:title" content="TrendPulse | Swipe Amazon Deals" />
+  <meta property="og:description" content="Swipe Amazon deals instantly." />
   <meta property="og:url" content="https://www.trend-pulse.shop/" />
   <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
 
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="TrendPulse | Swipe Amazon Deals Fast" />
-  <meta
-    name="twitter:description"
-    content="Swipe Amazon deals like Tinder. Fast mobile-first product discovery focused on the US market."
-  />
-  <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
-
   <meta name="theme-color" content="#09090b" />
-  <link rel="manifest" href="/manifest.json" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/assets/js/supabase.js?v=20260404-2" defer></script>
-  <script src="/assets/js/trendpulse-ui.js?v=20260404-2" defer></script>
-  <script src="/assets/js/swipe.js?v=20260404-2" defer></script>
 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "TrendPulse",
-    "url": "https://www.trend-pulse.shop/"
-  }
-  </script>
+  <!-- FORCE REFRESH -->
+  <script src="/assets/js/supabase.js?v=20260404-3" defer></script>
+  <script src="/assets/js/trendpulse-ui.js?v=20260404-3" defer></script>
+  <script src="/assets/js/swipe.js?v=20260404-3" defer></script>
+
+  <style>
+    body {
+      overscroll-behavior: none;
+    }
+  </style>
 </head>
+
 <body class="bg-black text-white antialiased">
+
+  <!-- HEADER -->
   <header class="sticky top-0 z-50 border-b border-zinc-800 bg-black/90 backdrop-blur">
     <div class="mx-auto flex max-w-md items-center justify-between px-4 py-4">
-      <a href="/" class="text-2xl font-bold tracking-tight text-white">TrendPulse</a>
 
-      <div class="flex items-center gap-2">
-        <a
-          href="/catalog.html"
-          class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
-        >
+      <a href="/" class="text-2xl font-bold tracking-tight">
+        TrendPulse
+      </a>
+
+      <div class="flex gap-2">
+        <a href="/catalog.html" class="px-4 py-2 border border-zinc-700 rounded-full text-sm hover:border-zinc-500">
           Catalog
         </a>
-        <a
-          href="/deals.html"
-          class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
-        >
+
+        <a href="/deals.html" class="px-4 py-2 border border-zinc-700 rounded-full text-sm hover:border-zinc-500">
           Deals
         </a>
       </div>
+
     </div>
   </header>
 
-  <main class="mx-auto max-w-md px-4 pb-28 pt-5">
+  <!-- MAIN -->
+  <main class="mx-auto max-w-md px-4 pt-5 pb-28">
+
+    <!-- INTRO -->
     <section class="mb-5 rounded-3xl border border-zinc-800 bg-zinc-950/80 p-4">
-      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Swipe Mode</p>
-      <h1 class="mt-2 text-3xl font-bold tracking-tight text-white">Find Amazon deals fast</h1>
-      <p class="mt-2 text-sm leading-6 text-zinc-300">
-        Swipe left to hide a deal. Swipe right or tap buy to open Amazon with your affiliate link.
+      <p class="text-xs uppercase tracking-widest text-zinc-400">
+        Swipe Mode
       </p>
+
+      <h1 class="mt-2 text-3xl font-bold">
+        Discover Amazon deals instantly
+      </h1>
+
+      <p class="mt-2 text-sm text-zinc-300">
+        Swipe right to buy. Swipe left to skip.
+      </p>
+
       <p class="mt-3 text-xs text-zinc-500">
-        Affiliate disclosure: TrendPulse may earn from qualifying purchases.
+        Affiliate disclosure: we may earn commissions.
       </p>
     </section>
 
+    <!-- SWIPE STACK -->
     <section class="relative">
-      <div id="swipe-empty-state" class="hidden rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 text-center">
-        <p class="text-sm font-medium text-zinc-300">No more deals right now.</p>
+
+      <!-- EMPTY -->
+      <div
+        id="swipe-empty-state"
+        class="hidden rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 text-center"
+      >
+        <p class="text-sm text-zinc-300">No more deals.</p>
+
         <button
           id="reset-disliked-deals"
-          type="button"
-          class="mt-4 inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+          class="mt-4 px-5 py-3 bg-white text-black rounded-full text-sm font-semibold"
         >
-          Show hidden deals again
+          Show again
         </button>
       </div>
 
+      <!-- STACK -->
       <div id="swipe-stack" class="relative h-[560px]"></div>
+
     </section>
 
+    <!-- BUTTONS -->
     <section class="mt-5 grid grid-cols-2 gap-3">
+
       <button
         id="swipe-dislike-btn"
-        type="button"
-        class="inline-flex items-center justify-center rounded-full border border-red-500/40 bg-red-500/10 px-5 py-4 text-base font-semibold text-red-300 transition hover:bg-red-500/15"
+        class="py-4 rounded-full border border-red-500/40 bg-red-500/10 text-red-300 font-semibold"
       >
         Dislike
       </button>
+
       <button
         id="swipe-like-btn"
-        type="button"
-        class="inline-flex items-center justify-center rounded-full bg-green-500 px-5 py-4 text-base font-semibold text-black transition hover:opacity-90"
+        class="py-4 rounded-full bg-green-500 text-black font-semibold"
       >
-        Buy on Amazon
+        Buy
       </button>
+
     </section>
 
+    <!-- QUICK LINKS -->
     <section class="mt-6 rounded-3xl border border-zinc-800 bg-zinc-950/80 p-4">
-      <div class="flex items-center justify-between gap-4">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Quick Links</p>
-          <h2 class="mt-1 text-lg font-semibold text-white">Explore more</h2>
-        </div>
-      </div>
+
+      <h2 class="text-lg font-semibold">Explore</h2>
 
       <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <a href="/catalog.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Catalog</a>
-        <a href="/cheap-tech.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Cheap Tech</a>
-        <a href="/best-gifts.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Best Gifts</a>
-        <a href="/best-sellers.html" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Best Sellers</a>
+
+        <a href="/catalog.html" class="p-4 border border-zinc-800 rounded-2xl hover:border-zinc-600">
+          Catalog
+        </a>
+
+        <a href="/cheap-tech.html" class="p-4 border border-zinc-800 rounded-2xl hover:border-zinc-600">
+          Cheap Tech
+        </a>
+
+        <a href="/best-gifts.html" class="p-4 border border-zinc-800 rounded-2xl hover:border-zinc-600">
+          Best Gifts
+        </a>
+
+        <a href="/best-sellers.html" class="p-4 border border-zinc-800 rounded-2xl hover:border-zinc-600">
+          Best Sellers
+        </a>
+
       </div>
+
     </section>
+
   </main>
 
-  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-black/95 backdrop-blur">
-    <div class="mx-auto grid max-w-md grid-cols-4">
-      <a href="/" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-white">
-        <span>Home</span>
+  <!-- MOBILE NAV -->
+  <nav class="fixed bottom-0 left-0 right-0 border-t border-zinc-800 bg-black md:hidden">
+    <div class="grid grid-cols-3 text-sm">
+
+      <a href="/" class="py-3 text-center text-white">
+        Home
       </a>
-      <a href="/deals.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
-        <span>Deals</span>
+
+      <a href="/deals.html" class="py-3 text-center text-zinc-400">
+        Deals
       </a>
-      <a href="/catalog.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
-        <span>Catalog</span>
+
+      <a href="/catalog.html" class="py-3 text-center text-zinc-400">
+        Catalog
       </a>
-      <a href="/best-gifts.html" class="flex flex-col items-center gap-1 px-3 py-3 text-[11px] font-medium text-zinc-400">
-        <span>Gifts</span>
-      </a>
+
     </div>
   </nav>
+
 </body>
-  </html>
+      </html>
