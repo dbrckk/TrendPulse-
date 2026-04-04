@@ -41,12 +41,14 @@ function slugify(value = "") {
     .slice(0, 120);
 }
 
-function uniqueBy(items, getKey) {
-  const map = new Map();
-  for (const item of items) {
-    map.set(getKey(item), item);
+function normalizeUrl(url = "") {
+  const raw = String(url).trim();
+  if (!raw) return "";
+  try {
+    return new URL(raw).toString();
+  } catch {
+    return "";
   }
-  return [...map.values()];
 }
 
 function isUsableImage(url = "") {
@@ -59,18 +61,25 @@ function isUsableImage(url = "") {
   return true;
 }
 
-function normalizeUrl(url = "") {
-  const raw = String(url).trim();
-  if (!raw) return "";
+function buildAffiliateLink(amazonUrl = "") {
+  const tag = process.env.AMAZON_AFFILIATE_TAG || "Drackk-20";
+  const url = normalizeUrl(amazonUrl);
+  if (!url) return "";
+
   try {
-    return new URL(raw).toString();
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("amazon.com")) {
+      parsed.searchParams.set("tag", tag);
+    }
+    return parsed.toString();
   } catch {
-    return "";
+    return url;
   }
 }
 
 function extractImageFromHtml(html = "") {
   if (!html) return "";
+
   const patterns = [
     /<img[^>]+src=["']([^"']+)["']/i,
     /<img[^>]+data-lazy-src=["']([^"']+)["']/i,
@@ -88,7 +97,7 @@ function extractImageFromHtml(html = "") {
   return "";
 }
 
-function extractImage(item) {
+function extractFeedImage(item) {
   const candidates = [
     item?.enclosure?.url,
     item?.["media:content"]?.url,
@@ -213,19 +222,65 @@ function inferCategory(text = "") {
   return "general";
 }
 
-function buildAffiliateLink(amazonUrl = "") {
-  const tag = process.env.AMAZON_AFFILIATE_TAG || "Drackk-20";
-  const url = normalizeUrl(amazonUrl);
-  if (!url) return "";
+async function fetchText(url) {
+  const response = await fetch(url, {
+    redirect: "follow",
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; TrendPulseBot/1.0; +https://www.trend-pulse.shop/)",
+      "Accept-Language": "en-US,en;q=0.9"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  return await response.text();
+}
+
+function extractAmazonMainImage(html = "") {
+  if (!html) return "";
+
+  const patterns = [
+    /"landingImageUrl"\s*:\s*"([^"]+)"/i,
+    /"large":"([^"]+)"/i,
+    /"hiRes":"([^"]+)"/i,
+    /"mainUrl":"([^"]+)"/i,
+    /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+    /<img[^>]+id=["']landingImage["'][^>]+src=["']([^"']+)["']/i
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) {
+      const cleaned = match[1].replace(/\\u0026/g, "&").replace(/\\/g, "");
+      const url = normalizeUrl(cleaned);
+      if (isUsableImage(url)) return url;
+    }
+  }
+
+  return "";
+}
+
+const amazonImageCache = new Map();
+
+async function fetchRealAmazonImage(amazonUrl = "") {
+  const normalized = normalizeUrl(amazonUrl);
+  if (!normalized) return "";
+
+  if (amazonImageCache.has(normalized)) {
+    return amazonImageCache.get(normalized);
+  }
 
   try {
-    const parsed = new URL(url);
-    if (parsed.hostname.includes("amazon.com")) {
-      parsed.searchParams.set("tag", tag);
-    }
-    return parsed.toString();
-  } catch {
-    return url;
+    const html = await fetchText(normalized);
+    const image = extractAmazonMainImage(html);
+    amazonImageCache.set(normalized, image || "");
+    return image || "";
+  } catch (error) {
+    log("amazon image fetch failed:", normalized, error.message || error);
+    amazonImageCache.set(normalized, "");
+    return "";
   }
 }
 
@@ -253,7 +308,9 @@ function mergeProduct(existing, incoming) {
     brand: incoming.brand || existing?.brand || null,
     description: incoming.description || existing?.description || null,
     short_description: incoming.short_description || existing?.short_description || null,
-    image_url: isUsableImage(incoming.image_url) ? incoming.image_url : existing?.image_url || null,
+    image_url: isUsableImage(incoming.image_url)
+      ? incoming.image_url
+      : existing?.image_url || null,
     gallery_urls: Array.isArray(existing?.gallery_urls) ? existing.gallery_urls : [],
     price: incoming.price > 0 ? incoming.price : existing?.price ?? null,
     original_price:
@@ -311,7 +368,11 @@ async function processFeed(feedUrl) {
     const title = cleanupTitle(item.title || "");
     const description = String(item.contentSnippet || item.summary || "").trim();
     const combinedText = `${title} ${description}`;
-    const imageUrl = extractImage(item);
+
+    const feedImage = extractFeedImage(item);
+    const amazonImage = await fetchRealAmazonImage(amazonUrl);
+    const finalImage = isUsableImage(amazonImage) ? amazonImage : feedImage;
+
     const price = extractPrice(item.title || item.contentSnippet || "");
     const category = inferCategory(combinedText);
     const slug = slugify(`${title}-${asin}`);
@@ -323,7 +384,7 @@ async function processFeed(feedUrl) {
       brand: null,
       description: description || null,
       short_description: description ? description.slice(0, 180) : null,
-      image_url: imageUrl || null,
+      image_url: isUsableImage(finalImage) ? finalImage : null,
       price: price || 0,
       original_price: 0,
       discount_percentage: 0,
@@ -344,6 +405,14 @@ async function processFeed(feedUrl) {
   }
 
   return items;
+}
+
+function uniqueBy(items, getKey) {
+  const map = new Map();
+  for (const item of items) {
+    map.set(getKey(item), item);
+  }
+  return [...map.values()];
 }
 
 async function main() {
@@ -404,14 +473,10 @@ async function main() {
 
   log("upserted products:", coreProducts.length);
   log("upserted deal sources:", dealSources.length);
+  log("DONE");
 }
 
-main()
-  .then(() => {
-    log("DONE");
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("[sync-deals] FAILED", error);
-    process.exit(1);
-  });
+main().catch((error) => {
+  console.error("[sync-deals] FAILED", error);
+  process.exit(1);
+});
