@@ -2,7 +2,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!window.supabaseClient) return;
 
   const pathParts = window.location.pathname.split("/").filter(Boolean);
-  const slug = pathParts[0] === "collections" && pathParts[1] ? pathParts[1].toLowerCase() : null;
+  const slug = pathParts[0] === "collections" && pathParts[1]
+    ? pathParts[1].toLowerCase()
+    : null;
+
   if (!slug) return;
 
   const titleEl = document.getElementById("collection-title");
@@ -11,72 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const gridEl = document.getElementById("collection-grid");
   const seoTextEl = document.getElementById("collection-seo-text");
   const relatedLinksEl = document.getElementById("collection-related-links");
-
-  const collectionMap = {
-    "best-tech-products": {
-      title: "Best Tech Products",
-      description: "Discover popular tech products frequently bought on Amazon.",
-      category: "tech",
-      seo: "This page highlights popular tech products with strong buying frequency on Amazon. It is designed to help users quickly discover proven electronics, gadgets, and accessories."
-    },
-    "best-home-products": {
-      title: "Best Home Products",
-      description: "Discover popular home products frequently bought on Amazon.",
-      category: "home",
-      seo: "This page gathers popular home products that users buy regularly on Amazon, including everyday essentials, comfort items, and useful home upgrades."
-    },
-    "best-kitchen-products": {
-      title: "Best Kitchen Products",
-      description: "Discover popular kitchen products frequently bought on Amazon.",
-      category: "kitchen",
-      seo: "This page focuses on high-demand kitchen products, cookware, and tools that perform well over time on Amazon."
-    },
-    "best-beauty-products": {
-      title: "Best Beauty Products",
-      description: "Discover popular beauty products frequently bought on Amazon.",
-      category: "beauty",
-      seo: "This page highlights beauty and skincare products with consistent buying demand on Amazon."
-    },
-    "best-sports-products": {
-      title: "Best Sports Products",
-      description: "Discover popular sports products frequently bought on Amazon.",
-      category: "sports",
-      seo: "This page groups frequently bought sports and fitness products with strong long-term demand."
-    },
-    "best-health-products": {
-      title: "Best Health Products",
-      description: "Discover popular health products frequently bought on Amazon.",
-      category: "health",
-      seo: "This page covers popular health and wellness products often bought by Amazon users."
-    },
-    "best-travel-products": {
-      title: "Best Travel Products",
-      description: "Discover popular travel products frequently bought on Amazon.",
-      category: "travel",
-      seo: "This page highlights travel essentials and gear with strong purchase frequency on Amazon."
-    },
-    "best-products-for-men": {
-      title: "Best Products for Men",
-      description: "Discover popular products for men frequently bought on Amazon.",
-      category: "men",
-      seo: "This page features frequently bought products for men, including accessories, essentials, and high-demand daily items."
-    },
-    "best-products-for-women": {
-      title: "Best Products for Women",
-      description: "Discover popular products for women frequently bought on Amazon.",
-      category: "women",
-      seo: "This page features frequently bought products for women across fashion, personal care, and lifestyle."
-    },
-    "best-jewelry-products": {
-      title: "Best Jewelry Products",
-      description: "Discover popular jewelry products frequently bought on Amazon.",
-      category: "jewelry",
-      seo: "This page highlights jewelry products with strong demand, including rings, necklaces, and bracelets."
-    }
-  };
-
-  const config = collectionMap[slug];
-  if (!config) return;
 
   function safeNumber(value, fallback = 0) {
     const n = Number(value);
@@ -126,25 +63,79 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  const { data, error } = await window.supabaseClient
+  let pages = [];
+  try {
+    const response = await fetch("/programmatic-pages.json");
+    pages = await response.json();
+  } catch (error) {
+    console.error("Failed to load programmatic pages config", error);
+    return;
+  }
+
+  const config = pages.find((page) => page.slug === slug);
+  if (!config) return;
+
+  let query = window.supabaseClient
     .from("catalog_products")
     .select("*")
     .eq("category", config.category)
-    .order("source_rank", { ascending: true })
-    .limit(24);
+    .limit(48);
+
+  const { data, error } = await query;
 
   if (error) {
     console.error(error);
     return;
   }
 
-  const products = data || [];
+  let products = [...(data || [])];
+
+  if (config.filter?.query) {
+    const needle = String(config.filter.query).toLowerCase();
+    products = products.filter((product) => {
+      const haystack = [
+        product.name,
+        product.brand,
+        product.description,
+        product.short_description,
+        product.category
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(needle);
+    });
+  }
+
+  if (config.filter?.maxPrice != null) {
+    products = products.filter(
+      (product) => safeNumber(product.price, 999999) <= safeNumber(config.filter.maxPrice, 999999)
+    );
+  }
+
+  if (config.sort === "reviews") {
+    products.sort((a, b) => safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count));
+  } else if (config.sort === "rating") {
+    products.sort((a, b) => safeNumber(b.amazon_rating) - safeNumber(a.amazon_rating));
+  } else if (config.sort === "price-low") {
+    products.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
+  } else {
+    products.sort((a, b) => {
+      if (safeNumber(a.source_rank, 999999) !== safeNumber(b.source_rank, 999999)) {
+        return safeNumber(a.source_rank, 999999) - safeNumber(b.source_rank, 999999);
+      }
+      return safeNumber(b.score) - safeNumber(a.score);
+    });
+  }
+
+  products = products.slice(0, 24);
 
   if (titleEl) titleEl.textContent = config.title;
   if (descriptionEl) descriptionEl.textContent = config.description;
   if (countEl) countEl.textContent = `${products.length} ${products.length === 1 ? "product" : "products"}`;
   if (gridEl) gridEl.innerHTML = products.map(card).join("");
-  if (seoTextEl) seoTextEl.textContent = config.seo;
+  if (seoTextEl) seoTextEl.textContent = config.seoText || config.description;
 
   document.title = `${config.title} | TrendPulse`;
 
@@ -165,17 +156,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const ogUrl = document.querySelector('meta[property="og:url"]');
   if (ogUrl) ogUrl.setAttribute("content", canonicalUrl);
 
-  const related = Object.entries(collectionMap)
-    .filter(([key]) => key !== slug)
+  const related = pages
+    .filter((page) => page.slug !== slug && page.category === config.category)
     .slice(0, 6);
 
   if (relatedLinksEl) {
-    relatedLinksEl.innerHTML = related.map(([key, value]) => `
+    relatedLinksEl.innerHTML = related.map((page) => `
       <a
-        href="/collections/${key}"
+        href="/collections/${page.slug}"
         class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
       >
-        ${escapeHtml(value.title)}
+        ${escapeHtml(page.title)}
       </a>
     `).join("");
   }
