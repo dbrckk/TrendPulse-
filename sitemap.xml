@@ -1,118 +1,567 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.trend-pulse.shop/</loc>
+    
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-
   <url>
-    <loc>https://www.trend-pulse.shop/deals.html</loc>
+    <loc>https://www.trend-pulse.shop/deals</loc>
+    
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
-
   <url>
-    <loc>https://www.trend-pulse.shop/catalog.html</loc>
+    <loc>https://www.trend-pulse.shop/catalog</loc>
+    
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=tech</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=home</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=kitchen</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=beauty</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=sports</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=health</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=travel</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=women</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=men</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=jewelry</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=baby</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=pets</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.trend-pulse.shop/catalog-category.html?category=general</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
   <url>
     <loc>https://www.trend-pulse.shop/best-sellers.html</loc>
+    
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
-
   <url>
     <loc>https://www.trend-pulse.shop/best-gifts.html</loc>
+    
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
-
   <url>
     <loc>https://www.trend-pulse.shop/cheap-tech.html</loc>
+    
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/tech</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/home</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/kitchen</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/beauty</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/health</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/sports</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/travel</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/fashion</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/family</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/catalog/general</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-tech-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-tech-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-tech-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-tech-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-tech-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-tech-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/tech-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-home-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-home-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-home-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-home-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-home-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-home-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/home-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-kitchen-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-kitchen-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-kitchen-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-kitchen-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-kitchen-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-kitchen-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/kitchen-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-beauty-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-beauty-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-beauty-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-beauty-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-beauty-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-beauty-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/beauty-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-health-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-health-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-health-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-health-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-health-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-health-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/health-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-sports-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-sports-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-sports-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-sports-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-sports-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-sports-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/sports-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-travel-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-travel-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-travel-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-travel-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-travel-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-travel-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/travel-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-fashion-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-fashion-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-fashion-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-fashion-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-fashion-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-fashion-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/fashion-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-family-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-family-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-family-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-family-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-family-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-family-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/family-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-general-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/top-general-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-general-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/cheap-general-products</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-general-products-under-25</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-general-products-under-50</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/general-essentials</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-gifts-for-men</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-gifts-for-women</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-gifts-for-travelers</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-gifts-for-gamers</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/best-gifts-for-home-lovers</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-products-for-men</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/collections/popular-products-for-women</loc>
+    
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/product/some-slug</loc>
+    <lastmod>2026-04-03T15:46:01.407Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>
