@@ -6,7 +6,8 @@
   "scripts": {
     "build": "echo \"No build step needed\"",
     "sync:deals": "node sync-deals.js",
-    "sync:catalog": "node sync-catalog.js"
+    "sync:catalog": "node sync-catalog.js",
+    "generate:sitemap": "node generate-sitemap.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
