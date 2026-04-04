@@ -1,6 +1,42 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "",
   "outputDirectory": ".",
   "framework": null,
-  "cleanUrls": false
+  "cleanUrls": false,
+  "rewrites": [
+    {
+      "source": "/deals",
+      "destination": "/deals.html"
+    },
+    {
+      "source": "/catalog",
+      "destination": "/catalog.html"
+    },
+    {
+      "source": "/catalog/:category",
+      "destination": "/catalog-category.html?category=:category"
+    },
+    {
+      "source": "/product/:slug",
+      "destination": "/product.html?slug=:slug"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/deals.html",
+      "destination": "/deals",
+      "permanent": true
+    },
+    {
+      "source": "/catalog.html",
+      "destination": "/catalog",
+      "permanent": true
+    }
+  ]
 }
