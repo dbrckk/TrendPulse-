@@ -12,10 +12,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!stack) return;
 
-  const STORAGE_KEY = "trendpulse_disliked_v4";
+  const STORAGE_KEY = "trendpulse_disliked_v5";
 
   let products = [];
-  let index = 0;
+  let currentIndex = 0;
 
   function getDisliked() {
     try {
@@ -58,16 +58,48 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function currentProduct() {
-    return products[index] || null;
+    return products[currentIndex] || null;
   }
 
-  function buildCard(product) {
+  function nextProduct(offset = 1) {
+    return products[currentIndex + offset] || null;
+  }
+
+  function preloadUpcomingImages() {
+    for (let i = 1; i <= 3; i += 1) {
+      const product = nextProduct(i);
+      if (product?.image_url) {
+        const img = new Image();
+        img.src = product.image_url;
+      }
+    }
+  }
+
+  function setEmptyState(isEmpty) {
+    if (!emptyState) return;
+    emptyState.classList.toggle("hidden", !isEmpty);
+  }
+
+  function buildCard(product, depth = 0) {
+    if (!product) return "";
+
     const image = product.image_url || "https://via.placeholder.com/600x600?text=No+Image";
     const rating = safeNumber(product.amazon_rating, 0);
     const reviews = safeNumber(product.amazon_review_count, 0);
 
+    const depthClass = depth === 0
+      ? "z-30 scale-100 opacity-100"
+      : depth === 1
+      ? "z-20 scale-[0.97] translate-y-3 opacity-70"
+      : "z-10 scale-[0.94] translate-y-6 opacity-40";
+
+    const pointerClass = depth === 0 ? "" : "pointer-events-none";
+
     return `
-      <article class="swipe-card absolute inset-0 overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30 select-none touch-pan-y">
+      <article
+        class="swipe-card ${depthClass} ${pointerClass} absolute inset-0 overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30 transition duration-300 select-none touch-pan-y"
+        data-depth="${depth}"
+      >
         <div class="relative h-full">
           <div class="absolute left-4 top-4 z-20 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
             ${escapeHtml(product.is_best_seller ? "Best Seller" : product.is_crazy_deal ? "Hot Deal" : "Deal")}
@@ -112,7 +144,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <ul class="mt-4 space-y-2 text-sm text-zinc-300">
               <li>⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})</li>
               <li>${product.discount_percentage > 0 ? `${product.discount_percentage}% off` : "Active deal"}</li>
-              <li>${product.brand ? `Brand: ${escapeHtml(product.brand)}` : "Swipe or tap buttons below"}</li>
+              <li>${product.brand ? `Brand: ${escapeHtml(product.brand)}` : "Swipe to skip or buy"}</li>
             </ul>
 
             <div class="mt-auto flex gap-3 pt-5">
@@ -138,18 +170,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  function setEmptyState(isEmpty) {
-    if (!emptyState) return;
-    if (isEmpty) {
-      emptyState.classList.remove("hidden");
-    } else {
-      emptyState.classList.add("hidden");
+  function renderStack() {
+    const first = currentProduct();
+    const second = nextProduct(1);
+    const third = nextProduct(2);
+
+    if (!first) {
+      stack.innerHTML = "";
+      setEmptyState(true);
+      return;
     }
+
+    setEmptyState(false);
+
+    stack.innerHTML = `
+      ${buildCard(third, 2)}
+      ${buildCard(second, 1)}
+      ${buildCard(first, 0)}
+    `;
+
+    const topCard = stack.querySelector('.swipe-card[data-depth="0"]');
+    const dislikeAction = stack.querySelector(".swipe-dislike-action");
+    const buyAction = stack.querySelector(".swipe-buy-action");
+
+    attachSwipe(topCard, first);
+
+    dislikeAction?.addEventListener("click", (e) => {
+      e.preventDefault();
+      dislikeCurrent();
+    });
+
+    buyAction?.addEventListener("click", () => {
+      setTimeout(() => {
+        advance();
+      }, 120);
+    });
+
+    preloadUpcomingImages();
   }
 
-  function nextCard() {
-    index += 1;
-    render();
+  function advance() {
+    currentIndex += 1;
+    renderStack();
+  }
+
+  function dislikeCurrent() {
+    const product = currentProduct();
+    if (!product) return;
+    addDisliked(product.id);
+    advance();
   }
 
   function openAmazon(product) {
@@ -157,39 +226,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.open(product.affiliate_link || "#", "_blank", "noopener,noreferrer");
   }
 
-  function render() {
-    const product = currentProduct();
+  function commitRight(card, product) {
+    card.style.transition = "transform 220ms ease, opacity 220ms ease";
+    card.style.transform = "translateX(120%) rotate(14deg)";
+    card.style.opacity = "0";
 
-    if (!product) {
-      stack.innerHTML = "";
-      setEmptyState(true);
-      return;
-    }
+    setTimeout(() => {
+      openAmazon(product);
+      advance();
+    }, 220);
+  }
 
-    setEmptyState(false);
-    stack.innerHTML = buildCard(product);
+  function commitLeft(card, product) {
+    card.style.transition = "transform 220ms ease, opacity 220ms ease";
+    card.style.transform = "translateX(-120%) rotate(-14deg)";
+    card.style.opacity = "0";
 
-    const card = stack.querySelector(".swipe-card");
-    const dislikeAction = stack.querySelector(".swipe-dislike-action");
-    const buyAction = stack.querySelector(".swipe-buy-action");
-
-    attachSwipe(card, product);
-
-    dislikeAction?.addEventListener("click", (e) => {
-      e.preventDefault();
+    setTimeout(() => {
       addDisliked(product.id);
-      nextCard();
-    });
-
-    buyAction?.addEventListener("click", () => {
-      setTimeout(() => {
-        nextCard();
-      }, 120);
-    });
+      advance();
+    }, 220);
   }
 
   function attachSwipe(card, product) {
-    if (!card) return;
+    if (!card || !product) return;
 
     const likeBadge = card.querySelector(".swipe-like-badge");
     const dislikeBadge = card.querySelector(".swipe-dislike-badge");
@@ -200,7 +260,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function updateVisuals(deltaX) {
       const rotation = deltaX / 18;
-      card.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
+      const scale = 1 - Math.min(Math.abs(deltaX) / 1600, 0.03);
+
+      card.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg) scale(${scale})`;
 
       const likeOpacity = Math.min(Math.max(deltaX / 140, 0), 1);
       const dislikeOpacity = Math.min(Math.max(-deltaX / 140, 0), 1);
@@ -214,28 +276,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       card.style.transform = "";
       if (likeBadge) likeBadge.style.opacity = "0";
       if (dislikeBadge) dislikeBadge.style.opacity = "0";
-    }
-
-    function commitRight() {
-      card.style.transition = "transform 220ms ease, opacity 220ms ease";
-      card.style.transform = "translateX(120%) rotate(14deg)";
-      card.style.opacity = "0";
-
-      setTimeout(() => {
-        openAmazon(product);
-        nextCard();
-      }, 220);
-    }
-
-    function commitLeft() {
-      card.style.transition = "transform 220ms ease, opacity 220ms ease";
-      card.style.transform = "translateX(-120%) rotate(-14deg)";
-      card.style.opacity = "0";
-
-      setTimeout(() => {
-        addDisliked(product.id);
-        nextCard();
-      }, 220);
     }
 
     function onStart(clientX) {
@@ -256,9 +296,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       dragging = false;
 
       if (currentX > 110) {
-        commitRight();
+        commitRight(card, product);
       } else if (currentX < -110) {
-        commitLeft();
+        commitLeft(card, product);
       } else {
         resetCard();
       }
@@ -311,22 +351,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const disliked = getDisliked();
 
     products = allProducts.filter((p) => !disliked.includes(p.id));
-    index = 0;
-    render();
+    currentIndex = 0;
+    renderStack();
   }
 
   dislikeBtn?.addEventListener("click", () => {
-    const product = currentProduct();
-    if (!product) return;
-    addDisliked(product.id);
-    nextCard();
+    dislikeCurrent();
   });
 
   likeBtn?.addEventListener("click", () => {
     const product = currentProduct();
     if (!product) return;
     openAmazon(product);
-    nextCard();
+    advance();
   });
 
   resetBtn?.addEventListener("click", async () => {
