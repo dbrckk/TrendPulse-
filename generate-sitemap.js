@@ -33,6 +33,19 @@ const categories = [
   "general"
 ];
 
+const collectionSlugs = [
+  "best-tech-products",
+  "best-home-products",
+  "best-kitchen-products",
+  "best-beauty-products",
+  "best-sports-products",
+  "best-health-products",
+  "best-travel-products",
+  "best-products-for-men",
+  "best-products-for-women",
+  "best-jewelry-products"
+];
+
 function xmlEscape(value = "") {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -103,6 +116,12 @@ async function main() {
     priority: "0.8"
   }));
 
+  const programmaticUrls = collectionSlugs.map((slug) => ({
+    loc: toAbsoluteUrl(`/collections/${encodeURIComponent(slug)}`),
+    changefreq: "daily",
+    priority: "0.7"
+  }));
+
   const dedupe = new Set();
 
   const productUrls = productRows
@@ -146,6 +165,7 @@ async function main() {
       loc: toAbsoluteUrl(item.loc)
     })),
     ...categoryUrls,
+    ...programmaticUrls,
     ...productUrls
   ];
 
