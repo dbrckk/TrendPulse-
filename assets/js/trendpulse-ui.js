@@ -5,59 +5,6 @@
 
   let productsCache = null;
   let productsPromise = null;
-  let debugBox = null;
-
-  function ensureDebugBox() {
-    if (debugBox) return debugBox;
-
-    debugBox = document.createElement("div");
-    debugBox.id = "tp-debug-box";
-    debugBox.style.position = "fixed";
-    debugBox.style.left = "0";
-    debugBox.style.right = "0";
-    debugBox.style.bottom = "0";
-    debugBox.style.maxHeight = "220px";
-    debugBox.style.overflow = "auto";
-    debugBox.style.background = "rgba(0,0,0,0.92)";
-    debugBox.style.color = "#7CFC00";
-    debugBox.style.fontSize = "11px";
-    debugBox.style.lineHeight = "1.45";
-    debugBox.style.padding = "8px";
-    debugBox.style.zIndex = "99999";
-    debugBox.style.whiteSpace = "pre-wrap";
-    debugBox.style.borderTop = "1px solid #222";
-
-    function appendBox() {
-      if (document.body && !document.body.contains(debugBox)) {
-        document.body.appendChild(debugBox);
-      }
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", appendBox, { once: true });
-    } else {
-      appendBox();
-    }
-
-    return debugBox;
-  }
-
-  function debugLog(label, value) {
-    const box = ensureDebugBox();
-    let text;
-
-    try {
-      text =
-        typeof value === "string"
-          ? value
-          : JSON.stringify(value, null, 2);
-    } catch {
-      text = String(value);
-    }
-
-    box.textContent += `\n[${label}]\n${text}\n`;
-    console.log(label, value);
-  }
 
   function escapeHtml(value = "") {
     return String(value)
@@ -198,7 +145,7 @@
     if (productsPromise) return productsPromise;
 
     if (!window.supabaseClient) {
-      debugLog("supabase", "client missing");
+      console.error("Supabase client is not available.");
       productsCache = [];
       return productsCache;
     }
@@ -208,23 +155,8 @@
       .select("*")
       .limit(300)
       .then(({ data, error }) => {
-        debugLog("raw error", error || "none");
-        debugLog("raw count", Array.isArray(data) ? data.length : 0);
-
-        if (Array.isArray(data) && data.length) {
-          debugLog(
-            "raw sample",
-            data.slice(0, 3).map((p) => ({
-              id: p.id,
-              name: p.name,
-              type: p.type,
-              is_active: p.is_active,
-              image_url: p.image_url
-            }))
-          );
-        }
-
         if (error) {
+          console.error("Failed to load products:", error);
           productsCache = [];
           return productsCache;
         }
@@ -233,7 +165,7 @@
         return productsCache;
       })
       .catch((error) => {
-        debugLog("fetch catch", String(error));
+        console.error("Failed to load products:", error);
         productsCache = [];
         return productsCache;
       });
@@ -343,10 +275,7 @@
 
   async function renderDealsPage() {
     const grid = document.getElementById("deals-grid");
-    if (!grid) {
-      debugLog("page", "not deals page");
-      return;
-    }
+    if (!grid) return;
 
     const searchInput = document.getElementById("searchInput");
     const categoryFilter = document.getElementById("categoryFilter");
@@ -380,24 +309,12 @@
 
     async function run() {
       const products = await fetchProducts();
-      debugLog("normalized count", products.length);
-
       const query = normalize(searchInput ? searchInput.value : "");
       const category = normalize(categoryFilter ? categoryFilter.value : "all");
       const maxPrice = parseMaxPrice();
       const sortValue = sortFilter ? sortFilter.value : "score";
 
       let items = products.filter((p) => p.is_active !== false);
-
-      debugLog(
-        "after active filter",
-        items.slice(0, 5).map((p) => ({
-          name: p.name,
-          type: p.type,
-          is_active: p.is_active,
-          image_url: p.image_url
-        }))
-      );
 
       if (query) {
         items = items.filter((p) => {
@@ -427,8 +344,6 @@
 
       items = sortItems(items, sortValue);
 
-      debugLog("final visible count", items.length);
-
       grid.innerHTML = items.map(productCard).join("");
 
       if (results) {
@@ -451,19 +366,7 @@
     buildPlaceholder
   };
 
-  window.debugDeals = async function () {
-    const { data, error } = await window.supabaseClient
-      .from("products")
-      .select("*")
-      .limit(5);
-
-    debugLog("manual data", data || []);
-    debugLog("manual error", error || "none");
-    return { data, error };
-  };
-
   document.addEventListener("DOMContentLoaded", async function () {
-    ensureDebugBox();
     await renderDealsPage();
   });
 })();
