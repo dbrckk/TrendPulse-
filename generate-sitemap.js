@@ -10,8 +10,8 @@ const supabase = createClient(
 
 const staticUrls = [
   { loc: "/", changefreq: "daily", priority: "1.0" },
-  { loc: "/deals.html", changefreq: "hourly", priority: "0.9" },
-  { loc: "/catalog.html", changefreq: "daily", priority: "0.9" },
+  { loc: "/deals", changefreq: "hourly", priority: "0.9" },
+  { loc: "/catalog", changefreq: "daily", priority: "0.9" },
   { loc: "/best-sellers.html", changefreq: "daily", priority: "0.7" },
   { loc: "/best-gifts.html", changefreq: "daily", priority: "0.7" },
   { loc: "/cheap-tech.html", changefreq: "daily", priority: "0.7" }
@@ -51,6 +51,18 @@ function buildUrlNode({ loc, changefreq, priority, lastmod }) {
   </url>`;
 }
 
+function toAbsoluteUrl(pathname) {
+  return `${SITE_URL}${pathname}`;
+}
+
+function isValidSlug(value = "") {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(String(value).trim());
+}
+
+function isValidAsin(value = "") {
+  return /^[A-Z0-9]{10}$/i.test(String(value).trim());
+}
+
 async function fetchProducts() {
   const { data, error } = await supabase
     .from("products")
@@ -64,30 +76,74 @@ async function fetchProducts() {
   return data || [];
 }
 
+async function fetchCatalogSourceAsins() {
+  const { data, error } = await supabase
+    .from("product_sources")
+    .select("asin")
+    .eq("source_kind", "catalog")
+    .eq("is_active", true)
+    .limit(10000);
+
+  if (error) {
+    throw error;
+  }
+
+  return new Set((data || []).map((row) => row.asin));
+}
+
 async function main() {
-  const productRows = await fetchProducts();
+  const [productRows, catalogAsins] = await Promise.all([
+    fetchProducts(),
+    fetchCatalogSourceAsins()
+  ]);
 
   const categoryUrls = categories.map((category) => ({
-    loc: `${SITE_URL}/catalog-category.html?category=${encodeURIComponent(category)}`,
+    loc: toAbsoluteUrl(`/catalog/${encodeURIComponent(category)}`),
     changefreq: "daily",
     priority: "0.8"
   }));
 
-  const productUrls = productRows.map((product) => ({
-    loc: product.slug
-      ? `${SITE_URL}/product.html?slug=${encodeURIComponent(product.slug)}`
-      : `${SITE_URL}/product.html?asin=${encodeURIComponent(product.asin || "")}`,
-    changefreq: "weekly",
-    priority: "0.6",
-    lastmod: product.updated_at
-      ? new Date(product.updated_at).toISOString()
-      : undefined
-  }));
+  const dedupe = new Set();
+
+  const productUrls = productRows
+    .filter((product) => {
+      if (!product?.asin) return false;
+      if (!catalogAsins.has(product.asin)) return false;
+      return true;
+    })
+    .map((product) => {
+      const cleanSlug = String(product.slug || "").trim();
+      const cleanAsin = String(product.asin || "").trim().toUpperCase();
+
+      const productPath =
+        cleanSlug && isValidSlug(cleanSlug)
+          ? `/product/${encodeURIComponent(cleanSlug)}`
+          : isValidAsin(cleanAsin)
+          ? `/product/${encodeURIComponent(cleanAsin)}`
+          : null;
+
+      if (!productPath) return null;
+
+      const loc = toAbsoluteUrl(productPath);
+
+      if (dedupe.has(loc)) return null;
+      dedupe.add(loc);
+
+      return {
+        loc,
+        changefreq: "weekly",
+        priority: "0.6",
+        lastmod: product.updated_at
+          ? new Date(product.updated_at).toISOString()
+          : undefined
+      };
+    })
+    .filter(Boolean);
 
   const allUrls = [
     ...staticUrls.map((item) => ({
       ...item,
-      loc: `${SITE_URL}${item.loc}`
+      loc: toAbsoluteUrl(item.loc)
     })),
     ...categoryUrls,
     ...productUrls
