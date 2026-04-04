@@ -33,19 +33,6 @@ const categories = [
   "general"
 ];
 
-const collectionSlugs = [
-  "best-tech-products",
-  "best-home-products",
-  "best-kitchen-products",
-  "best-beauty-products",
-  "best-sports-products",
-  "best-health-products",
-  "best-travel-products",
-  "best-products-for-men",
-  "best-products-for-women",
-  "best-jewelry-products"
-];
-
 function xmlEscape(value = "") {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -82,10 +69,7 @@ async function fetchProducts() {
     .select("asin, slug, updated_at")
     .limit(5000);
 
-  if (error) {
-    throw error;
-  }
-
+  if (error) throw error;
   return data || [];
 }
 
@@ -97,17 +81,24 @@ async function fetchCatalogSourceAsins() {
     .eq("is_active", true)
     .limit(10000);
 
-  if (error) {
-    throw error;
-  }
-
+  if (error) throw error;
   return new Set((data || []).map((row) => row.asin));
 }
 
+async function fetchProgrammaticPages() {
+  try {
+    const raw = await fs.readFile("programmatic-pages.json", "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
 async function main() {
-  const [productRows, catalogAsins] = await Promise.all([
+  const [productRows, catalogAsins, programmaticPages] = await Promise.all([
     fetchProducts(),
-    fetchCatalogSourceAsins()
+    fetchCatalogSourceAsins(),
+    fetchProgrammaticPages()
   ]);
 
   const categoryUrls = categories.map((category) => ({
@@ -116,8 +107,8 @@ async function main() {
     priority: "0.8"
   }));
 
-  const programmaticUrls = collectionSlugs.map((slug) => ({
-    loc: toAbsoluteUrl(`/collections/${encodeURIComponent(slug)}`),
+  const programmaticUrls = programmaticPages.map((page) => ({
+    loc: toAbsoluteUrl(`/collections/${encodeURIComponent(page.slug)}`),
     changefreq: "daily",
     priority: "0.7"
   }));
@@ -125,11 +116,7 @@ async function main() {
   const dedupe = new Set();
 
   const productUrls = productRows
-    .filter((product) => {
-      if (!product?.asin) return false;
-      if (!catalogAsins.has(product.asin)) return false;
-      return true;
-    })
+    .filter((product) => product?.asin && catalogAsins.has(product.asin))
     .map((product) => {
       const cleanSlug = String(product.slug || "").trim();
       const cleanAsin = String(product.asin || "").trim().toUpperCase();
@@ -144,7 +131,6 @@ async function main() {
       if (!productPath) return null;
 
       const loc = toAbsoluteUrl(productPath);
-
       if (dedupe.has(loc)) return null;
       dedupe.add(loc);
 
