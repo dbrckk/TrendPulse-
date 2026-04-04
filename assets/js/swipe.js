@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let products = [];
   let index = 0;
 
-  const STORAGE_KEY = "trendpulse_disliked_v2";
+  const STORAGE_KEY = "trendpulse_disliked_v3";
 
   function getDisliked() {
     try {
