@@ -2,40 +2,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!window.TrendPulseUI) return;
 
   const stack = document.getElementById("swipe-stack");
-
   if (!stack) return;
 
   const products = await window.TrendPulseUI.fetchProducts();
-
-  let i = 0;
+  let index = 0;
 
   function render() {
-    if (!products[i]) {
-      stack.innerHTML = "<p>No more deals</p>";
+    const product = products[index];
+
+    if (!product) {
+      stack.innerHTML = "<div class='rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 text-center text-zinc-300'>No more deals right now.</div>";
       return;
     }
 
-    const p = products[i];
-
     stack.innerHTML = `
-      <div class="p-4 bg-zinc-900 rounded-xl">
-        <img src="${p.image_url}" class="w-full h-64 object-contain bg-white"/>
-        <h2 class="text-xl mt-3">${p.name}</h2>
-        <div class="text-green-400 text-2xl">$${p.price}</div>
-        <a href="${p.affiliate_link}" target="_blank" class="block mt-4 bg-green-500 text-black text-center py-2 rounded">
-          Buy
+      <div class="rounded-3xl border border-zinc-800 bg-zinc-950 p-4">
+        <img src="${product.image_url || "https://via.placeholder.com/600x600?text=No+Image"}" class="w-full h-72 object-contain bg-white rounded-2xl" onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"/>
+        <h2 class="mt-4 text-xl font-bold">${product.name || "Product"}</h2>
+        <div class="mt-2 text-green-400 text-2xl font-bold">$${Number(product.price || 0).toFixed(2)}</div>
+        <a href="${product.affiliate_link || product.amazon_url || "#"}" target="_blank" class="mt-4 block rounded-full bg-green-500 px-4 py-3 text-center font-semibold text-black">
+          Buy on Amazon
         </a>
       </div>
     `;
   }
 
   document.getElementById("swipe-like-btn")?.addEventListener("click", () => {
-    i++;
+    index += 1;
     render();
   });
 
   document.getElementById("swipe-dislike-btn")?.addEventListener("click", () => {
-    i++;
+    index += 1;
     render();
   });
 
