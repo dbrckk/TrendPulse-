@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const searchInput = document.getElementById("catalog-search");
   const sortSelect = document.getElementById("catalog-sort");
   const emptyState = document.getElementById("catalog-empty-state");
+
   const titleEl = document.getElementById("catalog-category-title");
   const breadcrumbEl = document.getElementById("catalog-category-breadcrumb");
   const descriptionEl = document.getElementById("catalog-category-description");
@@ -17,239 +18,219 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!grid) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const category = (params.get("category") || "tech").trim().toLowerCase();
+  // ========================
+  // CATEGORY DETECTION (SEO URL)
+  // ========================
+  function getCategoryFromURL() {
+    const pathParts = window.location.pathname.split("/").filter(Boolean);
 
+    // /catalog/tech
+    if (pathParts[0] === "catalog" && pathParts[1]) {
+      return pathParts[1].toLowerCase();
+    }
+
+    // fallback ?category=
+    const params = new URLSearchParams(window.location.search);
+    return (params.get("category") || "tech").toLowerCase();
+  }
+
+  const category = getCategoryFromURL();
+
+  // ========================
+  // META CONFIG
+  // ========================
   const categoryMeta = {
     tech: {
       title: "Tech Catalog",
       description: "Popular tech products with strong buying frequency on Amazon.",
-      seo: "This tech catalog highlights frequently bought Amazon products across gadgets, accessories, electronics, and everyday devices. It is designed for long-term product discovery rather than short-term promotions."
+      seo: "This tech catalog highlights frequently bought Amazon products across gadgets, electronics, and accessories."
     },
     home: {
       title: "Home Catalog",
       description: "Popular home products with strong buying frequency on Amazon.",
-      seo: "This home catalog focuses on frequently bought Amazon products for comfort, storage, organization, and daily home improvement. It helps users discover evergreen household favorites."
+      seo: "This home catalog features products for comfort, storage, and everyday living."
     },
     kitchen: {
       title: "Kitchen Catalog",
       description: "Popular kitchen products with strong buying frequency on Amazon.",
-      seo: "This kitchen catalog highlights popular Amazon cooking tools, appliances, cookware, and prep essentials that people buy regularly."
+      seo: "Explore cooking tools, appliances, and kitchen essentials that people buy regularly."
     },
     beauty: {
       title: "Beauty Catalog",
       description: "Popular beauty products with strong buying frequency on Amazon.",
-      seo: "This beauty catalog gathers frequently purchased skincare, self-care, and beauty products that remain popular beyond temporary deals."
+      seo: "Discover skincare, cosmetics, and self-care products with strong demand."
     },
     sports: {
       title: "Sports Catalog",
       description: "Popular sports products with strong buying frequency on Amazon.",
-      seo: "This sports catalog covers frequently bought fitness accessories, training gear, and athletic essentials with strong ongoing demand."
+      seo: "Fitness equipment and sports gear frequently bought on Amazon."
     },
     health: {
       title: "Health Catalog",
       description: "Popular health products with strong buying frequency on Amazon.",
-      seo: "This health catalog features wellness products, supplements, and support items that people buy consistently on Amazon."
+      seo: "Wellness and health-related products with consistent demand."
     },
     travel: {
       title: "Travel Catalog",
       description: "Popular travel products with strong buying frequency on Amazon.",
-      seo: "This travel catalog helps users discover frequently purchased luggage, travel accessories, organizers, and mobility essentials."
+      seo: "Travel gear and accessories for frequent travelers."
     },
     women: {
       title: "Women Catalog",
-      description: "Popular products for women with strong buying frequency on Amazon.",
-      seo: "This women catalog highlights frequently bought fashion accessories, personal items, and everyday products popular on Amazon."
+      description: "Popular products for women with strong buying frequency.",
+      seo: "Fashion, accessories, and essentials for women."
     },
     men: {
       title: "Men Catalog",
-      description: "Popular products for men with strong buying frequency on Amazon.",
-      seo: "This men catalog focuses on frequently bought accessories, grooming products, and daily essentials with strong Amazon demand."
+      description: "Popular products for men with strong buying frequency.",
+      seo: "Accessories, essentials, and everyday items for men."
     },
     jewelry: {
       title: "Jewelry Catalog",
-      description: "Popular jewelry products with strong buying frequency on Amazon.",
-      seo: "This jewelry catalog highlights frequently purchased rings, bracelets, necklaces, and related accessories on Amazon."
+      description: "Popular jewelry products with strong buying frequency.",
+      seo: "Rings, necklaces, bracelets, and more."
     },
     baby: {
       title: "Baby Catalog",
-      description: "Popular baby products with strong buying frequency on Amazon.",
-      seo: "This baby catalog features frequently bought products for care, feeding, nursery use, and daily family needs."
+      description: "Popular baby products with strong buying frequency.",
+      seo: "Baby care products and essentials."
     },
     pets: {
       title: "Pets Catalog",
-      description: "Popular pet products with strong buying frequency on Amazon.",
-      seo: "This pets catalog highlights frequently bought dog, cat, and pet care products that remain consistently popular."
+      description: "Popular pet products with strong buying frequency.",
+      seo: "Pet supplies for dogs, cats, and more."
     },
     general: {
       title: "General Catalog",
       description: "Popular Amazon products with strong buying frequency.",
-      seo: "This general catalog brings together frequently bought Amazon products across categories, useful for broad evergreen product discovery."
+      seo: "A mix of popular products across all categories."
     }
   };
 
   const relatedCategoryMap = {
-    tech: ["home", "kitchen", "general", "travel"],
-    home: ["kitchen", "beauty", "general", "tech"],
-    kitchen: ["home", "health", "general", "beauty"],
-    beauty: ["health", "women", "general", "home"],
-    sports: ["health", "men", "women", "general"],
-    health: ["sports", "beauty", "general", "kitchen"],
-    travel: ["tech", "general", "men", "women"],
-    women: ["beauty", "jewelry", "general", "travel"],
-    men: ["tech", "sports", "general", "travel"],
-    jewelry: ["women", "general", "beauty", "men"],
-    baby: ["home", "health", "general", "pets"],
-    pets: ["home", "general", "health", "baby"],
-    general: ["tech", "home", "beauty", "kitchen"]
+    tech: ["home", "travel", "general"],
+    home: ["kitchen", "beauty", "general"],
+    kitchen: ["home", "health", "general"],
+    beauty: ["health", "women", "general"],
+    sports: ["health", "men", "general"],
+    health: ["sports", "beauty", "general"],
+    travel: ["tech", "general"],
+    women: ["beauty", "jewelry", "general"],
+    men: ["tech", "sports", "general"],
+    jewelry: ["women", "general"],
+    baby: ["home", "general"],
+    pets: ["home", "general"],
+    general: ["tech", "home", "beauty"]
   };
+
+  // ========================
+  // HELPERS
+  // ========================
+  function safeNumber(value, fallback = 0) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
+  }
 
   function escapeHtml(value = "") {
     return String(value)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function safeNumber(value, fallback = 0) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : fallback;
+      .replace(/>/g, "&gt;");
   }
 
   function formatPrice(value) {
     return `$${safeNumber(value).toFixed(2)}`;
   }
 
-  function capitalize(value = "") {
-    return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
-  }
-
   function proxyImage(url) {
-    const raw = String(url || "").trim();
-    if (!raw || raw.includes("your-image-url.com")) {
-      return "https://via.placeholder.com/600x600?text=No+Image";
-    }
-    return raw;
+    if (!url) return "https://via.placeholder.com/600x600?text=No+Image";
+    return url;
   }
 
   function productUrl(product) {
     if (product.slug) {
-      return `/product.html?slug=${encodeURIComponent(product.slug)}`;
+      return `/product/${encodeURIComponent(product.slug)}`;
     }
-    return `/product.html?asin=${encodeURIComponent(product.asin || "")}`;
+    return `/product/${encodeURIComponent(product.asin || "")}`;
   }
 
-  function updatePageMeta() {
-    const meta = categoryMeta[category] || {
-      title: `${capitalize(category)} Catalog`,
-      description: `Popular Amazon products in ${capitalize(category)}.`,
-      seo: `Browse frequently bought Amazon products in ${capitalize(category)}.`
-    };
+  // ========================
+  // META UPDATE
+  // ========================
+  function updateMeta() {
+    const meta = categoryMeta[category] || categoryMeta.general;
 
     if (titleEl) titleEl.textContent = meta.title;
-    if (breadcrumbEl) breadcrumbEl.textContent = capitalize(category);
+    if (breadcrumbEl) breadcrumbEl.textContent = category;
     if (descriptionEl) descriptionEl.textContent = meta.description;
     if (seoTextEl) seoTextEl.textContent = meta.seo;
 
     document.title = `${meta.title} | TrendPulse`;
 
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) metaDescription.setAttribute("content", meta.description);
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", meta.description);
 
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) {
       canonical.setAttribute(
         "href",
-        `https://www.trend-pulse.shop/catalog-category.html?category=${encodeURIComponent(category)}`
+        `https://www.trend-pulse.shop/catalog/${category}`
       );
     }
   }
 
+  // ========================
+  // RELATED CATEGORIES
+  // ========================
   function renderRelatedCategories() {
     if (!relatedCategoriesEl) return;
+
     const related = relatedCategoryMap[category] || ["general"];
 
     relatedCategoriesEl.innerHTML = related
       .map(
-        (item) => `
-          <a
-            href="/catalog-category.html?category=${encodeURIComponent(item)}"
-            class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
-          >
-            ${escapeHtml(capitalize(item))}
-          </a>
-        `
+        (cat) => `
+        <a href="/catalog/${cat}"
+           class="px-3 py-2 border border-zinc-700 rounded-full text-xs">
+          ${cat}
+        </a>
+      `
       )
       .join("");
   }
 
+  // ========================
+  // CARD
+  // ========================
   function productCard(product) {
-    const img = proxyImage(product.image_url || product.image || "");
-    const rating = safeNumber(product.amazon_rating, 0);
-    const reviews = safeNumber(product.amazon_review_count, 0);
-    const price = formatPrice(product.price);
-
     return `
-      <article class="group h-full overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/70 transition hover:border-zinc-500 hover:shadow-xl hover:shadow-black/30">
-        <a href="${productUrl(product)}" class="flex h-full flex-col">
-          <div class="relative aspect-square overflow-hidden bg-white">
-            <img
-              src="${img}"
-              alt="${escapeHtml(product.name || "Product")}"
-              class="h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
-              loading="lazy"
-              onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
-            />
-            ${
-              product.source_rank
-                ? `
-              <div class="absolute right-3 top-3 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
-                #${product.source_rank}
-              </div>
-            `
-                : ""
-            }
-          </div>
+      <a href="${productUrl(product)}"
+         class="block rounded-2xl border border-zinc-800 bg-zinc-900 p-4 hover:border-zinc-600">
 
-          <div class="flex flex-1 flex-col p-4">
-            <div class="mb-2 flex flex-wrap gap-2">
-              <span class="rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
-                ${escapeHtml(capitalize(product.category || category))}
-              </span>
-              ${
-                product.is_best_seller
-                  ? `<span class="rounded-full bg-green-500/15 px-2.5 py-1 text-[11px] font-medium text-green-300">Best Seller</span>`
-                  : ""
-              }
-            </div>
+        <img src="${proxyImage(product.image_url)}"
+             class="w-full h-40 object-contain bg-white rounded-xl"
+             loading="lazy"
+             onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'" />
 
-            <h3 class="min-h-[3rem] text-sm font-semibold leading-6 text-white">
-              ${escapeHtml(product.name || "Product")}
-            </h3>
+        <h3 class="mt-3 text-sm font-semibold text-white">
+          ${escapeHtml(product.name)}
+        </h3>
 
-            <div class="mt-2 text-xs text-zinc-400">
-              ⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})
-            </div>
+        <div class="text-xs text-zinc-400 mt-1">
+          ⭐ ${safeNumber(product.amazon_rating)} (${safeNumber(product.amazon_review_count)})
+        </div>
 
-            <div class="mt-auto flex items-end justify-between gap-3 pt-4">
-              <div class="flex flex-col">
-                <span class="text-lg font-bold text-green-400">${price}</span>
-                <span class="text-[10px] text-zinc-500">Frequently bought</span>
-              </div>
-
-              <div class="rounded-lg bg-green-500 px-3 py-2 text-xs font-bold text-black">
-                View →
-              </div>
-            </div>
-          </div>
-        </a>
-      </article>
+        <div class="mt-2 text-green-400 font-bold">
+          ${formatPrice(product.price)}
+        </div>
+      </a>
     `;
   }
 
-  async function fetchCatalogProducts() {
+  // ========================
+  // FETCH
+  // ========================
+  async function fetchProducts() {
     const { data, error } = await window.supabaseClient
       .from("catalog_products")
       .select("*")
@@ -257,72 +238,60 @@ document.addEventListener("DOMContentLoaded", async () => {
       .limit(300);
 
     if (error) {
-      console.error("Failed to load catalog products:", error);
+      console.error(error);
       return [];
     }
 
     const seen = new Set();
 
-    return (data || []).filter((item) => {
-      const key = item.asin || item.slug || item.id || item.name;
+    return (data || []).filter((p) => {
+      const key = p.asin || p.slug;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
   }
 
-  function sortProducts(items, sortValue) {
-    const sorted = [...items];
+  // ========================
+  // SORT
+  // ========================
+  function sortProducts(items, sort) {
+    const arr = [...items];
 
-    if (sortValue === "reviews") {
-      sorted.sort((a, b) => safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count));
-    } else if (sortValue === "rating") {
-      sorted.sort((a, b) => safeNumber(b.amazon_rating) - safeNumber(a.amazon_rating));
-    } else if (sortValue === "score") {
-      sorted.sort((a, b) => {
-        if (safeNumber(a.source_rank, 999999) !== safeNumber(b.source_rank, 999999)) {
-          return safeNumber(a.source_rank, 999999) - safeNumber(b.source_rank, 999999);
-        }
-        return safeNumber(b.score) - safeNumber(a.score);
-      });
-    } else if (sortValue === "price-low") {
-      sorted.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
-    } else if (sortValue === "price-high") {
-      sorted.sort((a, b) => safeNumber(b.price) - safeNumber(a.price));
+    if (sort === "reviews") {
+      arr.sort((a, b) => safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count));
+    } else if (sort === "rating") {
+      arr.sort((a, b) => safeNumber(b.amazon_rating) - safeNumber(a.amazon_rating));
+    } else if (sort === "price-low") {
+      arr.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
+    } else if (sort === "price-high") {
+      arr.sort((a, b) => safeNumber(b.price) - safeNumber(a.price));
     }
 
-    return sorted;
+    return arr;
   }
 
+  // ========================
+  // FILTER
+  // ========================
   function applyFilters(products) {
-    const search = String(searchInput?.value || "").trim().toLowerCase();
-    const sortValue = sortSelect?.value || "score";
+    const search = (searchInput?.value || "").toLowerCase();
+    const sort = sortSelect?.value || "score";
 
     let filtered = [...products];
 
     if (search) {
-      filtered = filtered.filter((product) => {
-        const haystack = [
-          product.name,
-          product.brand,
-          product.description,
-          product.short_description,
-          product.category
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return haystack.includes(search);
-      });
+      filtered = filtered.filter((p) =>
+        (p.name || "").toLowerCase().includes(search)
+      );
     }
 
-    filtered = sortProducts(filtered, sortValue);
+    filtered = sortProducts(filtered, sort);
 
     grid.innerHTML = filtered.map(productCard).join("");
 
     if (countEl) {
-      countEl.textContent = `${filtered.length} ${filtered.length === 1 ? "product" : "products"}`;
+      countEl.textContent = `${filtered.length} products`;
     }
 
     if (emptyState) {
@@ -330,10 +299,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  updatePageMeta();
+  // ========================
+  // INIT
+  // ========================
+  updateMeta();
   renderRelatedCategories();
 
-  const products = await fetchCatalogProducts();
+  const products = await fetchProducts();
   applyFilters(products);
 
   searchInput?.addEventListener("input", () => applyFilters(products));
