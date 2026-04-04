@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "build": "echo \"No build step needed\"",
-    "sync:deals": "node sync-deals.js"
+    "sync:deals": "node sync-deals.js",
+    "sync:catalog": "node sync-catalog.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
-    "node-fetch": "^3.3.2",
     "rss-parser": "^3.13.0"
   }
 }
