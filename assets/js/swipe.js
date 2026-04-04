@@ -1,5 +1,3 @@
-// assets/js/swipe.js
-
 document.addEventListener("DOMContentLoaded", async () => {
   if (!window.supabaseClient || !window.TrendPulseUI) {
     console.error("Supabase or TrendPulseUI missing");
@@ -79,20 +77,14 @@ document.addEventListener("DOMContentLoaded", async () => {
               class="absolute inset-0 h-full w-full object-cover"
               loading="lazy"
             />
-            ${
-              proxied
-                ? `
-              <img
-                src="${proxied}"
-                alt="${escapeHtml(product.name || "Product")}"
-                class="relative z-10 h-full w-full object-contain"
-                loading="lazy"
-                referrerpolicy="no-referrer"
-                onerror="this.remove()"
-              />
-            `
-                : ""
-            }
+            <img
+              src="${proxied}"
+              alt="${escapeHtml(product.name || "Product")}"
+              class="relative z-10 h-full w-full object-contain"
+              loading="lazy"
+              referrerpolicy="no-referrer"
+              onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
+            />
           </div>
 
           <div class="flex h-[42%] flex-col bg-zinc-950 p-5">
@@ -145,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const allProducts = await window.TrendPulseUI.fetchProducts();
 
     return allProducts
-      .filter((p) => p.type === "deal")
+      .filter((p) => p.is_active !== false)
       .sort((a, b) => {
         if ((b.priority || 0) !== (a.priority || 0)) return (b.priority || 0) - (a.priority || 0);
         if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
