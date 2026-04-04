@@ -4,11 +4,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const params = new URLSearchParams(window.location.search);
-  const asin = params.get("asin");
-  const slug = params.get("slug");
+  function getProductIdentifierFromURL() {
+    const pathParts = window.location.pathname.split("/").filter(Boolean);
 
-  if (!asin && !slug) return;
+    // /product/slug-or-asin
+    if (pathParts[0] === "product" && pathParts[1]) {
+      return {
+        mode: "path",
+        value: decodeURIComponent(pathParts[1])
+      };
+    }
+
+    // fallback query params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("slug")) {
+      return {
+        mode: "slug",
+        value: params.get("slug")
+      };
+    }
+    if (params.get("asin")) {
+      return {
+        mode: "asin",
+        value: params.get("asin")
+      };
+    }
+
+    return null;
+  }
+
+  const identifier = getProductIdentifierFromURL();
+  if (!identifier?.value) return;
 
   function safeNumber(value, fallback = 0) {
     const n = Number(value);
@@ -32,9 +58,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function productUrl(product) {
     if (product.slug) {
-      return `/product.html?slug=${encodeURIComponent(product.slug)}`;
+      return `/product/${encodeURIComponent(product.slug)}`;
     }
-    return `/product.html?asin=${encodeURIComponent(product.asin || "")}`;
+    return `/product/${encodeURIComponent(product.asin || "")}`;
   }
 
   function productCard(product) {
@@ -54,12 +80,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    let query = window.supabaseClient.from("products").select("*").limit(1);
+    let query = window.supabaseClient
+      .from("products")
+      .select("*")
+      .limit(1);
 
-    if (slug) {
-      query = query.eq("slug", slug);
+    const rawValue = identifier.value;
+    const looksLikeAsin = /^[A-Z0-9]{10}$/i.test(rawValue);
+
+    if (identifier.mode === "slug") {
+      query = query.eq("slug", rawValue);
+    } else if (identifier.mode === "asin") {
+      query = query.eq("asin", rawValue.toUpperCase());
     } else {
-      query = query.eq("asin", asin);
+      if (looksLikeAsin) {
+        query = query.eq("asin", rawValue.toUpperCase());
+      } else {
+        query = query.eq("slug", rawValue);
+      }
     }
 
     const { data, error } = await query;
@@ -82,9 +120,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const reviews = safeNumber(product.amazon_review_count);
     const category = (product.category || "general").toLowerCase();
 
-    const url = product.slug
-      ? `https://www.trend-pulse.shop/product.html?slug=${encodeURIComponent(product.slug)}`
-      : `https://www.trend-pulse.shop/product.html?asin=${encodeURIComponent(product.asin || "")}`;
+    const canonicalUrl = product.slug
+      ? `https://www.trend-pulse.shop/product/${encodeURIComponent(product.slug)}`
+      : `https://www.trend-pulse.shop/product/${encodeURIComponent(product.asin || "")}`;
 
     const elTitle = document.getElementById("product-title");
     const elImage = document.getElementById("product-image");
@@ -117,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (metaDescription) metaDescription.setAttribute("content", description);
 
     const canonical = document.querySelector('link[rel="canonical"]');
-    if (canonical) canonical.setAttribute("href", url);
+    if (canonical) canonical.setAttribute("href", canonicalUrl);
 
     const ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute("content", `${title} | TrendPulse`);
@@ -126,7 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (ogDescription) ogDescription.setAttribute("content", description);
 
     const ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) ogUrl.setAttribute("content", url);
+    if (ogUrl) ogUrl.setAttribute("content", canonicalUrl);
 
     const ogImage = document.querySelector('meta[property="og:image"]');
     if (ogImage) ogImage.setAttribute("content", image);
@@ -166,7 +204,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         priceCurrency: product.currency || "USD",
         price: String(price),
         availability: "https://schema.org/InStock",
-        url: product.affiliate_link || product.amazon_url || url
+        url: product.affiliate_link || product.amazon_url || canonicalUrl
       }
     };
 
@@ -179,12 +217,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     script.textContent = JSON.stringify(schema);
     document.head.appendChild(script);
 
-    const { data: relatedProducts } = await window.supabaseClient
+    const { data: relatedProducts, error: relatedError } = await window.supabaseClient
       .from("products")
       .select("*")
       .eq("category", category)
       .neq("asin", product.asin)
       .limit(4);
+
+    if (relatedError) {
+      console.error("Related products error:", relatedError);
+    }
 
     if (relatedProductsEl) {
       relatedProductsEl.innerHTML = (relatedProducts || []).map(productCard).join("");
@@ -213,7 +255,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         .map(
           (item) => `
             <a
-              href="/catalog-category.html?category=${encodeURIComponent(item)}"
+              href="/catalog/${encodeURIComponent(item)}"
               class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
             >
               ${escapeHtml(item.charAt(0).toUpperCase() + item.slice(1))}
