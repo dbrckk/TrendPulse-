@@ -1,9 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+
   "buildCommand": "",
   "outputDirectory": ".",
   "framework": null,
+
   "cleanUrls": false,
+
   "rewrites": [
     {
       "source": "/deals",
@@ -22,6 +25,7 @@
       "destination": "/product.html?slug=:slug"
     }
   ],
+
   "redirects": [
     {
       "source": "/index.html",
@@ -37,6 +41,27 @@
       "source": "/catalog.html",
       "destination": "/catalog",
       "permanent": true
+    }
+  ],
+
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*).html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
     }
   ]
 }
