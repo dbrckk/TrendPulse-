@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+
   "scripts": {
     "build": "echo \"No build step needed\"",
     "sync:deals": "node sync-deals.js",
     "sync:catalog": "node sync-catalog.js",
     "generate:sitemap": "node generate-sitemap.js"
   },
+
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
     "rss-parser": "^3.13.0"
