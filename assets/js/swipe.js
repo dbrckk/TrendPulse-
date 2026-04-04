@@ -59,13 +59,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `$${safeNumber(value).toFixed(2)}`;
   }
 
-  function productUrl(product) {
-    if (product.slug) {
-      return `/product.html?slug=${encodeURIComponent(product.slug)}`;
-    }
-    return `/product.html?asin=${encodeURIComponent(product.asin || "")}`;
-  }
-
   function buildCard(product) {
     const proxied = window.TrendPulseUI.proxyImage(product.image_url || product.image || "");
     const placeholder = window.TrendPulseUI.buildPlaceholder(product);
@@ -79,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             ${escapeHtml(product.is_best_seller ? "Best Seller" : product.is_crazy_deal ? "Hot Deal" : "Deal")}
           </div>
 
-          <div class="h-[58%] overflow-hidden bg-white relative">
+          <div class="relative h-[58%] overflow-hidden bg-white">
             <img
               src="${placeholder}"
               alt="${escapeHtml(product.name || "Product")}"
@@ -112,6 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   ${escapeHtml(product.name || "Product")}
                 </h2>
               </div>
+
               <div class="text-right">
                 <div class="text-3xl font-bold text-green-400">${formatPrice(product.price)}</div>
                 <div class="mt-1 text-xs text-zinc-500">Amazon deal</div>
@@ -131,9 +125,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               >
                 Dislike
               </button>
+
               <a
                 href="${escapeHtml(product.affiliate_link || "#")}"
-                data-product-url="${escapeHtml(productUrl(product))}"
                 target="_blank"
                 rel="nofollow sponsored noopener"
                 class="swipe-buy inline-flex flex-1 items-center justify-center rounded-full bg-green-500 px-4 py-3 text-sm font-semibold text-black"
@@ -149,12 +143,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function fetchDeals() {
     const allProducts = await window.TrendPulseUI.fetchProducts();
+
     return allProducts
       .filter((p) => p.type === "deal")
       .sort((a, b) => {
         if ((b.priority || 0) !== (a.priority || 0)) return (b.priority || 0) - (a.priority || 0);
         if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
-        return safeNumber(b.created_at) - safeNumber(a.created_at);
+        return safeNumber(b.amazon_review_count, 0) - safeNumber(a.amazon_review_count, 0);
       });
   }
 
@@ -188,7 +183,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const dislikeAction = card.querySelector(".swipe-dislike");
     const buyAction = card.querySelector(".swipe-buy");
 
-    dislikeAction?.addEventListener("click", () => {
+    dislikeAction?.addEventListener("click", (event) => {
+      event.preventDefault();
       addDisliked(current.id);
       trackRpc("increment_product_swipe_left", current.id);
       next();
@@ -237,6 +233,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         card.style.transition = "transform 220ms ease, opacity 220ms ease";
         card.style.transform = "translateX(120%) rotate(14deg)";
         card.style.opacity = "0";
+
         setTimeout(() => {
           openAmazon(product);
           next();
@@ -245,6 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         card.style.transition = "transform 220ms ease, opacity 220ms ease";
         card.style.transform = "translateX(-120%) rotate(-14deg)";
         card.style.opacity = "0";
+
         setTimeout(() => {
           addDisliked(product.id);
           trackRpc("increment_product_swipe_left", product.id);
@@ -256,15 +254,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    card.addEventListener("touchstart", (e) => {
-      dragging = true;
-      startX = e.touches[0].clientX;
-      currentX = 0;
-    }, { passive: true });
+    card.addEventListener(
+      "touchstart",
+      (e) => {
+        dragging = true;
+        startX = e.touches[0].clientX;
+        currentX = 0;
+      },
+      { passive: true }
+    );
 
-    card.addEventListener("touchmove", (e) => {
-      onMove(e.touches[0].clientX);
-    }, { passive: true });
+    card.addEventListener(
+      "touchmove",
+      (e) => {
+        onMove(e.touches[0].clientX);
+      },
+      { passive: true }
+    );
 
     card.addEventListener("touchend", onEnd, { passive: true });
 
