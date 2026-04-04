@@ -22,14 +22,11 @@ const categories = [
   "home",
   "kitchen",
   "beauty",
-  "sports",
   "health",
+  "sports",
   "travel",
-  "women",
-  "men",
-  "jewelry",
-  "baby",
-  "pets",
+  "fashion",
+  "family",
   "general"
 ];
 
@@ -88,7 +85,8 @@ async function fetchCatalogSourceAsins() {
 async function fetchProgrammaticPages() {
   try {
     const raw = await fs.readFile("programmatic-pages.json", "utf-8");
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -107,11 +105,13 @@ async function main() {
     priority: "0.8"
   }));
 
-  const programmaticUrls = programmaticPages.map((page) => ({
-    loc: toAbsoluteUrl(`/collections/${encodeURIComponent(page.slug)}`),
-    changefreq: "daily",
-    priority: "0.7"
-  }));
+  const programmaticUrls = programmaticPages
+    .filter((page) => page?.slug)
+    .map((page) => ({
+      loc: toAbsoluteUrl(`/collections/${encodeURIComponent(page.slug)}`),
+      changefreq: "daily",
+      priority: "0.7"
+    }));
 
   const dedupe = new Set();
 
@@ -125,8 +125,8 @@ async function main() {
         cleanSlug && isValidSlug(cleanSlug)
           ? `/product/${encodeURIComponent(cleanSlug)}`
           : isValidAsin(cleanAsin)
-          ? `/product/${encodeURIComponent(cleanAsin)}`
-          : null;
+            ? `/product/${encodeURIComponent(cleanAsin)}`
+            : null;
 
       if (!productPath) return null;
 
