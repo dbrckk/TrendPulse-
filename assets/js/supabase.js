@@ -15,3 +15,5 @@ if (!window.supabase || !window.supabase.createClient) {
 window.TRENDPULSE_CONFIG = {
   affiliateTag: "Drackk-20"
 };
+
+console.log("TrendPulse Supabase initialized");
