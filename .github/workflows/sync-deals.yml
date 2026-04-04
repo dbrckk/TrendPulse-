@@ -1,24 +1,17 @@
-# .github/workflows/sync-deals.yml
-
 name: Sync Deals
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 */4 * * *"
+    - cron: "*/30 * * * *"
 
 jobs:
   sync-deals:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,25 +22,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run deal sync
+      - name: Run deals sync
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
-          SITE_URL: ${{ secrets.SITE_URL }}
           RSS_FEEDS: ${{ secrets.RSS_FEEDS }}
-        run: node sync-deals.js
-
-      - name: Commit generated metadata only
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add sitemap.xml robots.txt tweet-state.json x-session.json 2>/dev/null || true
-
-          if git diff --cached --quiet; then
-            echo "No metadata changes to commit."
-          else
-            git commit -m "Auto-update metadata"
-            git push
-          fi
+          AMAZON_AFFILIATE_TAG: ${{ secrets.AMAZON_AFFILIATE_TAG }}
+        run: npm run sync:deals
