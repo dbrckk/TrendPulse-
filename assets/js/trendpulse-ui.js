@@ -1,5 +1,3 @@
-// assets/js/trendpulse-ui.js
-
 (function () {
   const config = window.TRENDPULSE_CONFIG || {
     affiliateTag: "Drackk-20"
