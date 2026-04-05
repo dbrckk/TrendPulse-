@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!window.supabaseClient) {
-    console.error("Supabase client not available");
+  if (!window.supabaseClient || !window.TrendPulseUI) {
+    console.error("Missing Supabase or TrendPulseUI");
     return;
   }
 
@@ -49,82 +49,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     return raw;
   }
 
-  function productUrl(product) {
-    const slugValue = String(product?.slug || "").trim();
-    const asin = String(product?.asin || "").trim();
-
-    if (slugValue) return `/product/${encodeURIComponent(slugValue)}`;
-    if (asin) return `/product/${encodeURIComponent(asin)}`;
-    return "/catalog";
-  }
-
-  function sanitizeProduct(row) {
-    const price = safeNumber(row?.price, 0);
-    const originalPrice =
-      safeNumber(row?.original_price, 0) > 0
-        ? safeNumber(row.original_price, 0)
-        : price > 0
-          ? price * 1.5
-          : 0;
-
-    return {
-      ...row,
-      slug: String(row?.slug || "").trim() || String(row?.asin || "").trim(),
-      asin: String(row?.asin || "").trim(),
-      name: String(row?.name || "").trim() || "Amazon Product",
-      image_url: proxyImage(row?.image_url),
-      price,
-      original_price: originalPrice,
-      discount_percentage: safeNumber(
-        row?.discount_percentage ?? row?.discount_percent,
-        0
-      ),
-      amazon_rating: safeNumber(row?.amazon_rating, 0),
-      amazon_review_count: safeNumber(row?.amazon_review_count, 0),
-      priority: safeNumber(row?.priority, 0),
-      source_kind: row?.source_kind || row?.type || "catalog",
-      is_active: typeof row?.is_active === "boolean" ? row.is_active : true
-    };
-  }
-
-  function getDiscount(product) {
-    return window.TrendPulseUI?.getDiscount
-      ? window.TrendPulseUI.getDiscount(product)
-      : Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
-  }
-
-  function computeScore(product) {
-    const reviews = safeNumber(product.amazon_review_count, 0);
-    const rating = safeNumber(product.amazon_rating, 0);
-    const discount = safeNumber(product.discount_percentage, 20);
-    const priority = safeNumber(product.priority, 0);
-    const sourceBonus =
-      String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
-
-    return (
-      reviews * 0.4 +
-      rating * 100 * 0.3 +
-      discount * 10 * 0.2 +
-      priority * 4 +
-      sourceBonus +
-      Math.random() * 25
-    );
-  }
-
   function card(product) {
     const rating = safeNumber(product.amazon_rating);
     const reviews = safeNumber(product.amazon_review_count);
     const image = proxyImage(product.image_url);
     const price = safeNumber(product.price, 0);
     const original = safeNumber(product.original_price, 0) || price * 1.5;
-    const discount = getDiscount(product);
+    const discount = window.TrendPulseUI.getDiscount(product);
     const hook = window.ProductHooks ? window.ProductHooks.getHook(product) : "Popular right now";
     const urgency = window.ProductHooks ? window.ProductHooks.getUrgency(product) : "Selling fast";
     const proof = window.ProductHooks ? window.ProductHooks.getSocialProof(product) : "Frequently bought";
     const priceStory = window.ProductHooks ? window.ProductHooks.getPriceStory(product) : "High-demand product";
 
     return `
-      <a href="${productUrl(product)}" class="block rounded-2xl border border-zinc-800 bg-zinc-900 p-4 transition hover:scale-[1.02] hover:border-zinc-600">
+      <a href="${window.TrendPulseUI.productPath(product)}" class="block rounded-2xl border border-zinc-800 bg-zinc-900 p-4 transition hover:scale-[1.02] hover:border-zinc-600">
         <div class="relative">
           <img
             src="${image}"
@@ -223,19 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function sortProducts(products, sortMode) {
-    const arr = [...products];
-
-    if (sortMode === "reviews") {
-      arr.sort((a, b) => safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count));
-    } else if (sortMode === "rating") {
-      arr.sort((a, b) => safeNumber(b.amazon_rating) - safeNumber(a.amazon_rating));
-    } else if (sortMode === "price-low") {
-      arr.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
-    } else {
-      arr.sort((a, b) => safeNumber(b.final_score) - safeNumber(a.final_score));
-    }
-
-    return arr;
+    return window.TrendPulseUI.sortProducts(products, sortMode === "price-low" ? "low" : sortMode);
   }
 
   function setEmptyState(isEmpty) {
@@ -267,19 +193,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (error) {
     console.error("Failed to load collection products", error);
-    return;
   }
 
-  let products = dedupeProducts((data || []).map(sanitizeProduct))
+  let products = dedupeProducts((data || []).map(window.TrendPulseUI.sanitizeProduct))
     .filter((p) => p.name && p.is_active !== false)
     .map((item) => ({
       ...item,
-      final_score: computeScore(item)
+      final_score: window.TrendPulseUI.computeScore(item)
     }));
 
   products = applyKeywordFilter(products, config.filter?.query || null);
   products = applyPriceFilter(products, config.filter?.maxPrice ?? null);
   products = sortProducts(products, config.sort || "score");
+
+  if (!products.length) {
+    const all = await window.TrendPulseUI.fetchProducts();
+
+    let fallback = all.filter(
+      (p) => window.TrendPulseUI.normalizeCategory(p.category) === config.category
+    );
+
+    fallback = applyKeywordFilter(fallback, config.filter?.query || null);
+    fallback = applyPriceFilter(fallback, config.filter?.maxPrice ?? null);
+    fallback = sortProducts(fallback, config.sort || "score");
+
+    if (!fallback.length) {
+      fallback = sortProducts(all, "score");
+    }
+
+    products = fallback;
+  }
+
   products = products.slice(0, 24);
 
   if (titleEl) titleEl.textContent = config.title;
