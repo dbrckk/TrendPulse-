@@ -58,13 +58,6 @@ const CATEGORY_META = {
   }
 };
 
-function titleCase(value = "") {
-  return String(value)
-    .split(" ")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
 function buildCategoryPages(category) {
   const meta = CATEGORY_META[category];
   const label = meta.label;
