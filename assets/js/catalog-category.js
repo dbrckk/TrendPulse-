@@ -235,25 +235,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       sameCategory = all;
     }
 
-    return sameCategory.slice(0, 60);
+    return sameCategory.slice(0, 80);
   }
 
   function sortProducts(items, sort) {
-    const arr = [...items];
-
-    if (sort === "reviews") {
-      arr.sort((a, b) => safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count));
-    } else if (sort === "rating") {
-      arr.sort((a, b) => safeNumber(b.amazon_rating) - safeNumber(a.amazon_rating));
-    } else if (sort === "price-low") {
-      arr.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
-    } else if (sort === "price-high") {
-      arr.sort((a, b) => safeNumber(b.price) - safeNumber(a.price));
-    } else {
-      arr.sort((a, b) => safeNumber(b.final_score) - safeNumber(a.final_score));
-    }
-
-    return arr;
+    if (sort === "price-low") return window.TrendPulseUI.sortProducts(items, "low");
+    if (sort === "price-high") return window.TrendPulseUI.sortProducts(items, "high");
+    return window.TrendPulseUI.sortProducts(items, sort);
   }
 
   function applyFilters(products) {
