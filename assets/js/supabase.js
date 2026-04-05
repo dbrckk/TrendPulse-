@@ -1,15 +1,68 @@
-const SUPABASE_URL = "https://hyrofyfhmabhlqbucjdp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
+(function () {
+  const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
-if (!window.supabase || !window.supabase.createClient) {
-  console.error("Supabase library missing");
-} else {
-  window.supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
-}
+  function canInitSupabase() {
+    return (
+      typeof window !== "undefined" &&
+      typeof window.supabase !== "undefined" &&
+      typeof window.supabase.createClient === "function"
+    );
+  }
 
-window.TRENDPULSE_CONFIG = {
-  affiliateTag: "Drackk-20"
-};
+  function createFallbackClient() {
+    return {
+      from() {
+        return {
+          select() {
+            return Promise.resolve({
+              data: [],
+              error: new Error("Supabase client not initialized")
+            });
+          }
+        };
+      }
+    };
+  }
+
+  if (!canInitSupabase()) {
+    console.error("[supabase] CDN client not loaded");
+    window.supabaseClient = createFallbackClient();
+    return;
+  }
+
+  if (
+    !SUPABASE_URL ||
+    !SUPABASE_ANON_KEY ||
+    SUPABASE_URL.includes("YOUR_PROJECT_ID") ||
+    SUPABASE_ANON_KEY.includes("YOUR_SUPABASE_ANON_KEY")
+  ) {
+    console.error("[supabase] Missing real SUPABASE_URL or SUPABASE_ANON_KEY");
+    window.supabaseClient = createFallbackClient();
+    return;
+  }
+
+  try {
+    window.supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false
+        },
+        global: {
+          headers: {
+            "x-client-info": "trendpulse-web"
+          }
+        }
+      }
+    );
+
+    console.log("[supabase] client initialized");
+  } catch (error) {
+    console.error("[supabase] init failed:", error);
+    window.supabaseClient = createFallbackClient();
+  }
+})();
