@@ -12,10 +12,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!stack) return;
 
-  const STORAGE_KEY = "trendpulse_disliked_v5";
+  const STORAGE_KEY = "trendpulse_disliked_v6";
 
   let products = [];
   let currentIndex = 0;
+  let autoAdvanceTimer = null;
 
   function getDisliked() {
     try {
@@ -30,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function addDisliked(id) {
+    if (!id) return;
     const list = getDisliked();
     if (!list.includes(id)) {
       list.push(id);
@@ -41,6 +43,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem(STORAGE_KEY);
   }
 
+  function safeNumber(value, fallback = 0) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
   function escapeHtml(value = "") {
     return String(value)
       .replace(/&/g, "&amp;")
@@ -48,13 +55,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       .replace(/>/g, "&gt;");
   }
 
-  function safeNumber(value, fallback = 0) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : fallback;
-  }
-
   function formatPrice(value) {
     return `$${safeNumber(value).toFixed(2)}`;
+  }
+
+  function proxyImage(url = "") {
+    const raw = String(url).trim();
+    if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
+      return "https://via.placeholder.com/700x700?text=No+Image";
+    }
+    return raw;
+  }
+
+  function vibrate() {
+    if (navigator.vibrate) {
+      navigator.vibrate(10);
+    }
   }
 
   function currentProduct() {
@@ -65,47 +81,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     return products[currentIndex + offset] || null;
   }
 
-  function preloadUpcomingImages() {
-    for (let i = 1; i <= 3; i += 1) {
-      const product = nextProduct(i);
-      if (product?.image_url) {
-        const img = new Image();
-        img.src = product.image_url;
-      }
-    }
-  }
-
   function setEmptyState(isEmpty) {
     if (!emptyState) return;
     emptyState.classList.toggle("hidden", !isEmpty);
   }
 
+  function getDiscount(product) {
+    const price = safeNumber(product.price, 0);
+    const original = safeNumber(product.original_price, 0) || price * 1.5;
+    if (original > price && price > 0) {
+      return Math.max(1, Math.round(((original - price) / original) * 100));
+    }
+    return Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
+  }
+
   function buildCard(product, depth = 0) {
     if (!product) return "";
 
-    const image = product.image_url || "https://via.placeholder.com/600x600?text=No+Image";
+    const image = proxyImage(product.image_url);
     const rating = safeNumber(product.amazon_rating, 0);
     const reviews = safeNumber(product.amazon_review_count, 0);
+    const price = safeNumber(product.price, 0);
+    const originalPrice = safeNumber(product.original_price, 0) || price * 1.5;
+    const depthClass =
+      depth === 0
+        ? "z-30 scale-100 opacity-100"
+        : depth === 1
+          ? "z-20 scale-[0.97] translate-y-3 opacity-70"
+          : "z-10 scale-[0.94] translate-y-6 opacity-40";
 
-    const depthClass = depth === 0
-      ? "z-30 scale-100 opacity-100"
-      : depth === 1
-      ? "z-20 scale-[0.97] translate-y-3 opacity-70"
-      : "z-10 scale-[0.94] translate-y-6 opacity-40";
-
-    const pointerClass = depth === 0 ? "" : "pointer-events-none";
+    const hook = window.TrendPulseUI.getHook(product);
+    const urgency = window.TrendPulseUI.getUrgency(product);
+    const discount = getDiscount(product);
 
     return `
       <article
-        class="swipe-card ${depthClass} ${pointerClass} absolute inset-0 overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30 transition duration-300 select-none touch-pan-y"
+        class="swipe-card ${depthClass} absolute inset-0 overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30 transition duration-300 select-none"
         data-depth="${depth}"
       >
         <div class="relative h-full">
-          <div class="absolute left-4 top-4 z-20 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-            ${escapeHtml(product.is_best_seller ? "Best Seller" : product.is_crazy_deal ? "Hot Deal" : "Deal")}
+          <div class="absolute left-4 top-4 z-20 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
+            -${discount}%
           </div>
 
-          <div class="swipe-like-badge absolute right-4 top-4 z-20 rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-black opacity-0 transition">
+          <div class="absolute right-4 top-4 z-20 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+            🔥 Trending
+          </div>
+
+          <div class="swipe-like-badge absolute right-4 top-14 z-20 rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-black opacity-0 transition">
             LIKE
           </div>
 
@@ -113,38 +136,43 @@ document.addEventListener("DOMContentLoaded", async () => {
             NOPE
           </div>
 
-          <div class="relative h-[58%] overflow-hidden bg-white">
+          <div class="relative h-[56%] overflow-hidden bg-white">
             <img
               src="${image}"
               alt="${escapeHtml(product.name || "Product")}"
               class="h-full w-full object-contain"
               loading="lazy"
               draggable="false"
-              onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
+              onerror="this.src='https://via.placeholder.com/700x700?text=No+Image'"
             />
           </div>
 
-          <div class="flex h-[42%] flex-col bg-zinc-950 p-5">
-            <div class="flex items-start justify-between gap-3">
+          <div class="flex h-[44%] flex-col bg-zinc-950 p-5">
+            <div class="text-xs font-semibold text-green-400">
+              ${escapeHtml(hook)}
+            </div>
+
+            <div class="mt-2 flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <div class="inline-flex rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-medium text-zinc-300">
                   ${escapeHtml(product.category || "deal")}
                 </div>
+
                 <h2 class="mt-3 text-2xl font-bold leading-tight text-white">
                   ${escapeHtml(product.name || "Product")}
                 </h2>
               </div>
 
               <div class="shrink-0 text-right">
-                <div class="text-3xl font-bold text-green-400">${formatPrice(product.price)}</div>
-                <div class="mt-1 text-xs text-zinc-500">Amazon deal</div>
+                <div class="text-3xl font-bold text-green-400">${formatPrice(price)}</div>
+                <div class="mt-1 text-xs text-zinc-500 line-through">${formatPrice(originalPrice)}</div>
               </div>
             </div>
 
             <ul class="mt-4 space-y-2 text-sm text-zinc-300">
               <li>⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})</li>
-              <li>${product.discount_percentage > 0 ? `${product.discount_percentage}% off` : "Active deal"}</li>
-              <li>${product.brand ? `Brand: ${escapeHtml(product.brand)}` : "Swipe to skip or buy"}</li>
+              <li>⚡ ${escapeHtml(urgency)}</li>
+              <li>${escapeHtml(product.brand ? `Brand: ${product.brand}` : "High-demand Amazon product")}</li>
             </ul>
 
             <div class="mt-auto flex gap-3 pt-5">
@@ -156,7 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               </button>
 
               <a
-                href="${escapeHtml(product.affiliate_link || "#")}"
+                href="${escapeHtml(product.affiliate_link || product.amazon_url || "#")}"
                 target="_blank"
                 rel="nofollow sponsored noopener"
                 class="swipe-buy-action inline-flex flex-1 items-center justify-center rounded-full bg-green-500 px-4 py-3 text-sm font-semibold text-black"
@@ -170,6 +198,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
+  function preloadUpcomingImages() {
+    for (let i = 1; i <= 3; i += 1) {
+      const product = nextProduct(i);
+      if (product?.image_url) {
+        const img = new Image();
+        img.src = proxyImage(product.image_url);
+      }
+    }
+  }
+
+  function clearAutoAdvance() {
+    if (autoAdvanceTimer) {
+      clearTimeout(autoAdvanceTimer);
+      autoAdvanceTimer = null;
+    }
+  }
+
+  function scheduleAutoAdvance() {
+    clearAutoAdvance();
+    autoAdvanceTimer = setTimeout(() => {
+      if (products.length > 0) {
+        advance();
+      }
+    }, 7000);
+  }
+
   function renderStack() {
     const first = currentProduct();
     const second = nextProduct(1);
@@ -178,6 +232,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!first) {
       stack.innerHTML = "";
       setEmptyState(true);
+      clearAutoAdvance();
       return;
     }
 
@@ -201,49 +256,61 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     buyAction?.addEventListener("click", () => {
+      clearAutoAdvance();
       setTimeout(() => {
         advance();
       }, 120);
     });
 
     preloadUpcomingImages();
+    scheduleAutoAdvance();
   }
 
   function advance() {
+    vibrate();
     currentIndex += 1;
+
+    if (currentIndex >= products.length) {
+      currentIndex = 0;
+    }
+
     renderStack();
   }
 
   function dislikeCurrent() {
     const product = currentProduct();
     if (!product) return;
-    addDisliked(product.id);
+    addDisliked(product.asin || product.id || product.slug);
     advance();
   }
 
   function openAmazon(product) {
     if (!product) return;
-    window.open(product.affiliate_link || "#", "_blank", "noopener,noreferrer");
+    window.open(product.affiliate_link || product.amazon_url || "#", "_blank", "noopener,noreferrer");
   }
 
   function commitRight(card, product) {
+    clearAutoAdvance();
     card.style.transition = "transform 220ms ease, opacity 220ms ease";
     card.style.transform = "translateX(120%) rotate(14deg)";
     card.style.opacity = "0";
 
     setTimeout(() => {
+      vibrate();
       openAmazon(product);
       advance();
     }, 220);
   }
 
   function commitLeft(card, product) {
+    clearAutoAdvance();
     card.style.transition = "transform 220ms ease, opacity 220ms ease";
     card.style.transform = "translateX(-120%) rotate(-14deg)";
     card.style.opacity = "0";
 
     setTimeout(() => {
-      addDisliked(product.id);
+      addDisliked(product.asin || product.id || product.slug);
+      vibrate();
       advance();
     }, 220);
   }
@@ -276,9 +343,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       card.style.transform = "";
       if (likeBadge) likeBadge.style.opacity = "0";
       if (dislikeBadge) dislikeBadge.style.opacity = "0";
+      scheduleAutoAdvance();
     }
 
     function onStart(clientX) {
+      clearAutoAdvance();
       dragging = true;
       startX = clientX;
       currentX = 0;
@@ -304,29 +373,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    card.addEventListener(
-      "touchstart",
-      (e) => {
-        onStart(e.touches[0].clientX);
-      },
-      { passive: true }
-    );
-
-    card.addEventListener(
-      "touchmove",
-      (e) => {
-        onMove(e.touches[0].clientX);
-      },
-      { passive: true }
-    );
-
-    card.addEventListener(
-      "touchend",
-      () => {
-        onEnd();
-      },
-      { passive: true }
-    );
+    card.addEventListener("touchstart", (e) => onStart(e.touches[0].clientX), { passive: true });
+    card.addEventListener("touchmove", (e) => onMove(e.touches[0].clientX), { passive: true });
+    card.addEventListener("touchend", () => onEnd(), { passive: true });
 
     card.addEventListener("mousedown", (e) => {
       onStart(e.clientX);
@@ -350,7 +399,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const allProducts = await window.TrendPulseUI.fetchProducts();
     const disliked = getDisliked();
 
-    products = allProducts.filter((p) => !disliked.includes(p.id));
+    products = allProducts.filter((p) => {
+      const key = p.asin || p.id || p.slug;
+      return !disliked.includes(key);
+    });
+
+    if (!products.length) {
+      products = allProducts;
+    }
+
     currentIndex = 0;
     renderStack();
   }
@@ -362,6 +419,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   likeBtn?.addEventListener("click", () => {
     const product = currentProduct();
     if (!product) return;
+    clearAutoAdvance();
+    vibrate();
     openAmazon(product);
     advance();
   });
