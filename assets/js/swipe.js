@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!stack) return;
 
-  const STORAGE_KEY = "trendpulse_disliked_v6";
+  const STORAGE_KEY = "trendpulse_disliked_v7";
 
   let products = [];
   let currentIndex = 0;
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function proxyImage(url = "") {
-    const raw = String(url).trim();
+    const raw = String(url || "").trim();
     if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
       return "https://via.placeholder.com/700x700?text=No+Image";
     }
@@ -71,6 +71,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (navigator.vibrate) {
       navigator.vibrate(10);
     }
+  }
+
+  function getKey(product) {
+    return (
+      String(product?.asin || "").trim() ||
+      String(product?.slug || "").trim() ||
+      String(product?.id || "").trim() ||
+      String(product?.name || "").trim()
+    );
   }
 
   function currentProduct() {
@@ -87,12 +96,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function getDiscount(product) {
-    const price = safeNumber(product.price, 0);
-    const original = safeNumber(product.original_price, 0) || price * 1.5;
-    if (original > price && price > 0) {
-      return Math.max(1, Math.round(((original - price) / original) * 100));
-    }
-    return Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
+    return window.TrendPulseUI?.getDiscount
+      ? window.TrendPulseUI.getDiscount(product)
+      : 20;
   }
 
   function buildCard(product, depth = 0) {
@@ -110,8 +116,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           ? "z-20 scale-[0.97] translate-y-3 opacity-70"
           : "z-10 scale-[0.94] translate-y-6 opacity-40";
 
-    const hook = window.TrendPulseUI.getHook(product);
-    const urgency = window.TrendPulseUI.getUrgency(product);
+    const hook = window.ProductHooks ? window.ProductHooks.getHook(product) : "Popular right now";
+    const urgency = window.ProductHooks ? window.ProductHooks.getUrgency(product) : "Selling fast";
+    const proof = window.ProductHooks ? window.ProductHooks.getSocialProof(product) : "Popular pick";
+    const priceStory = window.ProductHooks ? window.ProductHooks.getPriceStory(product) : "High-demand product";
     const discount = getDiscount(product);
 
     return `
@@ -125,7 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
 
           <div class="absolute right-4 top-4 z-20 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-            🔥 Trending
+            🔥 ${escapeHtml(proof)}
           </div>
 
           <div class="swipe-like-badge absolute right-4 top-14 z-20 rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-black opacity-0 transition">
@@ -155,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div class="mt-2 flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <div class="inline-flex rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-medium text-zinc-300">
-                  ${escapeHtml(product.category || "deal")}
+                  ${escapeHtml(product.category || "general")}
                 </div>
 
                 <h2 class="mt-3 text-2xl font-bold leading-tight text-white">
@@ -172,7 +180,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <ul class="mt-4 space-y-2 text-sm text-zinc-300">
               <li>⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})</li>
               <li>⚡ ${escapeHtml(urgency)}</li>
-              <li>${escapeHtml(product.brand ? `Brand: ${product.brand}` : "High-demand Amazon product")}</li>
+              <li>${escapeHtml(priceStory)}</li>
             </ul>
 
             <div class="mt-auto flex gap-3 pt-5">
@@ -184,7 +192,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               </button>
 
               <a
-                href="${escapeHtml(product.affiliate_link || product.amazon_url || "#")}"
+                href="${escapeHtml(window.TrendPulseUI.amazonLink(product))}"
                 target="_blank"
                 rel="nofollow sponsored noopener"
                 class="swipe-buy-action inline-flex flex-1 items-center justify-center rounded-full bg-green-500 px-4 py-3 text-sm font-semibold text-black"
@@ -280,13 +288,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   function dislikeCurrent() {
     const product = currentProduct();
     if (!product) return;
-    addDisliked(product.asin || product.id || product.slug);
+    addDisliked(getKey(product));
     advance();
   }
 
   function openAmazon(product) {
     if (!product) return;
-    window.open(product.affiliate_link || product.amazon_url || "#", "_blank", "noopener,noreferrer");
+    window.open(window.TrendPulseUI.amazonLink(product), "_blank", "noopener,noreferrer");
   }
 
   function commitRight(card, product) {
@@ -309,7 +317,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     card.style.opacity = "0";
 
     setTimeout(() => {
-      addDisliked(product.asin || product.id || product.slug);
+      addDisliked(getKey(product));
       vibrate();
       advance();
     }, 220);
@@ -399,10 +407,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const allProducts = await window.TrendPulseUI.fetchProducts();
     const disliked = getDisliked();
 
-    products = allProducts.filter((p) => {
-      const key = p.asin || p.id || p.slug;
-      return !disliked.includes(key);
-    });
+    products = allProducts.filter((p) => !disliked.includes(getKey(p)));
 
     if (!products.length) {
       products = allProducts;
