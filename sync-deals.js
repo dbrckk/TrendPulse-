@@ -43,10 +43,6 @@ function normalizeLower(value) {
   return normalizeText(value).toLowerCase();
 }
 
-function unique(array) {
-  return [...new Set(array)];
-}
-
 function getHaystack(row = {}) {
   return [
     row.category,
