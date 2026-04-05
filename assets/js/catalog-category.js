@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!window.supabaseClient) {
-    console.error("Supabase client is not available.");
+  if (!window.supabaseClient || !window.TrendPulseUI) {
+    console.error("Missing Supabase or TrendPulseUI");
     return;
   }
 
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const params = new URLSearchParams(window.location.search);
-    return (params.get("category") || "tech").toLowerCase();
+    return (params.get("category") || "general").toLowerCase();
   }
 
   const category = getCategoryFromURL();
@@ -110,78 +110,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return raw;
   }
 
-  function productUrl(product) {
-    const slug = String(product?.slug || "").trim();
-    const asin = String(product?.asin || "").trim();
-
-    if (slug) return `/product/${encodeURIComponent(slug)}`;
-    if (asin) return `/product/${encodeURIComponent(asin)}`;
-    return "/catalog";
-  }
-
-  function normalizeCategory(raw = "") {
-    const value = String(raw).trim().toLowerCase();
-    if (["men", "women", "jewelry"].includes(value)) return "fashion";
-    if (["baby", "pets"].includes(value)) return "family";
-    return value || "general";
-  }
-
   function capitalize(value = "") {
     return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
-  }
-
-  function sanitizeProduct(row) {
-    const price = safeNumber(row?.price, 0);
-    const originalPrice =
-      safeNumber(row?.original_price, 0) > 0
-        ? safeNumber(row.original_price, 0)
-        : price > 0
-          ? price * 1.5
-          : 0;
-
-    return {
-      ...row,
-      slug: String(row?.slug || "").trim() || String(row?.asin || "").trim(),
-      asin: String(row?.asin || "").trim(),
-      name: String(row?.name || "").trim() || "Amazon Product",
-      category: normalizeCategory(row?.category || category),
-      image_url: proxyImage(row?.image_url),
-      price,
-      original_price: originalPrice,
-      discount_percentage: safeNumber(
-        row?.discount_percentage ?? row?.discount_percent,
-        0
-      ),
-      amazon_rating: safeNumber(row?.amazon_rating, 0),
-      amazon_review_count: safeNumber(row?.amazon_review_count, 0),
-      priority: safeNumber(row?.priority, 0),
-      source_kind: row?.source_kind || row?.type || "catalog",
-      is_active: typeof row?.is_active === "boolean" ? row.is_active : true
-    };
-  }
-
-  function getDiscount(product) {
-    return window.TrendPulseUI?.getDiscount
-      ? window.TrendPulseUI.getDiscount(product)
-      : 20;
-  }
-
-  function computeScore(product) {
-    const reviews = safeNumber(product.amazon_review_count, 0);
-    const rating = safeNumber(product.amazon_rating, 0);
-    const discount = safeNumber(product.discount_percentage, 20);
-    const priority = safeNumber(product.priority, 0);
-    const sourceBonus =
-      String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
-
-    return (
-      reviews * 0.4 +
-      rating * 100 * 0.3 +
-      discount * 10 * 0.2 +
-      priority * 4 +
-      sourceBonus +
-      Math.random() * 25
-    );
   }
 
   function updateMeta() {
@@ -200,7 +130,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const reviewCount = safeNumber(product.amazon_review_count);
     const price = formatPrice(product.price);
     const image = proxyImage(product.image_url);
-    const discount = getDiscount(product);
+    const discount = window.TrendPulseUI.getDiscount(product);
     const original = safeNumber(product.original_price, 0) || safeNumber(product.price, 0) * 1.5;
     const hook = window.ProductHooks ? window.ProductHooks.getHook(product) : "Popular right now";
     const urgency = window.ProductHooks ? window.ProductHooks.getUrgency(product) : "Selling fast";
@@ -209,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     return `
       <article class="group h-full overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 transition hover:scale-[1.02] hover:border-zinc-600">
-        <a href="${productUrl(product)}" class="flex h-full flex-col">
+        <a href="${window.TrendPulseUI.productPath(product)}" class="flex h-full flex-col">
           <div class="relative aspect-square overflow-hidden bg-white">
             <img
               src="${image}"
@@ -267,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  async function fetchProducts() {
+  async function fetchCategoryProducts() {
     const { data, error } = await window.supabaseClient
       .from("catalog_category_feed")
       .select("*")
@@ -279,22 +209,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       return [];
     }
 
-    const seen = new Set();
-
     return (data || [])
-      .map(sanitizeProduct)
+      .map(window.TrendPulseUI.sanitizeProduct)
       .filter((p) => p.name && p.is_active !== false)
-      .filter((p) => {
-        const key = p.asin || p.slug || p.name;
-        if (!key) return false;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
       .map((p) => ({
         ...p,
-        final_score: computeScore(p)
+        final_score: window.TrendPulseUI.computeScore(p)
       }));
+  }
+
+  async function fetchFallbackProducts() {
+    const all = await window.TrendPulseUI.fetchProducts();
+
+    let sameCategory = all.filter(
+      (p) => window.TrendPulseUI.normalizeCategory(p.category) === category
+    );
+
+    if (!sameCategory.length) {
+      sameCategory = all.filter(
+        (p) => window.TrendPulseUI.normalizeCategory(p.category) === "general"
+      );
+    }
+
+    if (!sameCategory.length) {
+      sameCategory = all;
+    }
+
+    return sameCategory.slice(0, 60);
   }
 
   function sortProducts(items, sort) {
@@ -340,6 +281,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     filtered = sortProducts(filtered, sort);
 
+    if (!filtered.length) {
+      filtered = sortProducts(products, "score").slice(0, 24);
+    }
+
     grid.innerHTML = filtered.map(productCard).join("");
 
     if (countEl) {
@@ -353,7 +298,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   updateMeta();
 
-  const products = await fetchProducts();
+  let products = await fetchCategoryProducts();
+
+  if (!products.length) {
+    products = await fetchFallbackProducts();
+  }
+
   applyFilters(products);
 
   searchInput?.addEventListener("input", () => applyFilters(products));
