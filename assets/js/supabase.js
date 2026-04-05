@@ -1,6 +1,7 @@
 (function () {
-  const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
-  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  const SUPABASE_URL = "https://hyrofyfhmabhlqbucjdp.supabase.co";
+  const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
 
   function canInitSupabase() {
     return (
@@ -31,13 +32,8 @@
     return;
   }
 
-  if (
-    !SUPABASE_URL ||
-    !SUPABASE_ANON_KEY ||
-    SUPABASE_URL.includes("YOUR_PROJECT_ID") ||
-    SUPABASE_ANON_KEY.includes("YOUR_SUPABASE_ANON_KEY")
-  ) {
-    console.error("[supabase] Missing real SUPABASE_URL or SUPABASE_ANON_KEY");
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.error("[supabase] Missing SUPABASE_URL or SUPABASE_ANON_KEY");
     window.supabaseClient = createFallbackClient();
     return;
   }
@@ -59,6 +55,10 @@
         }
       }
     );
+
+    window.TRENDPULSE_CONFIG = {
+      affiliateTag: "Drackk-20"
+    };
 
     console.log("[supabase] client initialized");
   } catch (error) {
