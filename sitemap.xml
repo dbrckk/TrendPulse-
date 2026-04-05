@@ -19,24 +19,6 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.trend-pulse.shop/best-sellers.html</loc>
-    
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.trend-pulse.shop/best-gifts.html</loc>
-    
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.trend-pulse.shop/cheap-tech.html</loc>
-    
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://www.trend-pulse.shop/catalog/tech</loc>
     
     <changefreq>daily</changefreq>
@@ -697,12 +679,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.trend-pulse.shop/product/tadeto-circuit-breaker-finder-tool-with-outlet-tester-dual-lcd-display-light-socket-and-3-2-prong-grounding-adapter-alli-b0fkbdd4ff</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://www.trend-pulse.shop/product/monopoly-board-game-baltimore-md-edition-2-6-players-family-board-games-for-kids-and-adults-board-games-for-kids-8-and-u</loc>
     <lastmod>2026-04-05T11:35:15.170Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -716,7 +692,7 @@
   </url>
   <url>
     <loc>https://www.trend-pulse.shop/product/prime-6-pack-eleclink-solar-pathway-lights-outdoor-super-bright-up-to-12hrs-ip65-waterproof-27-99-b0c37k9dqb</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -811,26 +787,14 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.trend-pulse.shop/product/terramaster-f2-425-2-bay-nas-intel-n95-4gb-254-99-reg-299-15-off-b0fhvz53rn</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://www.trend-pulse.shop/product/B0FDQG84G3</loc>
     <lastmod>2026-04-01T14:05:26.652Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.trend-pulse.shop/product/collection-of-free-kindle-ebooks-b0fqjv489h</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.trend-pulse.shop/product/6-99-zulay-kitchen-spoon-rest-high-heat-resistant-silicone-bpa-free-for-ladles-tongs-spatulas-at-amazon-b07pvbs863</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
+    <loc>https://www.trend-pulse.shop/product/terramaster-f2-425-2-bay-nas-intel-n95-4gb-254-99-reg-299-15-off-b0fhvz53rn</loc>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -931,12 +895,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.trend-pulse.shop/product/17-dewalt-tstak-mobile-storage-deep-box-w-wheels-65-70-free-s-h-b01n1h4n5x</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://www.trend-pulse.shop/product/B08BN2GR87</loc>
     <lastmod>2026-03-30T20:36:44.215Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -967,8 +925,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.trend-pulse.shop/product/lokithor-jp400-2500a-12v-portable-car-battery-booster-pack-85l-gas65l-diesel-150psi-tire-inflator-4497-b0d3v88p54</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
+    <loc>https://www.trend-pulse.shop/product/17-dewalt-tstak-mobile-storage-deep-box-w-wheels-65-70-free-s-h-b01n1h4n5x</loc>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -981,6 +939,12 @@
   <url>
     <loc>https://www.trend-pulse.shop/product/B09V366BDY</loc>
     <lastmod>2026-03-31T17:15:27.702Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/product/lokithor-jp400-2500a-12v-portable-car-battery-booster-pack-85l-gas65l-diesel-150psi-tire-inflator-4497-b0d3v88p54</loc>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1052,13 +1016,31 @@
   </url>
   <url>
     <loc>https://www.trend-pulse.shop/product/batman-beyond-the-complete-series-blu-ray-16-99-amazon-b07ytd41c2</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.trend-pulse.shop/product/hormel-chili-hormel-home-style-chili-with-beans-15-ounce-pack-of-122263-with-ss-amazon-b01h3egmxo</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/product/tadeto-circuit-breaker-finder-tool-with-outlet-tester-dual-lcd-display-light-socket-and-3-2-prong-grounding-adapter-alli-b0fkbdd4ff</loc>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/product/collection-of-free-kindle-ebooks-b0fqjv489h</loc>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.trend-pulse.shop/product/6-99-zulay-kitchen-spoon-rest-high-heat-resistant-silicone-bpa-free-for-ladles-tongs-spatulas-at-amazon-b07pvbs863</loc>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1082,19 +1064,19 @@
   </url>
   <url>
     <loc>https://www.trend-pulse.shop/product/hisense-55-u65qg-series-144hz-4k-uhd-mini-led-qled-smart-tv-2025-best-buy-amazon-399-99-b0dywg3bl1</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.trend-pulse.shop/product/flashlight-10000-high-lumens-rechargeable-30w-super-bright-led-flash-light-17-8-b0f2yptxj2</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.trend-pulse.shop/product/42pc-rubbermaid-food-storage-containers-w-lids-15-b07psksg1m</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1112,7 +1094,7 @@
   </url>
   <url>
     <loc>https://www.trend-pulse.shop/product/ymmv-11-2-amazon-basics-flextra-tall-kitchen-drawstring-trash-bags-13-gallon-120-count-at-amazon-b092vpgjb9</loc>
-    <lastmod>2026-04-05T13:31:22.293Z</lastmod>
+    <lastmod>2026-04-05T14:07:13.879Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
