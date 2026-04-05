@@ -1,482 +1,465 @@
-import Parser from "rss-parser";
+#!/usr/bin/env node
+
 import { createClient } from "@supabase/supabase-js";
 
-const parser = new Parser({
-  timeout: 20000,
-  headers: {
-    "User-Agent": "TrendPulse/1.0 (+https://www.trend-pulse.shop/)"
-  }
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: { persistSession: false }
 });
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-const RSS_FEEDS = (process.env.RSS_FEEDS || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-
-function log(...args) {
-  console.log("[sync-deals]", ...args);
-}
+const TARGET_CATEGORIES = new Set([
+  "tech",
+  "home",
+  "kitchen",
+  "beauty",
+  "health",
+  "sports",
+  "travel",
+  "fashion",
+  "family",
+  "general"
+]);
 
 function safeNumber(value, fallback = 0) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
 }
 
-function nowIso() {
-  return new Date().toISOString();
+function normalizeText(value) {
+  return String(value || "").trim();
 }
 
-function slugify(value = "") {
-  return String(value)
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+function normalizeLower(value) {
+  return normalizeText(value).toLowerCase();
+}
+
+function slugify(value) {
+  return normalizeLower(value)
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 120);
+    .replace(/^-+|-+$/g, "");
 }
 
-function normalizeUrl(url = "") {
-  const raw = String(url).trim();
-  if (!raw) return "";
-  try {
-    return new URL(raw).toString();
-  } catch {
-    return "";
-  }
-}
+function normalizeCategory(rawCategory, row = {}) {
+  const raw = normalizeLower(rawCategory);
+  const name = normalizeLower(row.name);
+  const brand = normalizeLower(row.brand);
+  const subcategory = normalizeLower(row.subcategory);
+  const description = normalizeLower(row.short_description || row.description);
 
-function isUsableImage(url = "") {
-  const raw = String(url).trim().toLowerCase();
-  if (!raw) return false;
-  if (!raw.startsWith("http")) return false;
-  if (raw.includes("your-image-url.com")) return false;
-  if (raw.includes("placeholder")) return false;
-  if (raw.includes("data:image")) return false;
-  return true;
-}
+  const haystack = [raw, subcategory, name, brand, description].filter(Boolean).join(" ");
 
-function buildAffiliateLink(amazonUrl = "") {
-  const tag = process.env.AMAZON_AFFILIATE_TAG || "Drackk-20";
-  const url = normalizeUrl(amazonUrl);
-  if (!url) return "";
+  if (!haystack) return "general";
 
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname.includes("amazon.com")) {
-      parsed.searchParams.set("tag", tag);
-    }
-    return parsed.toString();
-  } catch {
-    return url;
-  }
-}
-
-function extractImageFromHtml(html = "") {
-  if (!html) return "";
-
-  const patterns = [
-    /<img[^>]+src=["']([^"']+)["']/i,
-    /<img[^>]+data-lazy-src=["']([^"']+)["']/i,
-    /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i
-  ];
-
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (match?.[1]) {
-      const url = normalizeUrl(match[1]);
-      if (isUsableImage(url)) return url;
-    }
+  if (
+    haystack.includes("tech") ||
+    haystack.includes("electronics") ||
+    haystack.includes("gadget") ||
+    haystack.includes("gaming") ||
+    haystack.includes("computer") ||
+    haystack.includes("laptop") ||
+    haystack.includes("keyboard") ||
+    haystack.includes("mouse") ||
+    haystack.includes("monitor") ||
+    haystack.includes("ssd") ||
+    haystack.includes("router") ||
+    haystack.includes("webcam") ||
+    haystack.includes("headphone") ||
+    haystack.includes("earbud") ||
+    haystack.includes("speaker") ||
+    haystack.includes("microphone") ||
+    haystack.includes("phone") ||
+    haystack.includes("iphone") ||
+    haystack.includes("android") ||
+    haystack.includes("charger") ||
+    haystack.includes("usb")
+  ) {
+    return "tech";
   }
 
-  return "";
-}
-
-function extractFeedImage(item) {
-  const candidates = [
-    item?.enclosure?.url,
-    item?.["media:content"]?.url,
-    item?.["media:thumbnail"]?.url,
-    item?.image?.url,
-    item?.image,
-    item?.thumbnail
-  ];
-
-  for (const candidate of candidates) {
-    const url = normalizeUrl(candidate);
-    if (isUsableImage(url)) return url;
+  if (
+    haystack.includes("home") ||
+    haystack.includes("furniture") ||
+    haystack.includes("decor") ||
+    haystack.includes("storage") ||
+    haystack.includes("household") ||
+    haystack.includes("organizer") ||
+    haystack.includes("vacuum") ||
+    haystack.includes("pillow") ||
+    haystack.includes("blanket") ||
+    haystack.includes("lamp")
+  ) {
+    return "home";
   }
 
-  const htmlCandidates = [
-    item?.content,
-    item?.["content:encoded"],
-    item?.summary,
-    item?.contentSnippet
-  ];
-
-  for (const html of htmlCandidates) {
-    const url = extractImageFromHtml(html || "");
-    if (isUsableImage(url)) return url;
+  if (
+    haystack.includes("kitchen") ||
+    haystack.includes("cooking") ||
+    haystack.includes("cookware") ||
+    haystack.includes("appliance") ||
+    haystack.includes("air fryer") ||
+    haystack.includes("blender") ||
+    haystack.includes("knife") ||
+    haystack.includes("coffee") ||
+    haystack.includes("espresso") ||
+    haystack.includes("toaster") ||
+    haystack.includes("pan")
+  ) {
+    return "kitchen";
   }
 
-  return "";
-}
-
-function extractAmazonUrlFromText(text = "") {
-  if (!text) return "";
-  const regex = /https?:\/\/[^\s"'<>]*amazon\.com[^\s"'<>]*/gi;
-  const match = text.match(regex);
-  if (!match?.length) return "";
-  return normalizeUrl(match[0]);
-}
-
-function extractAmazonUrl(item) {
-  const directCandidates = [
-    item?.amazon_url,
-    item?.link,
-    item?.guid,
-    item?.id
-  ];
-
-  for (const candidate of directCandidates) {
-    const url = normalizeUrl(candidate);
-    if (url.includes("amazon.com")) return url;
+  if (
+    haystack.includes("beauty") ||
+    haystack.includes("skincare") ||
+    haystack.includes("makeup") ||
+    haystack.includes("cosmetic") ||
+    haystack.includes("serum") ||
+    haystack.includes("cleanser") ||
+    haystack.includes("moisturizer") ||
+    haystack.includes("shampoo") ||
+    haystack.includes("conditioner")
+  ) {
+    return "beauty";
   }
 
-  const textCandidates = [
-    item?.content,
-    item?.["content:encoded"],
-    item?.summary,
-    item?.contentSnippet,
-    item?.title
-  ];
-
-  for (const text of textCandidates) {
-    const url = extractAmazonUrlFromText(text || "");
-    if (url) return url;
+  if (
+    haystack.includes("health") ||
+    haystack.includes("wellness") ||
+    haystack.includes("supplement") ||
+    haystack.includes("vitamin") ||
+    haystack.includes("recovery") ||
+    haystack.includes("massager") ||
+    haystack.includes("fitness")
+  ) {
+    return "health";
   }
 
-  return "";
-}
-
-function extractASIN(url = "") {
-  const raw = String(url);
-  const patterns = [
-    /\/dp\/([A-Z0-9]{10})(?:[/?]|$)/i,
-    /\/gp\/product\/([A-Z0-9]{10})(?:[/?]|$)/i,
-    /\/product\/([A-Z0-9]{10})(?:[/?]|$)/i,
-    /[?&]asin=([A-Z0-9]{10})(?:[&#]|$)/i
-  ];
-
-  for (const pattern of patterns) {
-    const match = raw.match(pattern);
-    if (match?.[1]) return match[1].toUpperCase();
+  if (
+    haystack.includes("sport") ||
+    haystack.includes("outdoor") ||
+    haystack.includes("exercise") ||
+    haystack.includes("training") ||
+    haystack.includes("yoga") ||
+    haystack.includes("gym") ||
+    haystack.includes("running") ||
+    haystack.includes("dumbbell") ||
+    haystack.includes("resistance band")
+  ) {
+    return "sports";
   }
 
-  return "";
-}
+  if (
+    haystack.includes("travel") ||
+    haystack.includes("luggage") ||
+    haystack.includes("suitcase") ||
+    haystack.includes("carry-on") ||
+    haystack.includes("passport") ||
+    haystack.includes("backpack") ||
+    haystack.includes("travel accessory")
+  ) {
+    return "travel";
+  }
 
-function extractPrice(text = "") {
-  if (!text) return 0;
-  const match = String(text).match(/\$ ?([0-9]+(?:\.[0-9]{1,2})?)/);
-  return match ? safeNumber(match[1], 0) : 0;
-}
+  if (
+    haystack.includes("fashion") ||
+    haystack.includes("men") ||
+    haystack.includes("women") ||
+    haystack.includes("jewelry") ||
+    haystack.includes("jewellery") ||
+    haystack.includes("shoe") ||
+    haystack.includes("watch") ||
+    haystack.includes("wallet") ||
+    haystack.includes("bracelet") ||
+    haystack.includes("necklace") ||
+    haystack.includes("ring") ||
+    haystack.includes("bag")
+  ) {
+    return "fashion";
+  }
 
-function cleanupTitle(title = "") {
-  return String(title)
-    .replace(/\s+/g, " ")
-    .replace(/\[[^\]]+\]/g, "")
-    .trim()
-    .slice(0, 250);
-}
-
-function inferCategory(text = "") {
-  const haystack = String(text).toLowerCase();
-
-  const map = [
-    ["tech", ["laptop", "monitor", "ssd", "keyboard", "mouse", "router", "charger", "usb", "headphones", "earbuds", "speaker", "iphone", "ipad", "galaxy", "pc", "gaming", "tv", "camera", "webcam", "tech"]],
-    ["home", ["blanket", "pillow", "mattress", "storage", "organizer", "cleaner", "vacuum", "home"]],
-    ["kitchen", ["air fryer", "blender", "knife", "cookware", "pan", "pot", "coffee", "espresso", "kitchen", "toaster"]],
-    ["beauty", ["skincare", "serum", "beauty", "makeup", "moisturizer", "cleanser", "shampoo", "conditioner"]],
-    ["sports", ["dumbbell", "yoga", "fitness", "sports", "running", "gym", "bike", "treadmill"]],
-    ["health", ["supplement", "vitamin", "protein", "sleep", "health", "wellness", "magnesium"]],
-    ["travel", ["travel", "luggage", "backpack", "suitcase", "passport", "carry-on"]],
-    ["women", ["women", "dress", "handbag", "purse", "bra", "leggings"]],
-    ["men", ["men", "wallet", "beard", "razor", "shirt", "watch"]],
-    ["jewelry", ["ring", "necklace", "bracelet", "earrings", "jewelry"]],
-    ["baby", ["baby", "stroller", "diaper", "nursery"]],
-    ["pets", ["dog", "cat", "pet", "litter", "leash"]]
-  ];
-
-  for (const [category, keywords] of map) {
-    if (keywords.some((kw) => haystack.includes(kw))) {
-      return category;
-    }
+  if (
+    haystack.includes("family") ||
+    haystack.includes("kid") ||
+    haystack.includes("baby") ||
+    haystack.includes("pet") ||
+    haystack.includes("dog") ||
+    haystack.includes("cat") ||
+    haystack.includes("toy") ||
+    haystack.includes("nursery") ||
+    haystack.includes("stroller") ||
+    haystack.includes("diaper")
+  ) {
+    return "family";
   }
 
   return "general";
 }
 
-async function fetchText(url) {
-  const response = await fetch(url, {
-    redirect: "follow",
-    headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; TrendPulseBot/1.0; +https://www.trend-pulse.shop/)",
-      "Accept-Language": "en-US,en;q=0.9"
-    }
-  });
+function computeDiscountPercent(row) {
+  const explicit = safeNumber(
+    row.discount_percentage ?? row.discount_percent,
+    NaN
+  );
 
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
+  if (Number.isFinite(explicit) && explicit > 0) {
+    return explicit;
   }
 
-  return await response.text();
+  const price = safeNumber(row.price, 0);
+  const original = safeNumber(row.original_price, 0);
+
+  if (price > 0 && original > price) {
+    return ((original - price) / original) * 100;
+  }
+
+  return 0;
 }
 
-function extractAmazonMainImage(html = "") {
-  if (!html) return "";
+function isGoodDeal(row) {
+  const price = safeNumber(row.price, 0);
+  const original = safeNumber(row.original_price, 0);
+  const discount = computeDiscountPercent(row);
+  const score = safeNumber(row.score, 0);
+  const likes = safeNumber(row.likes, 0);
+  const rating = safeNumber(row.amazon_rating, 0);
+  const reviews = safeNumber(row.amazon_review_count, 0);
+  const crazyDeal = row.is_crazy_deal === true;
+  const explicitDeal = normalizeLower(row.type) === "deal" || normalizeLower(row.source_kind) === "deal";
 
-  const patterns = [
-    /"landingImageUrl"\s*:\s*"([^"]+)"/i,
-    /"large":"([^"]+)"/i,
-    /"hiRes":"([^"]+)"/i,
-    /"mainUrl":"([^"]+)"/i,
-    /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
-    /<img[^>]+id=["']landingImage["'][^>]+src=["']([^"']+)["']/i
-  ];
+  if (crazyDeal || explicitDeal) return true;
+  if (discount >= 15) return true;
+  if (original > price && price > 0) return true;
+  if (score >= 60) return true;
+  if (likes >= 10) return true;
+  if (rating >= 4.4 && reviews >= 1000) return true;
 
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (match?.[1]) {
-      const cleaned = match[1].replace(/\\u0026/g, "&").replace(/\\/g, "");
-      const url = normalizeUrl(cleaned);
-      if (isUsableImage(url)) return url;
-    }
-  }
-
-  return "";
+  return false;
 }
 
-const amazonImageCache = new Map();
+function computeDealPriority(row) {
+  const discount = computeDiscountPercent(row);
+  const reviews = safeNumber(row.amazon_review_count, 0);
+  const rating = safeNumber(row.amazon_rating, 0);
+  const score = safeNumber(row.score, 0);
+  const priority = safeNumber(row.priority, 0);
+  const clicks = safeNumber(row.clicks, 0);
+  const views = safeNumber(row.views, 0);
+  const likes = safeNumber(row.likes, 0);
+  const crazyDealBonus = row.is_crazy_deal === true ? 120 : 0;
+  const bestsellerBonus = row.is_best_seller === true ? 60 : 0;
 
-async function fetchRealAmazonImage(amazonUrl = "") {
-  const normalized = normalizeUrl(amazonUrl);
-  if (!normalized) return "";
-
-  if (amazonImageCache.has(normalized)) {
-    return amazonImageCache.get(normalized);
-  }
-
-  try {
-    const html = await fetchText(normalized);
-    const image = extractAmazonMainImage(html);
-    amazonImageCache.set(normalized, image || "");
-    return image || "";
-  } catch (error) {
-    log("amazon image fetch failed:", normalized, error.message || error);
-    amazonImageCache.set(normalized, "");
-    return "";
-  }
+  return (
+    discount * 12 +
+    reviews * 0.25 +
+    rating * 100 * 0.22 +
+    score * 0.25 +
+    priority * 5 +
+    clicks * 1.8 +
+    views * 0.15 +
+    likes * 3 +
+    crazyDealBonus +
+    bestsellerBonus
+  );
 }
 
-async function fetchExistingProducts(asins) {
-  if (!asins.length) return new Map();
+function buildDealSourceRow(row) {
+  const asin = normalizeText(row.asin);
+  const name = normalizeText(row.name);
 
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .in("asin", asins);
+  if (!asin || !name) return null;
+  if (row.is_active === false) return null;
+  if (!isGoodDeal(row)) return null;
 
-  if (error) {
-    log("existing products fetch error:", error);
-    return new Map();
-  }
+  const category = normalizeCategory(row.category, row);
+  if (!TARGET_CATEGORIES.has(category)) return null;
 
-  return new Map((data || []).map((row) => [row.asin, row]));
-}
+  const sourceName =
+    normalizeText(row.source_name) ||
+    normalizeText(row.brand) ||
+    "deal-feed";
 
-function mergeProduct(existing, incoming) {
   return {
-    asin: incoming.asin,
-    slug: existing?.slug || incoming.slug,
-    name: incoming.name || existing?.name || "Amazon Product",
-    brand: incoming.brand || existing?.brand || null,
-    description: incoming.description || existing?.description || null,
-    short_description: incoming.short_description || existing?.short_description || null,
-    image_url: isUsableImage(incoming.image_url)
-      ? incoming.image_url
-      : existing?.image_url || null,
-    gallery_urls: Array.isArray(existing?.gallery_urls) ? existing.gallery_urls : [],
-    price: incoming.price > 0 ? incoming.price : existing?.price ?? null,
-    original_price:
-      incoming.original_price > 0 ? incoming.original_price : existing?.original_price ?? null,
-    discount_percentage:
-      incoming.discount_percentage > 0
-        ? incoming.discount_percentage
-        : existing?.discount_percentage ?? 0,
-    currency: incoming.currency || existing?.currency || "USD",
-    amazon_rating:
-      incoming.amazon_rating > 0 ? incoming.amazon_rating : existing?.amazon_rating ?? 0,
-    amazon_review_count:
-      incoming.amazon_review_count > 0
-        ? incoming.amazon_review_count
-        : existing?.amazon_review_count ?? 0,
-    amazon_url: incoming.amazon_url || existing?.amazon_url || null,
-    affiliate_link: incoming.affiliate_link || existing?.affiliate_link || null,
-    is_best_seller: Boolean(existing?.is_best_seller || incoming.is_best_seller),
-    is_giftable: Boolean(existing?.is_giftable || incoming.is_giftable),
-    is_crazy_deal: Boolean(incoming.is_crazy_deal || existing?.is_crazy_deal),
-    score: Math.max(safeNumber(existing?.score, 0), safeNumber(incoming.score, 0)),
-    priority: Math.max(safeNumber(existing?.priority, 0), safeNumber(incoming.priority, 0)),
-    updated_at: nowIso(),
-    created_at: existing?.created_at || nowIso()
-  };
-}
-
-function buildDealSource(product, sourceName, publishedAt) {
-  return {
-    asin: product.asin,
+    asin,
     source_kind: "deal",
-    category: product.category || "general",
+    category,
     source_name: sourceName,
-    source_rank: null,
-    is_active: true,
-    last_seen_at: nowIso(),
-    published_at: publishedAt || null,
-    created_at: nowIso(),
-    updated_at: nowIso()
+    source_rank: 0,
+    is_active: row.is_active !== false,
+    last_seen_at: new Date().toISOString(),
+    published_at: row.published_at || null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    _priority_score: computeDealPriority(row),
+    _name: name,
+    _slug: normalizeText(row.slug) || slugify(name) || asin.toLowerCase()
   };
 }
 
-async function processFeed(feedUrl) {
-  const feed = await parser.parseURL(feedUrl);
-  const sourceName = feed?.title || feedUrl;
+async function fetchAllProducts() {
+  const pageSize = 1000;
+  let from = 0;
+  let all = [];
 
-  const items = [];
+  while (true) {
+    const to = from + pageSize - 1;
 
-  for (const item of feed.items || []) {
-    const amazonUrl = extractAmazonUrl(item);
-    const asin = extractASIN(amazonUrl);
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .range(from, to);
 
-    if (!amazonUrl || !asin) continue;
+    if (error) {
+      throw new Error(`Failed to fetch products: ${error.message}`);
+    }
 
-    const title = cleanupTitle(item.title || "");
-    const description = String(item.contentSnippet || item.summary || "").trim();
-    const combinedText = `${title} ${description}`;
+    if (!data || data.length === 0) break;
 
-    const feedImage = extractFeedImage(item);
-    const amazonImage = await fetchRealAmazonImage(amazonUrl);
-    const finalImage = isUsableImage(amazonImage) ? amazonImage : feedImage;
+    all = all.concat(data);
 
-    const price = extractPrice(item.title || item.contentSnippet || "");
-    const category = inferCategory(combinedText);
-    const slug = slugify(`${title}-${asin}`);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
 
-    items.push({
-      asin,
-      slug,
-      name: title || `Amazon Product ${asin}`,
-      brand: null,
-      description: description || null,
-      short_description: description ? description.slice(0, 180) : null,
-      image_url: isUsableImage(finalImage) ? finalImage : null,
-      price: price || 0,
-      original_price: 0,
-      discount_percentage: 0,
-      currency: "USD",
-      amazon_rating: 0,
-      amazon_review_count: 0,
-      amazon_url: amazonUrl,
-      affiliate_link: buildAffiliateLink(amazonUrl),
-      is_best_seller: false,
-      is_giftable: false,
-      is_crazy_deal: true,
-      score: 10,
-      priority: 10,
-      category,
-      published_at: item.isoDate || item.pubDate || null,
-      source_name: sourceName
+  return all;
+}
+
+function dedupeByAsin(rows) {
+  const map = new Map();
+
+  for (const row of rows) {
+    if (!row?.asin) continue;
+
+    const existing = map.get(row.asin);
+    if (!existing || row._priority_score > existing._priority_score) {
+      map.set(row.asin, row);
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+function assignRanks(rows) {
+  const grouped = new Map();
+
+  for (const row of rows) {
+    if (!grouped.has(row.category)) grouped.set(row.category, []);
+    grouped.get(row.category).push(row);
+  }
+
+  const finalRows = [];
+
+  for (const [category, items] of grouped.entries()) {
+    items.sort((a, b) => {
+      if (b._priority_score !== a._priority_score) {
+        return b._priority_score - a._priority_score;
+      }
+      return a._name.localeCompare(b._name);
+    });
+
+    items.forEach((item, index) => {
+      finalRows.push({
+        asin: item.asin,
+        source_kind: item.source_kind,
+        category,
+        source_name: item.source_name,
+        source_rank: index + 1,
+        is_active: item.is_active,
+        last_seen_at: item.last_seen_at,
+        published_at: item.published_at,
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      });
     });
   }
 
-  return items;
+  return finalRows;
 }
 
-function uniqueBy(items, getKey) {
-  const map = new Map();
-  for (const item of items) {
-    map.set(getKey(item), item);
+async function deleteExistingDealSources() {
+  const { error } = await supabase
+    .from("product_sources")
+    .delete()
+    .eq("source_kind", "deal");
+
+  if (error) {
+    throw new Error(`Failed to delete old deal sources: ${error.message}`);
   }
-  return [...map.values()];
+}
+
+async function insertDealSources(rows) {
+  if (!rows.length) return;
+
+  const chunkSize = 500;
+
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    const chunk = rows.slice(i, i + chunkSize);
+
+    const { error } = await supabase
+      .from("product_sources")
+      .insert(chunk);
+
+    if (error) {
+      throw new Error(`Failed to insert deal sources: ${error.message}`);
+    }
+  }
+}
+
+async function verifyCounts() {
+  const { data, error } = await supabase
+    .from("product_sources")
+    .select("source_kind, category", { count: "exact" })
+    .eq("source_kind", "deal");
+
+  if (error) {
+    throw new Error(`Failed to verify deal source counts: ${error.message}`);
+  }
+
+  const counts = {};
+  for (const row of data || []) {
+    counts[row.category] = (counts[row.category] || 0) + 1;
+  }
+
+  return counts;
 }
 
 async function main() {
-  if (!RSS_FEEDS.length) {
-    throw new Error("RSS_FEEDS is empty");
-  }
+  console.log("Starting deals sync...");
 
-  log("feeds:", RSS_FEEDS.length);
+  const products = await fetchAllProducts();
+  console.log(`Fetched ${products.length} products`);
 
-  let rawItems = [];
+  const mapped = products
+    .map(buildDealSourceRow)
+    .filter(Boolean);
 
-  for (const feedUrl of RSS_FEEDS) {
-    try {
-      log("parsing feed:", feedUrl);
-      const items = await processFeed(feedUrl);
-      log("items found:", items.length, "from", feedUrl);
-      rawItems.push(...items);
-    } catch (error) {
-      log("feed error:", feedUrl, error.message || error);
-    }
-  }
+  console.log(`Mapped ${mapped.length} potential deal rows`);
 
-  rawItems = uniqueBy(rawItems, (item) => item.asin);
+  const deduped = dedupeByAsin(mapped);
+  console.log(`Deduped to ${deduped.length} deal rows`);
 
-  log("unique deals:", rawItems.length);
+  const ranked = assignRanks(deduped);
+  console.log(`Ranked ${ranked.length} deal rows`);
 
-  if (!rawItems.length) {
-    log("nothing to upsert");
-    return;
-  }
+  await deleteExistingDealSources();
+  console.log("Deleted old deal sources");
 
-  const asins = rawItems.map((item) => item.asin);
-  const existingMap = await fetchExistingProducts(asins);
+  await insertDealSources(ranked);
+  console.log("Inserted new deal sources");
 
-  const coreProducts = rawItems.map((item) =>
-    mergeProduct(existingMap.get(item.asin), item)
-  );
+  const counts = await verifyCounts();
+  console.log("Deal categories:");
+  console.log(counts);
 
-  const dealSources = rawItems.map((item) =>
-    buildDealSource(item, item.source_name, item.published_at)
-  );
-
-  const { error: productsError } = await supabase
-    .from("products")
-    .upsert(coreProducts, { onConflict: "asin" });
-
-  if (productsError) {
-    throw productsError;
-  }
-
-  const { error: sourcesError } = await supabase
-    .from("product_sources")
-    .upsert(dealSources, { onConflict: "asin,source_kind,category" });
-
-  if (sourcesError) {
-    throw sourcesError;
-  }
-
-  log("upserted products:", coreProducts.length);
-  log("upserted deal sources:", dealSources.length);
-  log("DONE");
+  console.log("Deals sync complete");
 }
 
 main().catch((error) => {
-  console.error("[sync-deals] FAILED", error);
+  console.error(error);
   process.exit(1);
 });
