@@ -14,7 +14,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false }
 });
 
-const TARGET_CATEGORIES = new Set([
+const TARGET_CATEGORIES = [
   "tech",
   "home",
   "kitchen",
@@ -25,7 +25,10 @@ const TARGET_CATEGORIES = new Set([
   "fashion",
   "family",
   "general"
-]);
+];
+
+const MIN_DEALS_TOTAL = 48;
+const PAGE_SIZE = 1000;
 
 function safeNumber(value, fallback = 0) {
   const n = Number(value);
@@ -40,160 +43,249 @@ function normalizeLower(value) {
   return normalizeText(value).toLowerCase();
 }
 
-function slugify(value) {
-  return normalizeLower(value)
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+function unique(array) {
+  return [...new Set(array)];
+}
+
+function getHaystack(row = {}) {
+  return [
+    row.category,
+    row.subcategory,
+    row.name,
+    row.brand,
+    row.short_description,
+    row.description,
+    row.source_name
+  ]
+    .map(normalizeLower)
+    .filter(Boolean)
+    .join(" ");
+}
+
+function hasAny(haystack, keywords) {
+  return keywords.some((keyword) => haystack.includes(keyword));
 }
 
 function normalizeCategory(rawCategory, row = {}) {
-  const raw = normalizeLower(rawCategory);
-  const name = normalizeLower(row.name);
-  const brand = normalizeLower(row.brand);
-  const subcategory = normalizeLower(row.subcategory);
-  const description = normalizeLower(row.short_description || row.description);
-
-  const haystack = [raw, subcategory, name, brand, description].filter(Boolean).join(" ");
+  const haystack = [normalizeLower(rawCategory), getHaystack(row)].filter(Boolean).join(" ");
 
   if (!haystack) return "general";
 
   if (
-    haystack.includes("tech") ||
-    haystack.includes("electronics") ||
-    haystack.includes("gadget") ||
-    haystack.includes("gaming") ||
-    haystack.includes("computer") ||
-    haystack.includes("laptop") ||
-    haystack.includes("keyboard") ||
-    haystack.includes("mouse") ||
-    haystack.includes("monitor") ||
-    haystack.includes("ssd") ||
-    haystack.includes("router") ||
-    haystack.includes("webcam") ||
-    haystack.includes("headphone") ||
-    haystack.includes("earbud") ||
-    haystack.includes("speaker") ||
-    haystack.includes("microphone") ||
-    haystack.includes("phone") ||
-    haystack.includes("iphone") ||
-    haystack.includes("android") ||
-    haystack.includes("charger") ||
-    haystack.includes("usb")
+    hasAny(haystack, [
+      "tech",
+      "electronics",
+      "gadget",
+      "gaming",
+      "computer",
+      "laptop",
+      "keyboard",
+      "mouse",
+      "monitor",
+      "ssd",
+      "router",
+      "webcam",
+      "audio",
+      "speaker",
+      "earbud",
+      "headphone",
+      "microphone",
+      "phone",
+      "iphone",
+      "android",
+      "charger",
+      "usb",
+      "tablet",
+      "smartwatch",
+      "camera",
+      "tv",
+      "projector",
+      "magsafe"
+    ])
   ) {
     return "tech";
   }
 
   if (
-    haystack.includes("home") ||
-    haystack.includes("furniture") ||
-    haystack.includes("decor") ||
-    haystack.includes("storage") ||
-    haystack.includes("household") ||
-    haystack.includes("organizer") ||
-    haystack.includes("vacuum") ||
-    haystack.includes("pillow") ||
-    haystack.includes("blanket") ||
-    haystack.includes("lamp")
+    hasAny(haystack, [
+      "home",
+      "furniture",
+      "decor",
+      "storage",
+      "household",
+      "organizer",
+      "vacuum",
+      "pillow",
+      "blanket",
+      "lamp",
+      "cleaner",
+      "bedding",
+      "sofa",
+      "shelf",
+      "office chair",
+      "desk lamp",
+      "humidifier",
+      "air purifier"
+    ])
   ) {
     return "home";
   }
 
   if (
-    haystack.includes("kitchen") ||
-    haystack.includes("cooking") ||
-    haystack.includes("cookware") ||
-    haystack.includes("appliance") ||
-    haystack.includes("air fryer") ||
-    haystack.includes("blender") ||
-    haystack.includes("knife") ||
-    haystack.includes("coffee") ||
-    haystack.includes("espresso") ||
-    haystack.includes("toaster") ||
-    haystack.includes("pan")
+    hasAny(haystack, [
+      "kitchen",
+      "cooking",
+      "cookware",
+      "appliance",
+      "air fryer",
+      "blender",
+      "knife",
+      "coffee",
+      "espresso",
+      "toaster",
+      "pan",
+      "pot",
+      "mixer",
+      "fryer",
+      "rice cooker",
+      "cutting board",
+      "water bottle",
+      "meal prep"
+    ])
   ) {
     return "kitchen";
   }
 
   if (
-    haystack.includes("beauty") ||
-    haystack.includes("skincare") ||
-    haystack.includes("makeup") ||
-    haystack.includes("cosmetic") ||
-    haystack.includes("serum") ||
-    haystack.includes("cleanser") ||
-    haystack.includes("moisturizer") ||
-    haystack.includes("shampoo") ||
-    haystack.includes("conditioner")
+    hasAny(haystack, [
+      "beauty",
+      "skincare",
+      "makeup",
+      "cosmetic",
+      "serum",
+      "cleanser",
+      "moisturizer",
+      "shampoo",
+      "conditioner",
+      "haircare",
+      "face wash",
+      "lip",
+      "mascara",
+      "nail",
+      "fragrance",
+      "perfume"
+    ])
   ) {
     return "beauty";
   }
 
   if (
-    haystack.includes("health") ||
-    haystack.includes("wellness") ||
-    haystack.includes("supplement") ||
-    haystack.includes("vitamin") ||
-    haystack.includes("recovery") ||
-    haystack.includes("massager") ||
-    haystack.includes("fitness")
+    hasAny(haystack, [
+      "health",
+      "wellness",
+      "supplement",
+      "vitamin",
+      "recovery",
+      "massager",
+      "fitness tracker",
+      "sleep",
+      "posture",
+      "pain relief",
+      "protein",
+      "electrolyte",
+      "healthcare",
+      "medical"
+    ])
   ) {
     return "health";
   }
 
   if (
-    haystack.includes("sport") ||
-    haystack.includes("outdoor") ||
-    haystack.includes("exercise") ||
-    haystack.includes("training") ||
-    haystack.includes("yoga") ||
-    haystack.includes("gym") ||
-    haystack.includes("running") ||
-    haystack.includes("dumbbell") ||
-    haystack.includes("resistance band")
+    hasAny(haystack, [
+      "sport",
+      "outdoor",
+      "exercise",
+      "training",
+      "yoga",
+      "gym",
+      "running",
+      "dumbbell",
+      "resistance band",
+      "treadmill",
+      "cycling",
+      "basketball",
+      "football",
+      "camping",
+      "hiking",
+      "workout"
+    ])
   ) {
     return "sports";
   }
 
   if (
-    haystack.includes("travel") ||
-    haystack.includes("luggage") ||
-    haystack.includes("suitcase") ||
-    haystack.includes("carry-on") ||
-    haystack.includes("passport") ||
-    haystack.includes("backpack") ||
-    haystack.includes("travel accessory")
+    hasAny(haystack, [
+      "travel",
+      "luggage",
+      "suitcase",
+      "carry-on",
+      "passport",
+      "backpack",
+      "travel accessory",
+      "packing cube",
+      "neck pillow",
+      "toiletry bag",
+      "adapter",
+      "trip"
+    ])
   ) {
     return "travel";
   }
 
   if (
-    haystack.includes("fashion") ||
-    haystack.includes("men") ||
-    haystack.includes("women") ||
-    haystack.includes("jewelry") ||
-    haystack.includes("jewellery") ||
-    haystack.includes("shoe") ||
-    haystack.includes("watch") ||
-    haystack.includes("wallet") ||
-    haystack.includes("bracelet") ||
-    haystack.includes("necklace") ||
-    haystack.includes("ring") ||
-    haystack.includes("bag")
+    hasAny(haystack, [
+      "fashion",
+      "men",
+      "women",
+      "jewelry",
+      "jewellery",
+      "shoe",
+      "watch",
+      "wallet",
+      "bracelet",
+      "necklace",
+      "ring",
+      "bag",
+      "handbag",
+      "clothing",
+      "hoodie",
+      "dress",
+      "shirt",
+      "sneaker",
+      "belt",
+      "sunglasses"
+    ])
   ) {
     return "fashion";
   }
 
   if (
-    haystack.includes("family") ||
-    haystack.includes("kid") ||
-    haystack.includes("baby") ||
-    haystack.includes("pet") ||
-    haystack.includes("dog") ||
-    haystack.includes("cat") ||
-    haystack.includes("toy") ||
-    haystack.includes("nursery") ||
-    haystack.includes("stroller") ||
-    haystack.includes("diaper")
+    hasAny(haystack, [
+      "family",
+      "kid",
+      "baby",
+      "pet",
+      "dog",
+      "cat",
+      "toy",
+      "nursery",
+      "stroller",
+      "diaper",
+      "toddler",
+      "children",
+      "puppy",
+      "kitten"
+    ])
   ) {
     return "family";
   }
@@ -221,6 +313,20 @@ function computeDiscountPercent(row) {
   return 0;
 }
 
+function looksLikeDealFeed(row) {
+  const haystack = getHaystack(row);
+  return hasAny(haystack, [
+    "deal",
+    "discount",
+    "flash sale",
+    "limited time",
+    "coupon",
+    "clearance",
+    "price drop",
+    "sale"
+  ]);
+}
+
 function isGoodDeal(row) {
   const price = safeNumber(row.price, 0);
   const original = safeNumber(row.original_price, 0);
@@ -232,7 +338,7 @@ function isGoodDeal(row) {
   const crazyDeal = row.is_crazy_deal === true;
   const explicitDeal = normalizeLower(row.type) === "deal" || normalizeLower(row.source_kind) === "deal";
 
-  if (crazyDeal || explicitDeal) return true;
+  if (crazyDeal || explicitDeal || looksLikeDealFeed(row)) return true;
   if (discount >= 15) return true;
   if (original > price && price > 0) return true;
   if (score >= 60) return true;
@@ -253,6 +359,7 @@ function computeDealPriority(row) {
   const likes = safeNumber(row.likes, 0);
   const crazyDealBonus = row.is_crazy_deal === true ? 120 : 0;
   const bestsellerBonus = row.is_best_seller === true ? 60 : 0;
+  const explicitDealBonus = looksLikeDealFeed(row) ? 80 : 0;
 
   return (
     discount * 12 +
@@ -264,7 +371,8 @@ function computeDealPriority(row) {
     views * 0.15 +
     likes * 3 +
     crazyDealBonus +
-    bestsellerBonus
+    bestsellerBonus +
+    explicitDealBonus
   );
 }
 
@@ -277,37 +385,60 @@ function buildDealSourceRow(row) {
   if (!isGoodDeal(row)) return null;
 
   const category = normalizeCategory(row.category, row);
-  if (!TARGET_CATEGORIES.has(category)) return null;
-
-  const sourceName =
-    normalizeText(row.source_name) ||
-    normalizeText(row.brand) ||
-    "deal-feed";
 
   return {
     asin,
     source_kind: "deal",
     category,
-    source_name: sourceName,
+    source_name: normalizeText(row.source_name) || normalizeText(row.brand) || "deal-feed",
     source_rank: 0,
-    is_active: row.is_active !== false,
+    is_active: true,
     last_seen_at: new Date().toISOString(),
     published_at: row.published_at || null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     _priority_score: computeDealPriority(row),
-    _name: name,
-    _slug: normalizeText(row.slug) || slugify(name) || asin.toLowerCase()
+    _name: name
+  };
+}
+
+function buildFallbackDealRow(row) {
+  const asin = normalizeText(row.asin);
+  const name = normalizeText(row.name);
+
+  if (!asin || !name) return null;
+  if (row.is_active === false) return null;
+
+  const category = normalizeCategory(row.category, row);
+
+  return {
+    asin,
+    source_kind: "deal",
+    category,
+    source_name: "catalog-fallback",
+    source_rank: 0,
+    is_active: true,
+    last_seen_at: new Date().toISOString(),
+    published_at: row.published_at || null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    _priority_score:
+      safeNumber(row.amazon_review_count, 0) * 0.45 +
+      safeNumber(row.amazon_rating, 0) * 100 * 0.25 +
+      safeNumber(row.score, 0) * 0.2 +
+      safeNumber(row.priority, 0) * 5 +
+      safeNumber(row.likes, 0) * 2 +
+      20,
+    _name: name
   };
 }
 
 async function fetchAllProducts() {
-  const pageSize = 1000;
   let from = 0;
   let all = [];
 
   while (true) {
-    const to = from + pageSize - 1;
+    const to = from + PAGE_SIZE - 1;
 
     const { data, error } = await supabase
       .from("products")
@@ -322,8 +453,8 @@ async function fetchAllProducts() {
 
     all = all.concat(data);
 
-    if (data.length < pageSize) break;
-    from += pageSize;
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
   }
 
   return all;
@@ -334,7 +465,6 @@ function dedupeByAsin(rows) {
 
   for (const row of rows) {
     if (!row?.asin) continue;
-
     const existing = map.get(row.asin);
     if (!existing || row._priority_score > existing._priority_score) {
       map.set(row.asin, row);
@@ -344,8 +474,33 @@ function dedupeByAsin(rows) {
   return Array.from(map.values());
 }
 
+function ensureMinimumDeals(primaryDeals, allProducts) {
+  if (primaryDeals.length >= MIN_DEALS_TOTAL) return primaryDeals;
+
+  const existing = new Set(primaryDeals.map((row) => row.asin));
+  const fallbackCandidates = allProducts
+    .map(buildFallbackDealRow)
+    .filter(Boolean)
+    .sort((a, b) => b._priority_score - a._priority_score);
+
+  const out = [...primaryDeals];
+
+  for (const row of fallbackCandidates) {
+    if (existing.has(row.asin)) continue;
+    out.push(row);
+    existing.add(row.asin);
+    if (out.length >= MIN_DEALS_TOTAL) break;
+  }
+
+  return out;
+}
+
 function assignRanks(rows) {
   const grouped = new Map();
+
+  for (const category of TARGET_CATEGORIES) {
+    grouped.set(category, []);
+  }
 
   for (const row of rows) {
     if (!grouped.has(row.category)) grouped.set(row.category, []);
@@ -413,7 +568,7 @@ async function insertDealSources(rows) {
 async function verifyCounts() {
   const { data, error } = await supabase
     .from("product_sources")
-    .select("source_kind, category", { count: "exact" })
+    .select("category")
     .eq("source_kind", "deal");
 
   if (error) {
@@ -441,9 +596,12 @@ async function main() {
   console.log(`Mapped ${mapped.length} potential deal rows`);
 
   const deduped = dedupeByAsin(mapped);
-  console.log(`Deduped to ${deduped.length} deal rows`);
+  console.log(`Deduped to ${deduped.length} unique deal products`);
 
-  const ranked = assignRanks(deduped);
+  const withFallback = ensureMinimumDeals(deduped, products);
+  console.log(`Expanded to ${withFallback.length} deal rows after fallback`);
+
+  const ranked = assignRanks(withFallback);
   console.log(`Ranked ${ranked.length} deal rows`);
 
   await deleteExistingDealSources();
