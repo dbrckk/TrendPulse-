@@ -18,7 +18,7 @@
   <meta property="og:title" content="Amazon Catalog | TrendPulse" />
   <meta
     property="og:description"
-    content="Browse frequently bought Amazon products by category."
+    content="Browse frequently bought Amazon products by category on TrendPulse."
   />
   <meta property="og:url" content="https://www.trend-pulse.shop/catalog" />
   <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
@@ -27,7 +27,7 @@
   <meta name="twitter:title" content="Amazon Catalog | TrendPulse" />
   <meta
     name="twitter:description"
-    content="Browse frequently bought Amazon products by category."
+    content="Browse frequently bought Amazon products by category on TrendPulse."
   />
   <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
 
@@ -62,7 +62,7 @@
         href="/deals"
         class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
       >
-        Browse Deals
+        Live Deals
       </a>
     </div>
   </header>
@@ -83,9 +83,16 @@
       </h1>
 
       <p class="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
-        Explore frequently bought Amazon products across strong evergreen categories.
-        Each category is built to stay dense, useful, and SEO-friendly, while category pages can also surface relevant live deals.
+        Explore high-demand Amazon products across stronger evergreen categories.
+        Each category is designed to stay dense, useful, and conversion-friendly,
+        while category pages can also surface relevant live deals.
       </p>
+
+      <div class="mt-5 flex flex-wrap gap-2">
+        <span class="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-300">High demand</span>
+        <span class="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-300">Live deals</span>
+        <span class="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-300">Best sellers</span>
+      </div>
 
       <div class="mt-6 flex flex-wrap gap-3">
         <a
@@ -114,85 +121,146 @@
           <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">Categories</p>
           <h2 class="mt-1 text-2xl font-bold tracking-tight text-white">Choose a category</h2>
         </div>
+
+        <a href="/deals" class="hidden text-sm text-zinc-400 hover:text-white sm:block">
+          See live deals →
+        </a>
       </div>
 
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
 
-        <a href="/catalog/tech" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">Tech</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">Gadgets, electronics, accessories, and high-demand devices.</p>
+        <a href="/catalog/tech" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">Tech</div>
+            <span class="rounded-full bg-blue-500/15 px-2.5 py-1 text-[11px] font-medium text-blue-300">Hot</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            Gadgets, electronics, accessories, desk upgrades, and high-demand devices.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
-        <a href="/catalog/home" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">Home</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">Comfort, storage, organization, and practical daily-use home products.</p>
+        <a href="/catalog/home" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">Home</div>
+            <span class="rounded-full bg-green-500/15 px-2.5 py-1 text-[11px] font-medium text-green-300">Useful</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            Comfort, storage, organization, and practical daily-use home products.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
-        <a href="/catalog/kitchen" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">Kitchen</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">Cooking tools, appliances, cookware, and frequently bought kitchen essentials.</p>
+        <a href="/catalog/kitchen" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">Kitchen</div>
+            <span class="rounded-full bg-red-500/15 px-2.5 py-1 text-[11px] font-medium text-red-300">Popular</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            Cooking tools, appliances, cookware, and frequently bought kitchen essentials.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
-        <a href="/catalog/beauty" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">Beauty</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">Skincare, self-care, cosmetics, and frequently purchased beauty products.</p>
+        <a href="/catalog/beauty" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">Beauty</div>
+            <span class="rounded-full bg-pink-500/15 px-2.5 py-1 text-[11px] font-medium text-pink-300">Trending</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            Skincare, self-care, cosmetics, and frequently purchased beauty products.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
-        <a href="/catalog/health" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">Health</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">Wellness, support products, and everyday health-related best sellers.</p>
+        <a href="/catalog/health" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">Health</div>
+            <span class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-medium text-emerald-300">Steady</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            Wellness, daily support products, and strong-demand health essentials.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
-        <a href="/catalog/sports" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">Sports</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">Fitness gear, active products, and frequently bought sports essentials.</p>
+        <a href="/catalog/sports" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">Sports</div>
+            <span class="rounded-full bg-orange-500/15 px-2.5 py-1 text-[11px] font-medium text-orange-300">Active</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            Fitness gear, active products, and frequently bought sports essentials.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
-        <a href="/catalog/travel" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">Travel</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">Travel gear, luggage, organizers, and accessories with steady demand.</p>
+        <a href="/catalog/travel" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">Travel</div>
+            <span class="rounded-full bg-cyan-500/15 px-2.5 py-1 text-[11px] font-medium text-cyan-300">Useful</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            Travel gear, luggage, organizers, and accessories with steady demand.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
-        <a href="/catalog/fashion" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">Fashion</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">A denser category combining men, women, and jewelry products.</p>
+        <a href="/catalog/fashion" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">Fashion</div>
+            <span class="rounded-full bg-fuchsia-500/15 px-2.5 py-1 text-[11px] font-medium text-fuchsia-300">Dense</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            A stronger category combining men, women, and jewelry products.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
-        <a href="/catalog/family" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">Family</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">A stronger family category combining baby and pet-related products.</p>
+        <a href="/catalog/family" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">Family</div>
+            <span class="rounded-full bg-violet-500/15 px-2.5 py-1 text-[11px] font-medium text-violet-300">Practical</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            A stronger family category combining baby and pet-related products.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
-        <a href="/catalog/general" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-600 hover:shadow-xl hover:shadow-black/20">
-          <div class="text-sm font-semibold text-white">General</div>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">Mixed evergreen products with strong buying frequency across Amazon.</p>
+        <a href="/catalog/general" class="group rounded-[2rem] border border-zinc-800 bg-zinc-900 p-5 transition hover:scale-[1.02] hover:border-zinc-600">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold text-white">General</div>
+            <span class="rounded-full bg-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-200">Mixed</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-zinc-400">
+            Mixed evergreen products with strong buying frequency across Amazon.
+          </p>
           <div class="mt-4 text-xs font-semibold text-green-400">Explore →</div>
         </a>
 
       </div>
     </section>
 
-    <section class="mt-10 grid gap-4 lg:grid-cols-2">
+    <section class="mt-10 grid gap-4 lg:grid-cols-3">
       <div class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6">
-        <h2 class="text-lg font-semibold text-white">Why these categories are better</h2>
+        <h2 class="text-lg font-semibold text-white">Why these categories work better</h2>
         <p class="mt-3 text-sm leading-7 text-zinc-300">
-          The catalog now focuses on fewer, stronger categories with more products in each one. This makes category pages more useful for users and stronger for long-term search visibility.
+          The catalog now focuses on fewer, stronger categories with more products in each one. That makes category pages more useful for users and stronger for long-term search visibility.
         </p>
       </div>
 
       <div class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6">
         <h2 class="text-lg font-semibold text-white">What you will find inside</h2>
         <p class="mt-3 text-sm leading-7 text-zinc-300">
-          Each category is designed to surface frequently bought evergreen products first, while category pages can also include relevant live deals when available.
+          Each category is built around frequently bought evergreen products first, while category pages can also include relevant live deals when available.
+        </p>
+      </div>
+
+      <div class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6">
+        <h2 class="text-lg font-semibold text-white">Best way to use TrendPulse</h2>
+        <p class="mt-3 text-sm leading-7 text-zinc-300">
+          Use the swipe homepage for fast discovery, the deals page for short-term opportunities, and the catalog for deeper evergreen browsing by theme.
         </p>
       </div>
     </section>
@@ -208,4 +276,4 @@
   </nav>
 
 </body>
-          </html>
+      </html>
