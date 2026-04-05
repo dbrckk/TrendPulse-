@@ -8,167 +8,155 @@
 
   <meta
     name="description"
-    content="Swipe Amazon deals like Tinder. Discover trending products instantly and buy fast."
+    content="Swipe Amazon deals, trending products, and high-demand finds on TrendPulse. Fast mobile-first product discovery."
   />
 
+  <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://www.trend-pulse.shop/" />
 
+  <meta property="og:type" content="website" />
   <meta property="og:title" content="TrendPulse | Swipe Amazon Deals" />
-  <meta property="og:description" content="Swipe Amazon deals instantly." />
+  <meta
+    property="og:description"
+    content="Swipe Amazon deals and discover trending products instantly."
+  />
   <meta property="og:url" content="https://www.trend-pulse.shop/" />
   <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TrendPulse | Swipe Amazon Deals" />
+  <meta
+    name="twitter:description"
+    content="Swipe Amazon deals and discover trending products instantly."
+  />
+  <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
 
   <meta name="theme-color" content="#09090b" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- FORCE REFRESH -->
-  <script src="/assets/js/supabase.js?v=20260404-3" defer></script>
-  <script src="/assets/js/trendpulse-ui.js?v=20260404-3" defer></script>
-  <script src="/assets/js/swipe.js?v=20260404-3" defer></script>
+  <script src="/assets/js/supabase.js?v=20260405-1" defer></script>
+  <script src="/assets/js/trendpulse-ui.js?v=20260405-1" defer></script>
+  <script src="/assets/js/swipe.js?v=20260405-1" defer></script>
 
   <style>
     body {
       overscroll-behavior: none;
+    }
+
+    .glass {
+      background: rgba(24, 24, 27, 0.72);
+      backdrop-filter: blur(12px);
     }
   </style>
 </head>
 
 <body class="bg-black text-white antialiased">
 
-  <!-- HEADER -->
   <header class="sticky top-0 z-50 border-b border-zinc-800 bg-black/90 backdrop-blur">
     <div class="mx-auto flex max-w-md items-center justify-between px-4 py-4">
-
-      <a href="/" class="text-2xl font-bold tracking-tight">
-        TrendPulse
-      </a>
+      <a href="/" class="text-2xl font-bold tracking-tight text-white">TrendPulse</a>
 
       <div class="flex gap-2">
-        <a href="/catalog.html" class="px-4 py-2 border border-zinc-700 rounded-full text-sm hover:border-zinc-500">
+        <a
+          href="/catalog"
+          class="rounded-full border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition hover:border-zinc-500 hover:text-white"
+        >
           Catalog
         </a>
-
-        <a href="/deals.html" class="px-4 py-2 border border-zinc-700 rounded-full text-sm hover:border-zinc-500">
+        <a
+          href="/deals"
+          class="rounded-full border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition hover:border-zinc-500 hover:text-white"
+        >
           Deals
         </a>
       </div>
-
     </div>
   </header>
 
-  <!-- MAIN -->
-  <main class="mx-auto max-w-md px-4 pt-5 pb-28">
+  <main class="mx-auto max-w-md px-4 pb-28 pt-5">
 
-    <!-- INTRO -->
     <section class="mb-5 rounded-3xl border border-zinc-800 bg-zinc-950/80 p-4">
-      <p class="text-xs uppercase tracking-widest text-zinc-400">
-        Swipe Mode
-      </p>
+      <p class="text-xs uppercase tracking-[0.22em] text-zinc-400">Swipe Mode</p>
 
-      <h1 class="mt-2 text-3xl font-bold">
-        Discover Amazon deals instantly
+      <h1 class="mt-2 text-3xl font-bold tracking-tight text-white">
+        Discover products people are buying right now
       </h1>
 
-      <p class="mt-2 text-sm text-zinc-300">
-        Swipe right to buy. Swipe left to skip.
+      <p class="mt-2 text-sm leading-6 text-zinc-300">
+        Swipe left to skip. Swipe right or tap buy to open Amazon.
       </p>
 
-      <p class="mt-3 text-xs text-zinc-500">
-        Affiliate disclosure: we may earn commissions.
+      <div class="mt-4 flex flex-wrap gap-2">
+        <span class="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-300">Trending</span>
+        <span class="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-300">Live Deals</span>
+        <span class="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-300">Best Sellers</span>
+      </div>
+
+      <p class="mt-4 text-xs text-zinc-500">
+        Affiliate disclosure: TrendPulse may earn from qualifying purchases.
       </p>
     </section>
 
-    <!-- SWIPE STACK -->
     <section class="relative">
-
-      <!-- EMPTY -->
       <div
         id="swipe-empty-state"
         class="hidden rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 text-center"
       >
-        <p class="text-sm text-zinc-300">No more deals.</p>
-
+        <p class="text-sm font-medium text-zinc-300">No more products right now.</p>
         <button
           id="reset-disliked-deals"
-          class="mt-4 px-5 py-3 bg-white text-black rounded-full text-sm font-semibold"
+          class="mt-4 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black"
         >
-          Show again
+          Show products again
         </button>
       </div>
 
-      <!-- STACK -->
-      <div id="swipe-stack" class="relative h-[560px]"></div>
-
+      <div id="swipe-stack" class="relative h-[620px]"></div>
     </section>
 
-    <!-- BUTTONS -->
     <section class="mt-5 grid grid-cols-2 gap-3">
-
       <button
         id="swipe-dislike-btn"
-        class="py-4 rounded-full border border-red-500/40 bg-red-500/10 text-red-300 font-semibold"
+        class="rounded-full border border-red-500/40 bg-red-500/10 px-5 py-4 text-base font-semibold text-red-300"
       >
         Dislike
       </button>
 
       <button
         id="swipe-like-btn"
-        class="py-4 rounded-full bg-green-500 text-black font-semibold"
+        class="rounded-full bg-green-500 px-5 py-4 text-base font-semibold text-black"
       >
         Buy
       </button>
-
     </section>
 
-    <!-- QUICK LINKS -->
     <section class="mt-6 rounded-3xl border border-zinc-800 bg-zinc-950/80 p-4">
-
-      <h2 class="text-lg font-semibold">Explore</h2>
-
-      <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-
-        <a href="/catalog.html" class="p-4 border border-zinc-800 rounded-2xl hover:border-zinc-600">
-          Catalog
-        </a>
-
-        <a href="/cheap-tech.html" class="p-4 border border-zinc-800 rounded-2xl hover:border-zinc-600">
-          Cheap Tech
-        </a>
-
-        <a href="/best-gifts.html" class="p-4 border border-zinc-800 rounded-2xl hover:border-zinc-600">
-          Best Gifts
-        </a>
-
-        <a href="/best-sellers.html" class="p-4 border border-zinc-800 rounded-2xl hover:border-zinc-600">
-          Best Sellers
-        </a>
-
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-zinc-400">Explore</p>
+          <h2 class="mt-1 text-lg font-semibold text-white">More ways to browse</h2>
+        </div>
       </div>
 
+      <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <a href="/deals" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Live Deals</a>
+        <a href="/catalog" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Catalog</a>
+        <a href="/collections/best-tech-products" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Best Tech</a>
+        <a href="/collections/cheap-home-products" class="rounded-2xl border border-zinc-800 p-4 text-zinc-300 transition hover:border-zinc-600 hover:text-white">Cheap Home</a>
+      </div>
     </section>
 
   </main>
 
-  <!-- MOBILE NAV -->
-  <nav class="fixed bottom-0 left-0 right-0 border-t border-zinc-800 bg-black md:hidden">
-    <div class="grid grid-cols-3 text-sm">
-
-      <a href="/" class="py-3 text-center text-white">
-        Home
-      </a>
-
-      <a href="/deals.html" class="py-3 text-center text-zinc-400">
-        Deals
-      </a>
-
-      <a href="/catalog.html" class="py-3 text-center text-zinc-400">
-        Catalog
-      </a>
-
+  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-black/95 backdrop-blur md:hidden">
+    <div class="mx-auto grid max-w-md grid-cols-3">
+      <a href="/" class="py-3 text-center text-sm text-white">Home</a>
+      <a href="/deals" class="py-3 text-center text-sm text-zinc-400">Deals</a>
+      <a href="/catalog" class="py-3 text-center text-sm text-zinc-400">Catalog</a>
     </div>
   </nav>
 
 </body>
-      </html>
+</html>
