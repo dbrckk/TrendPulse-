@@ -57,6 +57,7 @@
     );
 
     window.TRENDPULSE_CONFIG = {
+      siteUrl: "https://www.trend-pulse.shop",
       affiliateTag: "Drackk-20"
     };
 
