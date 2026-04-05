@@ -332,37 +332,6 @@ function computeCatalogPriority(row) {
   );
 }
 
-function buildCatalogSourceRow(row) {
-  const asin = normalizeText(row.asin);
-  const name = normalizeText(row.name);
-
-  if (!asin || !name) return null;
-  if (row.is_active === false) return null;
-
-  const category = normalizeCategory(row.category, row);
-
-  return {
-    asin,
-    source_kind: "catalog",
-    category,
-    source_name: "catalog-seed",
-    source_rank: 0,
-    is_active: true,
-    last_seen_at: new Date().toISOString(),
-    published_at: row.published_at || null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    _priority_score: computeCatalogPriority(row),
-    _name: name,
-    _slug: normalizeText(row.slug) || slugify(name) || asin.toLowerCase(),
-    _base_category: category,
-    _all_candidate_categories: unique([
-      category,
-      ...getSupplementalCategories(row, category)
-    ])
-  };
-}
-
 function getSupplementalCategories(row, baseCategory) {
   const haystack = getHaystack(row);
   const list = [];
@@ -400,6 +369,37 @@ function getSupplementalCategories(row, baseCategory) {
   }
 
   return unique(list.filter((cat) => TARGET_CATEGORIES.includes(cat)));
+}
+
+function buildCatalogSourceRow(row) {
+  const asin = normalizeText(row.asin);
+  const name = normalizeText(row.name);
+
+  if (!asin || !name) return null;
+  if (row.is_active === false) return null;
+
+  const category = normalizeCategory(row.category, row);
+
+  return {
+    asin,
+    source_kind: "catalog",
+    category,
+    source_name: "catalog-seed",
+    source_rank: 0,
+    is_active: true,
+    last_seen_at: new Date().toISOString(),
+    published_at: row.published_at || null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    _priority_score: computeCatalogPriority(row),
+    _name: name,
+    _slug: normalizeText(row.slug) || slugify(name) || asin.toLowerCase(),
+    _base_category: category,
+    _all_candidate_categories: unique([
+      category,
+      ...getSupplementalCategories(row, category)
+    ])
+  };
 }
 
 async function fetchAllProducts() {
