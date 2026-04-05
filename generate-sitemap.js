@@ -1,20 +1,26 @@
+#!/usr/bin/env node
+
 import fs from "fs/promises";
 import { createClient } from "@supabase/supabase-js";
 
 const SITE_URL = "https://www.trend-pulse.shop";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: { persistSession: false }
+});
 
 const staticUrls = [
   { loc: "/", changefreq: "daily", priority: "1.0" },
   { loc: "/deals", changefreq: "hourly", priority: "0.9" },
-  { loc: "/catalog", changefreq: "daily", priority: "0.9" },
-  { loc: "/best-sellers.html", changefreq: "daily", priority: "0.7" },
-  { loc: "/best-gifts.html", changefreq: "daily", priority: "0.7" },
-  { loc: "/cheap-tech.html", changefreq: "daily", priority: "0.7" }
+  { loc: "/catalog", changefreq: "daily", priority: "0.9" }
 ];
 
 const categories = [
@@ -60,26 +66,94 @@ function isValidAsin(value = "") {
   return /^[A-Z0-9]{10}$/i.test(String(value).trim());
 }
 
-async function fetchProducts() {
-  const { data, error } = await supabase
-    .from("products")
-    .select("asin, slug, updated_at")
-    .limit(5000);
+function normalizeCategory(value = "") {
+  const v = String(value || "").trim().toLowerCase();
 
-  if (error) throw error;
-  return data || [];
+  if (["men", "women", "jewelry", "jewellery", "shoes", "watches"].includes(v)) {
+    return "fashion";
+  }
+
+  if (["baby", "kids", "pets", "toys"].includes(v)) {
+    return "family";
+  }
+
+  if (categories.includes(v)) {
+    return v;
+  }
+
+  return "general";
+}
+
+function dedupeByLoc(items) {
+  const seen = new Set();
+  const out = [];
+
+  for (const item of items) {
+    if (!item?.loc) continue;
+    if (seen.has(item.loc)) continue;
+    seen.add(item.loc);
+    out.push(item);
+  }
+
+  return out;
+}
+
+async function fetchProducts() {
+  const pageSize = 1000;
+  let from = 0;
+  const all = [];
+
+  while (true) {
+    const to = from + pageSize - 1;
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("asin, slug, updated_at, is_active, category")
+      .range(from, to);
+
+    if (error) {
+      throw new Error(`Failed to fetch products: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) break;
+
+    all.push(...data);
+
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+
+  return all;
 }
 
 async function fetchCatalogSourceAsins() {
-  const { data, error } = await supabase
-    .from("product_sources")
-    .select("asin")
-    .eq("source_kind", "catalog")
-    .eq("is_active", true)
-    .limit(10000);
+  const pageSize = 1000;
+  let from = 0;
+  const all = [];
 
-  if (error) throw error;
-  return new Set((data || []).map((row) => row.asin));
+  while (true) {
+    const to = from + pageSize - 1;
+
+    const { data, error } = await supabase
+      .from("product_sources")
+      .select("asin, category, is_active")
+      .eq("source_kind", "catalog")
+      .eq("is_active", true)
+      .range(from, to);
+
+    if (error) {
+      throw new Error(`Failed to fetch catalog sources: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) break;
+
+    all.push(...data);
+
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+
+  return all;
 }
 
 async function fetchProgrammaticPages() {
@@ -92,60 +166,91 @@ async function fetchProgrammaticPages() {
   }
 }
 
-async function main() {
-  const [productRows, catalogAsins, programmaticPages] = await Promise.all([
-    fetchProducts(),
-    fetchCatalogSourceAsins(),
-    fetchProgrammaticPages()
-  ]);
-
-  const categoryUrls = categories.map((category) => ({
+function buildCategoryUrls() {
+  return categories.map((category) => ({
     loc: toAbsoluteUrl(`/catalog/${encodeURIComponent(category)}`),
     changefreq: "daily",
     priority: "0.8"
   }));
+}
 
-  const programmaticUrls = programmaticPages
+function buildProgrammaticUrls(programmaticPages) {
+  return (programmaticPages || [])
     .filter((page) => page?.slug)
     .map((page) => ({
       loc: toAbsoluteUrl(`/collections/${encodeURIComponent(page.slug)}`),
       changefreq: "daily",
       priority: "0.7"
     }));
+}
 
-  const dedupe = new Set();
+function buildProductUrls(products, catalogSources) {
+  const catalogAsinSet = new Set((catalogSources || []).map((row) => String(row.asin || "").trim()).filter(Boolean));
+  const byAsinCategory = new Map();
 
-  const productUrls = productRows
-    .filter((product) => product?.asin && catalogAsins.has(product.asin))
-    .map((product) => {
-      const cleanSlug = String(product.slug || "").trim();
-      const cleanAsin = String(product.asin || "").trim().toUpperCase();
+  for (const row of catalogSources || []) {
+    const asin = String(row.asin || "").trim();
+    if (!asin) continue;
+    byAsinCategory.set(asin, normalizeCategory(row.category));
+  }
 
-      const productPath =
-        cleanSlug && isValidSlug(cleanSlug)
-          ? `/product/${encodeURIComponent(cleanSlug)}`
-          : isValidAsin(cleanAsin)
-            ? `/product/${encodeURIComponent(cleanAsin)}`
-            : null;
+  const urls = [];
 
-      if (!productPath) return null;
+  for (const product of products || []) {
+    const asin = String(product?.asin || "").trim().toUpperCase();
+    const slug = String(product?.slug || "").trim();
 
-      const loc = toAbsoluteUrl(productPath);
-      if (dedupe.has(loc)) return null;
-      dedupe.add(loc);
+    if (!asin || !catalogAsinSet.has(asin)) continue;
+    if (product?.is_active === false) continue;
 
-      return {
-        loc,
-        changefreq: "weekly",
-        priority: "0.6",
-        lastmod: product.updated_at
-          ? new Date(product.updated_at).toISOString()
-          : undefined
-      };
-    })
-    .filter(Boolean);
+    let productPath = null;
 
-  const allUrls = [
+    if (slug && isValidSlug(slug)) {
+      productPath = `/product/${encodeURIComponent(slug)}`;
+    } else if (isValidAsin(asin)) {
+      productPath = `/product/${encodeURIComponent(asin)}`;
+    }
+
+    if (!productPath) continue;
+
+    urls.push({
+      loc: toAbsoluteUrl(productPath),
+      changefreq: "weekly",
+      priority: "0.6",
+      lastmod: product.updated_at
+        ? new Date(product.updated_at).toISOString()
+        : undefined
+    });
+
+    const category = byAsinCategory.get(asin) || normalizeCategory(product.category);
+    urls.push({
+      loc: toAbsoluteUrl(`/catalog/${encodeURIComponent(category)}`),
+      changefreq: "daily",
+      priority: "0.8"
+    });
+  }
+
+  return urls;
+}
+
+async function main() {
+  console.log("[generate-sitemap] starting...");
+
+  const [products, catalogSources, programmaticPages] = await Promise.all([
+    fetchProducts(),
+    fetchCatalogSourceAsins(),
+    fetchProgrammaticPages()
+  ]);
+
+  console.log(`[generate-sitemap] fetched ${products.length} products`);
+  console.log(`[generate-sitemap] fetched ${catalogSources.length} catalog sources`);
+  console.log(`[generate-sitemap] loaded ${programmaticPages.length} programmatic pages`);
+
+  const categoryUrls = buildCategoryUrls();
+  const programmaticUrls = buildProgrammaticUrls(programmaticPages);
+  const productUrls = buildProductUrls(products, catalogSources);
+
+  const allUrls = dedupeByLoc([
     ...staticUrls.map((item) => ({
       ...item,
       loc: toAbsoluteUrl(item.loc)
@@ -153,7 +258,7 @@ async function main() {
     ...categoryUrls,
     ...programmaticUrls,
     ...productUrls
-  ];
+  ]);
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -162,6 +267,7 @@ ${allUrls.map(buildUrlNode).join("\n")}
 `;
 
   await fs.writeFile("sitemap.xml", xml, "utf-8");
+
   console.log(`[generate-sitemap] wrote ${allUrls.length} URLs to sitemap.xml`);
 }
 
