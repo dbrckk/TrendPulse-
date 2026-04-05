@@ -1,281 +1,277 @@
-// assets/js/trendpulse-data.js
+(function () {
+  const PAGE_SIZE = 100;
 
-window.TRENDPULSE_CONFIG = {
-  siteUrl: "https://www.trend-pulse.shop",
-  affiliateTag: "Drackk-20"
-};
-
-window.TRENDPULSE_DEALS = [
-  {
-    asin: "portable-blender-usb",
-    title: "Portable Blender USB Rechargeable",
-    image: "",
-    price: 19.99,
-    badge: "Trending Deal",
-    category: "tech",
-    description: "Compact personal blender for smoothies, shakes, and travel use.",
-    best_for: "Travel",
-    affiliate_link: "https://www.amazon.com/s?k=portable+blender+usb+rechargeable&tag=Drackk-20",
-    quick_points: [
-      "USB rechargeable",
-      "Portable size",
-      "Easy smoothie prep"
-    ],
-    tags: ["blender", "travel", "kitchen", "usb"]
-  },
-  {
-    asin: "led-galaxy-projector",
-    title: "LED Galaxy Projector Light",
-    image: "",
-    price: 14.99,
-    badge: "Best Gift",
-    category: "home",
-    description: "Atmosphere projector for bedrooms, desks, and cozy night setups.",
-    best_for: "Relax",
-    affiliate_link: "https://www.amazon.com/s?k=led+galaxy+projector+light&tag=Drackk-20",
-    quick_points: [
-      "Mood lighting",
-      "Remote control",
-      "Gift-friendly"
-    ],
-    tags: ["projector", "light", "gift", "home"]
-  },
-  {
-    asin: "magnetic-phone-holder-car",
-    title: "Magnetic Phone Holder Car Mount",
-    image: "",
-    price: 9.99,
-    badge: "Cheap Tech",
-    category: "tech",
-    description: "Simple car phone mount for hands-free driving and easy dashboard setup.",
-    best_for: "Car",
-    affiliate_link: "https://www.amazon.com/s?k=magnetic+phone+holder+car+mount&tag=Drackk-20",
-    quick_points: [
-      "Fast mount setup",
-      "Strong hold",
-      "Useful daily"
-    ],
-    tags: ["car", "phone", "holder", "tech"]
-  },
-  {
-    asin: "cozy-fleece-blanket",
-    title: "Cozy Fleece Blanket",
-    image: "",
-    price: 24.99,
-    badge: "Home Find",
-    category: "home",
-    description: "Soft fleece throw blanket for couch, bed, and comfort-focused gifting.",
-    best_for: "Cozy",
-    affiliate_link: "https://www.amazon.com/s?k=cozy+fleece+blanket&tag=Drackk-20",
-    quick_points: [
-      "Soft feel",
-      "Warm and cozy",
-      "Easy gift pick"
-    ],
-    tags: ["blanket", "home", "cozy", "gift"]
-  },
-  {
-    asin: "mini-ring-light-phone",
-    title: "Mini Ring Light for Phone",
-    image: "",
-    price: 12.99,
-    badge: "Creator Pick",
-    category: "tech",
-    description: "Compact ring light for selfies, short videos, and better mobile lighting.",
-    best_for: "Content",
-    affiliate_link: "https://www.amazon.com/s?k=mini+ring+light+for+phone&tag=Drackk-20",
-    quick_points: [
-      "Better selfies",
-      "Pocket friendly",
-      "Quick setup"
-    ],
-    tags: ["ring light", "creator", "phone", "tech"]
-  },
-  {
-    asin: "desk-cable-organizer",
-    title: "Desk Cable Organizer",
-    image: "",
-    price: 8.99,
-    badge: "Useful Tech",
-    category: "tech",
-    description: "Simple cable organizer to clean up desk clutter and charging cables.",
-    best_for: "Desk",
-    affiliate_link: "https://www.amazon.com/s?k=desk+cable+organizer&tag=Drackk-20",
-    quick_points: [
-      "Cleaner desk",
-      "Low-cost upgrade",
-      "Fast setup"
-    ],
-    tags: ["desk", "office", "organizer", "tech"]
-  },
-  {
-    asin: "portable-tripod-phone",
-    title: "Portable Phone Tripod",
-    image: "",
-    price: 18.99,
-    badge: "Creator Pick",
-    category: "tech",
-    description: "Adjustable phone tripod for videos, calls, and simple content creation.",
-    best_for: "Creator",
-    affiliate_link: "https://www.amazon.com/s?k=portable+phone+tripod&tag=Drackk-20",
-    quick_points: [
-      "Stable shots",
-      "Travel friendly",
-      "Good for creators"
-    ],
-    tags: ["tripod", "phone", "creator", "travel"]
-  },
-  {
-    asin: "usb-desk-lamp",
-    title: "USB Desk Lamp",
-    image: "",
-    price: 22.99,
-    badge: "Smart Utility",
-    category: "tech",
-    description: "Desk lamp with compact footprint for work, gaming, and night setups.",
-    best_for: "Desk",
-    affiliate_link: "https://www.amazon.com/s?k=usb+desk+lamp&tag=Drackk-20",
-    quick_points: [
-      "Desk upgrade",
-      "Compact design",
-      "Useful every day"
-    ],
-    tags: ["lamp", "desk", "office", "tech"]
-  },
-  {
-    asin: "travel-bottle",
-    title: "Insulated Water Bottle",
-    image: "",
-    price: 17.99,
-    badge: "Popular Pick",
-    category: "home",
-    description: "Reusable insulated bottle for commute, gym, outdoor use, and travel.",
-    best_for: "Hydration",
-    affiliate_link: "https://www.amazon.com/s?k=insulated+water+bottle&tag=Drackk-20",
-    quick_points: [
-      "Everyday useful",
-      "Travel friendly",
-      "Broad appeal"
-    ],
-    tags: ["water", "travel", "sports", "hydration"]
-  },
-  {
-    asin: "memory-photo-gift",
-    title: "Custom Photo Gift Idea",
-    image: "",
-    price: 16.99,
-    badge: "Giftable Pick",
-    category: "gifts",
-    description: "Sentimental gift-style idea for birthdays, couples, and memory keepsakes.",
-    best_for: "Memory Gift",
-    affiliate_link: "https://www.amazon.com/s?k=custom+photo+gift&tag=Drackk-20",
-    quick_points: [
-      "Sentimental pick",
-      "High gift intent",
-      "Easy to understand"
-    ],
-    tags: ["gift", "photo", "memory", "women"]
-  },
-  {
-    asin: "sleep-mask",
-    title: "Comfort Sleep Mask",
-    image: "",
-    price: 11.99,
-    badge: "Budget Find",
-    category: "home",
-    description: "Simple sleep accessory for home, flights, and better rest routines.",
-    best_for: "Sleep",
-    affiliate_link: "https://www.amazon.com/s?k=comfort+sleep+mask&tag=Drackk-20",
-    quick_points: [
-      "Sleep support",
-      "Travel useful",
-      "Budget pick"
-    ],
-    tags: ["sleep", "travel", "comfort", "wellness"]
-  },
-  {
-    asin: "kitchen-gadget-set",
-    title: "Kitchen Gadget Set",
-    image: "",
-    price: 27.99,
-    badge: "Strong Value",
-    category: "kitchen",
-    description: "Useful kitchen tool bundle for cooking, gifting, and practical home upgrades.",
-    best_for: "Kitchen",
-    affiliate_link: "https://www.amazon.com/s?k=kitchen+gadget+set&tag=Drackk-20",
-    quick_points: [
-      "Practical bundle",
-      "Useful daily",
-      "Good value"
-    ],
-    tags: ["kitchen", "cooking", "home", "gift"]
-  },
-  {
-    asin: "air-fryer-liners",
-    title: "Air Fryer Paper Liners",
-    image: "",
-    price: 9.49,
-    badge: "Budget Find",
-    category: "kitchen",
-    description: "Low-cost kitchen accessory that makes cleanup easier for air fryer users.",
-    best_for: "Kitchen",
-    affiliate_link: "https://www.amazon.com/s?k=air+fryer+paper+liners&tag=Drackk-20",
-    quick_points: [
-      "Easy cleanup",
-      "Low price",
-      "Simple utility"
-    ],
-    tags: ["air fryer", "kitchen", "budget", "useful"]
-  },
-  {
-    asin: "beauty-face-roller",
-    title: "Face Roller Beauty Tool",
-    image: "",
-    price: 13.99,
-    badge: "Giftable Pick",
-    category: "gifts",
-    description: "Beauty-style self-care tool with strong gift appeal and simple use case.",
-    best_for: "Self Care",
-    affiliate_link: "https://www.amazon.com/s?k=face+roller+beauty+tool&tag=Drackk-20",
-    quick_points: [
-      "Gift-friendly",
-      "Easy use",
-      "Beauty angle"
-    ],
-    tags: ["beauty", "self care", "gift", "women"]
-  },
-  {
-    asin: "travel-organizer-pouch",
-    title: "Travel Organizer Pouch",
-    image: "",
-    price: 15.99,
-    badge: "Popular Pick",
-    category: "tech",
-    description: "Travel organizer for chargers, accessories, cables, and small tech items.",
-    best_for: "Travel",
-    affiliate_link: "https://www.amazon.com/s?k=travel+organizer+pouch&tag=Drackk-20",
-    quick_points: [
-      "Travel ready",
-      "Organizes cables",
-      "Useful daily"
-    ],
-    tags: ["travel", "organizer", "tech", "cables"]
-  },
-  {
-    asin: "phone-wallet-stand",
-    title: "Phone Wallet Stand",
-    image: "",
-    price: 10.99,
-    badge: "Useful Tech",
-    category: "tech",
-    description: "Slim phone accessory that adds grip, simple storage, and viewing support.",
-    best_for: "Phone",
-    affiliate_link: "https://www.amazon.com/s?k=phone+wallet+stand&tag=Drackk-20",
-    quick_points: [
-      "Phone utility",
-      "Compact design",
-      "Low-cost add-on"
-    ],
-    tags: ["phone", "wallet", "stand", "tech"]
+  function ensureClient() {
+    if (!window.supabaseClient) {
+      throw new Error("Supabase client is not initialized");
+    }
+    return window.supabaseClient;
   }
-];
+
+  function safeNumber(value, fallback = 0) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function normalizeText(value) {
+    return String(value || "").trim();
+  }
+
+  function normalizeCategory(value) {
+    const v = normalizeText(value).toLowerCase();
+
+    if (["men", "women", "jewelry", "jewellery", "shoes", "watches"].includes(v)) return "fashion";
+    if (["baby", "kids", "pets", "toys"].includes(v)) return "family";
+    if (["electronics", "gadgets", "gaming", "computer", "computers", "audio", "phone", "phones"].includes(v)) return "tech";
+    if (["furniture", "decor", "storage", "household", "office"].includes(v)) return "home";
+    if (["cooking", "cookware", "appliances"].includes(v)) return "kitchen";
+    if (["skincare", "makeup", "cosmetics"].includes(v)) return "beauty";
+    if (["fitness", "wellness", "supplements"].includes(v)) return "health";
+    if (["outdoor", "exercise", "training"].includes(v)) return "sports";
+    if (["luggage", "bags", "travel-accessories"].includes(v)) return "travel";
+
+    return v || "general";
+  }
+
+  function proxyImage(url) {
+    const raw = normalizeText(url);
+    if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
+      return "https://via.placeholder.com/600x600?text=No+Image";
+    }
+    return raw;
+  }
+
+  function sanitizeProduct(row = {}) {
+    const price = safeNumber(row.price, 0);
+    const originalPrice =
+      safeNumber(row.original_price, 0) > 0
+        ? safeNumber(row.original_price, 0)
+        : price > 0
+          ? Number((price * 1.5).toFixed(2))
+          : 0;
+
+    return {
+      id: row.id || null,
+      asin: normalizeText(row.asin),
+      slug: normalizeText(row.slug) || normalizeText(row.asin),
+      name: normalizeText(row.name) || normalizeText(row.title) || "Amazon Product",
+      brand: normalizeText(row.brand),
+      tagline: normalizeText(row.tagline),
+      description: normalizeText(row.description),
+      short_description: normalizeText(row.short_description),
+      image_url: proxyImage(row.image_url || row.image),
+      gallery_urls: Array.isArray(row.gallery_urls) ? row.gallery_urls : [],
+      category: normalizeCategory(row.category),
+      subcategory: normalizeText(row.subcategory),
+      source_kind: normalizeText(row.source_kind || row.type || "catalog").toLowerCase(),
+      source_name: normalizeText(row.source_name),
+      source_rank: safeNumber(row.source_rank, 0),
+      price,
+      original_price: originalPrice,
+      discount_percentage: safeNumber(
+        row.discount_percentage ?? row.discount_percent,
+        0
+      ),
+      amazon_rating: safeNumber(row.amazon_rating, 0),
+      amazon_review_count: safeNumber(row.amazon_review_count, 0),
+      score: safeNumber(row.score, 0),
+      priority: safeNumber(row.priority, 0),
+      likes: safeNumber(row.likes, 0),
+      clicks: safeNumber(row.clicks, 0),
+      views: safeNumber(row.views, 0),
+      is_active: row.is_active !== false,
+      affiliate_link: normalizeText(row.affiliate_link || row.affiliate_url || row.amazon_url || row.link || "#"),
+      amazon_url: normalizeText(row.amazon_url || row.affiliate_link || row.link || "#"),
+      created_at: row.created_at || null,
+      updated_at: row.updated_at || null,
+      published_at: row.published_at || null
+    };
+  }
+
+  function dedupeProducts(items) {
+    const seen = new Set();
+    const out = [];
+
+    for (const item of items || []) {
+      const key =
+        normalizeText(item.asin) ||
+        normalizeText(item.slug) ||
+        normalizeText(item.id) ||
+        normalizeText(item.name);
+
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      out.push(item);
+    }
+
+    return out;
+  }
+
+  function computeScore(product) {
+    const reviews = safeNumber(product.amazon_review_count, 0);
+    const rating = safeNumber(product.amazon_rating, 0);
+    const discount = safeNumber(product.discount_percentage, 0);
+    const priority = safeNumber(product.priority, 0);
+    const likes = safeNumber(product.likes, 0);
+    const clicks = safeNumber(product.clicks, 0);
+    const views = safeNumber(product.views, 0);
+    const sourceBonus = product.source_kind === "deal" ? 120 : 0;
+
+    return (
+      reviews * 0.4 +
+      rating * 100 * 0.3 +
+      discount * 10 * 0.2 +
+      priority * 4 +
+      likes * 2 +
+      clicks * 1.5 +
+      views * 0.15 +
+      sourceBonus
+    );
+  }
+
+  async function fetchDeals(limit = PAGE_SIZE) {
+    const client = ensureClient();
+
+    const { data, error } = await client
+      .from("deal_products")
+      .select("*")
+      .limit(limit);
+
+    if (error) {
+      console.error("[trendpulse-data] fetchDeals error:", error);
+      return [];
+    }
+
+    return dedupeProducts(
+      (data || [])
+        .map(sanitizeProduct)
+        .filter((p) => p.is_active !== false)
+        .map((p) => ({ ...p, final_score: computeScore(p) }))
+        .sort((a, b) => b.final_score - a.final_score)
+    );
+  }
+
+  async function fetchCatalogByCategory(category, limit = 60) {
+    const client = ensureClient();
+    const normalized = normalizeCategory(category);
+
+    const { data, error } = await client
+      .from("catalog_category_feed")
+      .select("*")
+      .eq("category", normalized)
+      .limit(limit);
+
+    if (error) {
+      console.error("[trendpulse-data] fetchCatalogByCategory error:", error);
+      return [];
+    }
+
+    return dedupeProducts(
+      (data || [])
+        .map(sanitizeProduct)
+        .filter((p) => p.is_active !== false)
+        .map((p) => ({ ...p, final_score: computeScore(p) }))
+        .sort((a, b) => b.final_score - a.final_score)
+    );
+  }
+
+  async function fetchCatalog(limit = PAGE_SIZE) {
+    const client = ensureClient();
+
+    const { data, error } = await client
+      .from("catalog_category_feed")
+      .select("*")
+      .limit(limit);
+
+    if (error) {
+      console.error("[trendpulse-data] fetchCatalog error:", error);
+      return [];
+    }
+
+    return dedupeProducts(
+      (data || [])
+        .map(sanitizeProduct)
+        .filter((p) => p.is_active !== false)
+        .map((p) => ({ ...p, final_score: computeScore(p) }))
+        .sort((a, b) => b.final_score - a.final_score)
+    );
+  }
+
+  async function fetchTopProducts(limit = PAGE_SIZE) {
+    const client = ensureClient();
+
+    const { data, error } = await client
+      .from("products")
+      .select("*")
+      .limit(limit);
+
+    if (error) {
+      console.error("[trendpulse-data] fetchTopProducts error:", error);
+      return [];
+    }
+
+    return dedupeProducts(
+      (data || [])
+        .map(sanitizeProduct)
+        .filter((p) => p.is_active !== false)
+        .map((p) => ({ ...p, final_score: computeScore(p) }))
+        .sort((a, b) => b.final_score - a.final_score)
+    );
+  }
+
+  async function fetchCollectionProducts(config = {}, limit = 24) {
+    const baseCategory = normalizeCategory(config.category);
+    let items = await fetchCatalogByCategory(baseCategory, 120);
+
+    if (config.filter?.query) {
+      const needle = normalizeText(config.filter.query).toLowerCase();
+      items = items.filter((item) => {
+        const haystack = [
+          item.name,
+          item.brand,
+          item.description,
+          item.short_description,
+          item.category,
+          item.subcategory
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return haystack.includes(needle);
+      });
+    }
+
+    if (config.filter?.maxPrice != null) {
+      const maxPrice = safeNumber(config.filter.maxPrice, 0);
+      items = items.filter((item) => safeNumber(item.price, 999999) <= maxPrice);
+    }
+
+    if (config.sort === "reviews") {
+      items.sort((a, b) => safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count));
+    } else if (config.sort === "rating") {
+      items.sort((a, b) => safeNumber(b.amazon_rating) - safeNumber(a.amazon_rating));
+    } else if (config.sort === "price-low") {
+      items.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
+    } else {
+      items.sort((a, b) => safeNumber(b.final_score) - safeNumber(a.final_score));
+    }
+
+    if (!items.length) {
+      items = await fetchTopProducts(limit);
+    }
+
+    return items.slice(0, limit);
+  }
+
+  window.TrendPulseData = {
+    fetchDeals,
+    fetchCatalog,
+    fetchCatalogByCategory,
+    fetchTopProducts,
+    fetchCollectionProducts,
+    sanitizeProduct,
+    computeScore,
+    normalizeCategory
+  };
+})();
