@@ -25,45 +25,29 @@
   }
 
   function proxyImage(url = "") {
-    const raw = String(url).trim();
+    const raw = String(url || "").trim();
     if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
       return "https://via.placeholder.com/600x600?text=No+Image";
     }
     return raw;
   }
 
-  function productUrl(product) {
-    if (product.slug) return `/product/${encodeURIComponent(product.slug)}`;
-    return `/product/${encodeURIComponent(product.asin || "")}`;
+  function productPath(product) {
+    const slug = String(product?.slug || "").trim();
+    const asin = String(product?.asin || "").trim();
+
+    if (slug) return `/product/${encodeURIComponent(slug)}`;
+    if (asin) return `/product/${encodeURIComponent(asin)}`;
+    return "/catalog";
   }
 
-  function computeScore(product) {
-    const reviews = safeNumber(product.amazon_review_count, 0);
-    const rating = safeNumber(product.amazon_rating, 0);
-    const discount = safeNumber(product.discount_percentage, 20);
-    const priority = safeNumber(product.priority, 0);
-    const sourceBonus = String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
-
+  function amazonLink(product) {
     return (
-      reviews * 0.4 +
-      rating * 100 * 0.3 +
-      discount * 10 * 0.2 +
-      priority * 4 +
-      sourceBonus +
-      Math.random() * 50
+      product?.affiliate_link ||
+      product?.amazon_url ||
+      product?.raw_amazon_url ||
+      "#"
     );
-  }
-
-  function dedupeProducts(items) {
-    const seen = new Set();
-
-    return items.filter((item) => {
-      const key = item.asin || item.slug || item.name;
-      if (!key) return false;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
   }
 
   function normalizeCategory(raw = "") {
@@ -74,13 +58,101 @@
     return value || "general";
   }
 
+  function computeScore(product) {
+    const reviews = safeNumber(product.amazon_review_count, 0);
+    const rating = safeNumber(product.amazon_rating, 0);
+    const discount = safeNumber(
+      product.discount_percentage ?? product.discount_percent,
+      20
+    );
+    const priority = safeNumber(product.priority, 0);
+    const likes = safeNumber(product.likes, 0);
+    const sourceBonus =
+      String(product.source_kind || product.type || "").toLowerCase() === "deal"
+        ? 120
+        : 0;
+
+    return (
+      reviews * 0.4 +
+      rating * 100 * 0.3 +
+      discount * 10 * 0.2 +
+      priority * 4 +
+      likes * 2 +
+      sourceBonus +
+      Math.random() * 25
+    );
+  }
+
+  function dedupeProducts(items) {
+    const seen = new Set();
+
+    return items.filter((item) => {
+      const key =
+        String(item?.asin || "").trim() ||
+        String(item?.slug || "").trim() ||
+        String(item?.id || "").trim() ||
+        String(item?.name || "").trim();
+
+      if (!key) return false;
+      if (seen.has(key)) return false;
+
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function sanitizeProduct(row) {
+    const price = safeNumber(row?.price, 0);
+    const originalPrice =
+      safeNumber(row?.original_price, 0) > 0
+        ? safeNumber(row.original_price, 0)
+        : price > 0
+          ? price * 1.5
+          : 0;
+
+    return {
+      ...row,
+      slug: String(row?.slug || "").trim() || String(row?.asin || "").trim(),
+      asin: String(row?.asin || "").trim(),
+      name: String(row?.name || "").trim() || "Amazon Product",
+      description: row?.description || "",
+      short_description: row?.short_description || "",
+      brand: row?.brand || "",
+      category: normalizeCategory(row?.category),
+      image_url: proxyImage(row?.image_url),
+      price,
+      original_price: originalPrice,
+      discount_percentage: safeNumber(
+        row?.discount_percentage ?? row?.discount_percent,
+        0
+      ),
+      amazon_rating: safeNumber(row?.amazon_rating, 0),
+      amazon_review_count: safeNumber(row?.amazon_review_count, 0),
+      priority: safeNumber(row?.priority, 0),
+      score: safeNumber(row?.score, 0),
+      is_active:
+        typeof row?.is_active === "boolean" ? row.is_active : true,
+      source_kind: row?.source_kind || row?.type || "catalog"
+    };
+  }
+
   function getDiscount(product) {
     const price = safeNumber(product.price, 0);
     const original = safeNumber(product.original_price, 0) || price * 1.5;
+
     if (original > price && price > 0) {
       return Math.max(1, Math.round(((original - price) / original) * 100));
     }
-    return Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
+
+    return Math.max(
+      10,
+      Math.min(
+        65,
+        Math.round(
+          safeNumber(product.discount_percentage ?? product.discount_percent, 18)
+        )
+      )
+    );
   }
 
   function productCard(product) {
@@ -96,65 +168,79 @@
           : 0;
 
     const discount = getDiscount(product);
-    const hook = window.ProductHooks ? window.ProductHooks.getHook(product) : "Popular right now";
-    const urgency = window.ProductHooks ? window.ProductHooks.getUrgency(product) : "Selling fast";
-    const proof = window.ProductHooks ? window.ProductHooks.getSocialProof(product) : "Frequently bought";
-    const priceStory = window.ProductHooks ? window.ProductHooks.getPriceStory(product) : "High-demand product";
+    const hook = window.ProductHooks
+      ? window.ProductHooks.getHook(product)
+      : "Popular right now";
+    const urgency = window.ProductHooks
+      ? window.ProductHooks.getUrgency(product)
+      : "Selling fast";
+    const proof = window.ProductHooks
+      ? window.ProductHooks.getSocialProof(product)
+      : "Frequently bought";
+    const priceStory = window.ProductHooks
+      ? window.ProductHooks.getPriceStory(product)
+      : "High-demand product";
 
     return `
-      <a href="${productUrl(product)}"
-         class="block rounded-2xl border border-zinc-800 bg-zinc-900 p-4 transition hover:scale-[1.02] hover:border-zinc-600">
-        <div class="relative">
-          <img
-            src="${image}"
-            alt="${escapeHtml(product.name || "Product")}"
-            class="h-44 w-full rounded-xl bg-white object-contain"
-            loading="lazy"
-            onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
-          />
+      <article class="block rounded-2xl border border-zinc-800 bg-zinc-900 p-4 transition hover:scale-[1.02] hover:border-zinc-600">
+        <a href="${productPath(product)}" class="block">
+          <div class="relative">
+            <img
+              src="${image}"
+              alt="${escapeHtml(product.name || "Product")}"
+              class="h-44 w-full rounded-xl bg-white object-contain"
+              loading="lazy"
+              onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
+            />
 
-          <div class="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">
-            -${discount}%
+            <div class="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">
+              -${discount}%
+            </div>
+
+            <div class="absolute bottom-2 right-2 rounded-full bg-black/80 px-2 py-1 text-xs text-white">
+              🔥 ${escapeHtml(proof)}
+            </div>
           </div>
 
-          <div class="absolute bottom-2 right-2 rounded-full bg-black/80 px-2 py-1 text-xs text-white">
-            🔥 ${escapeHtml(proof)}
+          <div class="mt-3 text-xs font-semibold text-green-400">
+            ${escapeHtml(hook)}
           </div>
-        </div>
 
-        <div class="mt-3 text-xs font-semibold text-green-400">
-          ${escapeHtml(hook)}
-        </div>
+          <h3 class="mt-2 line-clamp-2 text-sm font-semibold text-white">
+            ${escapeHtml(product.name || "Product")}
+          </h3>
 
-        <h3 class="mt-2 line-clamp-2 text-sm font-semibold text-white">
-          ${escapeHtml(product.name || "Product")}
-        </h3>
-
-        <div class="mt-2 text-xs text-zinc-400">
-          ⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})
-        </div>
-
-        <div class="mt-1 text-xs font-semibold text-red-400">
-          ⚡ ${escapeHtml(urgency)}
-        </div>
-
-        <div class="mt-1 text-xs text-zinc-500">
-          ${escapeHtml(priceStory)}
-        </div>
-
-        <div class="mt-2 flex items-center gap-2">
-          <div class="text-lg font-bold text-green-400">
-            ${formatPrice(price)}
+          <div class="mt-2 text-xs text-zinc-400">
+            ⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})
           </div>
-          <div class="text-xs text-zinc-500 line-through">
-            ${originalPrice > 0 ? formatPrice(originalPrice) : ""}
-          </div>
-        </div>
 
-        <div class="mt-3 rounded-xl bg-green-500 py-2 text-center text-sm font-bold text-black">
+          <div class="mt-1 text-xs font-semibold text-red-400">
+            ⚡ ${escapeHtml(urgency)}
+          </div>
+
+          <div class="mt-1 text-xs text-zinc-500">
+            ${escapeHtml(priceStory)}
+          </div>
+
+          <div class="mt-2 flex items-center gap-2">
+            <div class="text-lg font-bold text-green-400">
+              ${formatPrice(price)}
+            </div>
+            <div class="text-xs text-zinc-500 line-through">
+              ${originalPrice > 0 ? formatPrice(originalPrice) : ""}
+            </div>
+          </div>
+        </a>
+
+        <a
+          href="${escapeHtml(amazonLink(product))}"
+          target="_blank"
+          rel="nofollow sponsored noopener"
+          class="mt-3 block rounded-xl bg-green-500 py-2 text-center text-sm font-bold text-black"
+        >
           View Deal →
-        </div>
-      </a>
+        </a>
+      </article>
     `;
   }
 
@@ -173,11 +259,9 @@
       }
 
       return dedupeProducts(
-        (data || []).map((row) => ({
-          ...row,
-          category: normalizeCategory(row.category),
-          final_score: computeScore(row)
-        }))
+        (data || [])
+          .map(sanitizeProduct)
+          .filter((row) => row.name && row.is_active !== false)
       );
     } catch (error) {
       console.error("Primary product fetch failed:", error);
@@ -192,7 +276,7 @@
       const { data, error } = await window.supabaseClient
         .from("products")
         .select("*")
-        .limit(300);
+        .limit(400);
 
       if (error) {
         console.error("products fallback error:", error);
@@ -200,12 +284,9 @@
       }
 
       return dedupeProducts(
-        (data || []).map((row) => ({
-          ...row,
-          category: normalizeCategory(row.category),
-          source_kind: row.source_kind || "catalog",
-          final_score: computeScore(row)
-        }))
+        (data || [])
+          .map(sanitizeProduct)
+          .filter((row) => row.name && row.is_active !== false)
       );
     } catch (error) {
       console.error("Fallback product fetch failed:", error);
@@ -291,7 +372,8 @@
             p.description,
             p.short_description,
             p.brand,
-            p.category
+            p.category,
+            p.subcategory
           ]
             .filter(Boolean)
             .join(" ")
@@ -310,7 +392,6 @@
       }
 
       items = sortProducts(items, sortMode);
-
       grid.innerHTML = items.map(productCard).join("");
 
       if (results) {
@@ -330,7 +411,11 @@
     fetchProducts,
     productCard,
     computeScore,
-    getDiscount
+    getDiscount,
+    productPath,
+    amazonLink,
+    sanitizeProduct,
+    normalizeCategory
   };
 
   document.addEventListener("DOMContentLoaded", renderDealsPage);
