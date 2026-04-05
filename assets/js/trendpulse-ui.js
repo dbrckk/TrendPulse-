@@ -233,7 +233,44 @@
     `;
   }
 
-  async function fetchFromView(limit = 400) {
+  async function fetchDeals(limit = 400) {
+    const { data, error } = await window.supabaseClient
+      .from("product_sources")
+      .select(`
+        source_kind,
+        category,
+        source_name,
+        source_rank,
+        is_active,
+        last_seen_at,
+        products (*)
+      `)
+      .eq("source_kind", "deal")
+      .eq("is_active", true)
+      .order("source_rank", { ascending: true })
+      .limit(limit);
+
+    if (error) {
+      console.error("deal source fetch error:", error);
+      return [];
+    }
+
+    return dedupeProducts(
+      (data || [])
+        .map((row) => ({
+          ...(row.products || {}),
+          source_kind: row.source_kind,
+          category: row.category || row.products?.category,
+          source_name: row.source_name,
+          source_rank: row.source_rank,
+          is_active: row.is_active
+        }))
+        .map(sanitizeProduct)
+        .filter((row) => row.name && row.is_active !== false)
+    );
+  }
+
+  async function fetchCatalogView(limit = 400) {
     const { data, error } = await window.supabaseClient
       .from("catalog_category_feed")
       .select("*")
@@ -274,7 +311,11 @@
     if (productsPromise) return productsPromise;
 
     productsPromise = (async () => {
-      let items = await fetchFromView(400);
+      let items = await fetchDeals(400);
+
+      if (!items.length) {
+        items = await fetchCatalogView(400);
+      }
 
       if (!items.length) {
         items = await fetchFromProducts(400);
@@ -322,7 +363,8 @@
     const priceFilter = document.getElementById("priceFilter");
     const results = document.getElementById("resultCount");
 
-    const products = await fetchProducts();
+    const dealProducts = await fetchDeals(400);
+    const allProducts = await fetchProducts();
 
     function parseMaxPrice() {
       const value = priceFilter?.value || "all";
@@ -338,7 +380,7 @@
       const maxPrice = parseMaxPrice();
       const sortMode = sortFilter?.value || "score";
 
-      let items = [...products];
+      let items = [...dealProducts];
 
       if (query) {
         items = items.filter((p) => {
@@ -369,7 +411,35 @@
       items = sortProducts(items, sortMode);
 
       if (!items.length) {
-        items = sortProducts(products, "score").slice(0, 24);
+        let fallback = [...allProducts];
+
+        if (query) {
+          fallback = fallback.filter((p) => {
+            const haystack = [
+              p.name,
+              p.description,
+              p.short_description,
+              p.brand,
+              p.category,
+              p.subcategory
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+
+            return haystack.includes(query);
+          });
+        }
+
+        if (category && category !== "all") {
+          fallback = fallback.filter((p) => normalizeCategory(p.category) === category);
+        }
+
+        if (maxPrice != null) {
+          fallback = fallback.filter((p) => safeNumber(p.price, 999999) <= maxPrice);
+        }
+
+        items = sortProducts(fallback, "score").slice(0, 24);
       }
 
       grid.innerHTML = items.map(productCard).join("");
@@ -389,6 +459,7 @@
 
   window.TrendPulseUI = {
     fetchProducts,
+    fetchDeals,
     productCard,
     computeScore,
     getDiscount,
