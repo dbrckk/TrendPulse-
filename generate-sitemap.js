@@ -69,17 +69,9 @@ function isValidAsin(value = "") {
 function normalizeCategory(value = "") {
   const v = String(value || "").trim().toLowerCase();
 
-  if (["men", "women", "jewelry", "jewellery", "shoes", "watches"].includes(v)) {
-    return "fashion";
-  }
-
-  if (["baby", "kids", "pets", "toys"].includes(v)) {
-    return "family";
-  }
-
-  if (categories.includes(v)) {
-    return v;
-  }
+  if (["men", "women", "jewelry", "jewellery", "shoes", "watches"].includes(v)) return "fashion";
+  if (["baby", "kids", "pets", "toys"].includes(v)) return "family";
+  if (categories.includes(v)) return v;
 
   return "general";
 }
@@ -105,20 +97,15 @@ async function fetchProducts() {
 
   while (true) {
     const to = from + pageSize - 1;
-
     const { data, error } = await supabase
       .from("products")
       .select("asin, slug, updated_at, is_active, category")
       .range(from, to);
 
-    if (error) {
-      throw new Error(`Failed to fetch products: ${error.message}`);
-    }
-
+    if (error) throw new Error(`Failed to fetch products: ${error.message}`);
     if (!data || data.length === 0) break;
 
     all.push(...data);
-
     if (data.length < pageSize) break;
     from += pageSize;
   }
@@ -133,7 +120,6 @@ async function fetchCatalogSourceAsins() {
 
   while (true) {
     const to = from + pageSize - 1;
-
     const { data, error } = await supabase
       .from("product_sources")
       .select("asin, category, is_active")
@@ -141,14 +127,10 @@ async function fetchCatalogSourceAsins() {
       .eq("is_active", true)
       .range(from, to);
 
-    if (error) {
-      throw new Error(`Failed to fetch catalog sources: ${error.message}`);
-    }
-
+    if (error) throw new Error(`Failed to fetch catalog sources: ${error.message}`);
     if (!data || data.length === 0) break;
 
     all.push(...data);
-
     if (data.length < pageSize) break;
     from += pageSize;
   }
@@ -209,7 +191,6 @@ function buildProductUrls(products, catalogSources) {
     if (product?.is_active === false) continue;
 
     let productPath = null;
-
     if (slug && isValidSlug(slug)) {
       productPath = `/product/${encodeURIComponent(slug)}`;
     } else if (isValidAsin(asin)) {
@@ -222,9 +203,7 @@ function buildProductUrls(products, catalogSources) {
       loc: toAbsoluteUrl(productPath),
       changefreq: "weekly",
       priority: "0.6",
-      lastmod: product.updated_at
-        ? new Date(product.updated_at).toISOString()
-        : undefined
+      lastmod: product.updated_at ? new Date(product.updated_at).toISOString() : undefined
     });
 
     const category = byAsinCategory.get(asin) || normalizeCategory(product.category);
@@ -256,10 +235,7 @@ async function main() {
   const productUrls = buildProductUrls(products, catalogSources);
 
   const allUrls = dedupeByLoc([
-    ...staticUrls.map((item) => ({
-      ...item,
-      loc: toAbsoluteUrl(item.loc)
-    })),
+    ...staticUrls.map((item) => ({ ...item, loc: toAbsoluteUrl(item.loc) })),
     ...categoryUrls,
     ...programmaticUrls,
     ...productUrls
@@ -272,7 +248,6 @@ ${allUrls.map(buildUrlNode).join("\n")}
 `;
 
   await fs.writeFile("sitemap.xml", xml, "utf-8");
-
   console.log(`[generate-sitemap] wrote ${allUrls.length} URLs to sitemap.xml`);
 }
 
