@@ -3,230 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Amazon Category Catalog | TrendPulse</title>
-
-  <meta
-    name="description"
-    content="Browse popular Amazon products by category on TrendPulse. Discover frequently bought products and relevant live deals in the same category."
-  />
-
-  <meta name="robots" content="index,follow" />
-  <link rel="canonical" href="https://www.trend-pulse.shop/catalog/tech" />
-
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Amazon Category Catalog | TrendPulse" />
-  <meta
-    property="og:description"
-    content="Browse popular Amazon products by category, including evergreen best sellers and relevant live deals."
-  />
-  <meta property="og:url" content="https://www.trend-pulse.shop/catalog/tech" />
-  <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Amazon Category Catalog | TrendPulse" />
-  <meta
-    name="twitter:description"
-    content="Browse popular Amazon products by category, including evergreen best sellers and relevant live deals."
-  />
-  <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
-
-  <meta name="theme-color" content="#09090b" />
-
+  <title>Catalog Category | TrendPulse</title>
+  <meta name="description" content="Browse a dense Amazon catalog by category." />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script src="/assets/js/supabase.js?v=20260405-2" defer></script>
-  <script src="/assets/js/product-hooks.js?v=20260405-2" defer></script>
-  <script src="/assets/js/catalog-category.js?v=20260405-2" defer></script>
-
-  <script type="application/ld+json" id="category-schema">
-  {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Amazon Category Catalog | TrendPulse",
-    "url": "https://www.trend-pulse.shop/catalog/tech",
-    "description": "Browse popular Amazon products by category, including evergreen best sellers and relevant live deals."
-  }
-  </script>
 </head>
-
-<body class="bg-zinc-950 text-zinc-100 antialiased pb-24 md:pb-0">
-
-  <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-      <a href="/" class="text-xl font-bold text-white">TrendPulse</a>
-
-      <nav class="hidden md:flex gap-5 text-sm text-zinc-300">
-        <a href="/" class="hover:text-white">Home</a>
-        <a href="/deals" class="hover:text-white">Deals</a>
+<body class="min-h-screen bg-black text-white">
+  <header class="border-b border-zinc-800 bg-zinc-950">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+      <a href="/" class="text-xl font-bold">TrendPulse</a>
+      <nav class="flex items-center gap-4 text-sm text-zinc-300">
+        <a href="/">Home</a>
+        <a href="/deals">Deals</a>
         <a href="/catalog" class="text-white">Catalog</a>
       </nav>
-
-      <a
-        href="/catalog"
-        class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
-      >
-        All Categories
-      </a>
     </div>
   </header>
 
-  <main class="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+  <main class="mx-auto max-w-6xl px-4 py-8">
+    <div class="mb-8">
+      <h1 id="catalog-title" class="text-3xl font-bold">Category</h1>
+      <p id="catalog-description" class="mt-2 text-zinc-400">Loading category...</p>
+      <div id="catalog-count" class="mt-3 text-sm text-zinc-500">Loading products...</div>
+    </div>
 
-    <nav class="mb-5 text-sm text-zinc-400">
-      <a href="/" class="hover:text-white">Home</a>
-      <span class="mx-2">/</span>
-      <a href="/catalog" class="hover:text-white">Catalog</a>
-      <span class="mx-2">/</span>
-      <span id="catalog-category-breadcrumb" class="text-zinc-200">Category</span>
-    </nav>
-
-    <section class="rounded-[2rem] border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 shadow-2xl shadow-black/20 sm:p-8">
-      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Category Catalog</p>
-
-      <h1 id="catalog-category-title" class="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-        Category Catalog
-      </h1>
-
-      <p id="catalog-category-description" class="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
-        Browse frequently bought Amazon products and relevant active deals in this category.
-      </p>
-
-      <div class="mt-5 flex flex-wrap gap-2">
-        <span class="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-300">High demand</span>
-        <span class="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-300">Live deals</span>
-        <span class="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-300">Best sellers</span>
-      </div>
-
-      <div class="mt-6 flex flex-wrap gap-3">
-        <a
-          href="/deals"
-          class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:text-white"
-        >
-          Browse Live Deals
-        </a>
-
-        <a
-          href="/catalog"
-          class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-        >
-          Back to Categories
-        </a>
-      </div>
-
-      <p class="mt-4 text-xs text-zinc-500">
-        Affiliate disclosure: TrendPulse may earn from qualifying purchases.
-      </p>
-    </section>
-
-    <section class="mt-6 grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-
-      <aside class="h-fit rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-5">
-        <h2 class="text-lg font-semibold text-white">Categories</h2>
-
-        <div class="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-1">
-          <a href="/catalog/tech" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">Tech</a>
-          <a href="/catalog/home" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">Home</a>
-          <a href="/catalog/kitchen" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">Kitchen</a>
-          <a href="/catalog/beauty" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">Beauty</a>
-          <a href="/catalog/health" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">Health</a>
-          <a href="/catalog/sports" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">Sports</a>
-          <a href="/catalog/travel" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">Travel</a>
-          <a href="/catalog/fashion" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">Fashion</a>
-          <a href="/catalog/family" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">Family</a>
-          <a href="/catalog/general" class="rounded-2xl border border-zinc-800 px-3 py-3 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white">General</a>
-        </div>
-
-        <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
-          <h3 class="text-sm font-semibold text-white">How this page works</h3>
-          <p class="mt-2 text-sm leading-6 text-zinc-300">
-            This category view combines evergreen catalog products with relevant active deals, so each category stays dense and useful.
-          </p>
-        </div>
-      </aside>
-
-      <section>
-
-        <div class="flex flex-col gap-4 rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Category Feed</p>
-            <h2 class="mt-2 text-2xl font-bold tracking-tight text-white">Frequently bought products + live deals</h2>
-          </div>
-
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label for="catalog-sort" class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Sort</label>
-              <select
-                id="catalog-sort"
-                class="w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none transition focus:border-zinc-500"
-              >
-                <option value="score">Best Ranked</option>
-                <option value="reviews">Most Reviews</option>
-                <option value="rating">Best Rating</option>
-                <option value="price-low">Lowest Price</option>
-                <option value="price-high">Highest Price</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="catalog-search" class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Search</label>
-              <input
-                id="catalog-search"
-                type="text"
-                placeholder="Search products..."
-                class="w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none transition focus:border-zinc-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-5 flex items-center justify-between gap-3">
-          <div id="catalog-count" class="text-sm font-medium text-zinc-400">0 products</div>
-          <div class="text-xs text-zinc-500">Catalog + relevant deals</div>
-        </div>
-
-        <div id="catalog-category-grid" class="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4"></div>
-
-        <div id="catalog-empty-state" class="hidden mt-8 rounded-[2rem] border border-zinc-800 bg-zinc-900/50 p-8 text-center">
-          <h3 class="text-lg font-semibold text-white">No products found</h3>
-          <p class="mt-2 text-sm leading-6 text-zinc-300">
-            Try another category or clear your search.
-          </p>
-          <a
-            href="/catalog"
-            class="mt-4 inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-          >
-            Back to Catalog
-          </a>
-        </div>
-
-      </section>
-    </section>
-
-    <section class="mt-10 grid gap-4 lg:grid-cols-2">
-      <div class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6">
-        <h2 class="text-lg font-semibold text-white">About this category</h2>
-        <p id="catalog-seo-text" class="mt-3 text-sm leading-7 text-zinc-300">
-          This category combines frequently bought Amazon products with matching live deals, creating a denser and more useful evergreen page.
-        </p>
-      </div>
-
-      <div class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6">
-        <h2 class="text-lg font-semibold text-white">Related categories</h2>
-        <div id="related-categories" class="mt-4 flex flex-wrap gap-2"></div>
-      </div>
-    </section>
-
+    <div id="products-container" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
   </main>
 
-  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-950/98 backdrop-blur md:hidden">
-    <div class="grid grid-cols-3">
-      <a href="/" class="py-3 text-center text-zinc-400">Home</a>
-      <a href="/deals" class="py-3 text-center text-zinc-400">Deals</a>
-      <a href="/catalog" class="py-3 text-center text-white">Catalog</a>
-    </div>
-  </nav>
+  <script src="/assets/js/supabase.js"></script>
+  <script src="/assets/js/trendpulse-data.js"></script>
+  <script src="/assets/js/trendpulse-ui.js"></script>
+  <script>
+    (async function () {
+      const params = new URLSearchParams(window.location.search);
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      const rawCategory =
+        (pathParts[0] === "catalog" && pathParts[1]) ? decodeURIComponent(pathParts[1]) :
+        (params.get("category") || "tech");
 
+      const category = window.TrendPulseData.normalizeCategory(rawCategory);
+      const title = document.getElementById("catalog-title");
+      const desc = document.getElementById("catalog-description");
+      const count = document.getElementById("catalog-count");
+
+      title.textContent = `${category.charAt(0).toUpperCase() + category.slice(1)} Catalog`;
+      desc.textContent = `Browse top Amazon products in ${category}.`;
+
+      let products = await window.TrendPulseData.fetchCatalogByCategory(category, 60);
+
+      if (!products.length) {
+        products = await window.TrendPulseData.fetchTopProducts(24);
+      }
+
+      window.TrendPulseUI.renderProducts(products, "#products-container");
+      count.textContent = `${products.length} ${products.length === 1 ? "product" : "products"}`;
+    })();
+  </script>
 </body>
-                                                                                                                                                                           </html>
+</html>
