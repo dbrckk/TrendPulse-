@@ -32,6 +32,60 @@
     return raw;
   }
 
+  function normalizeCategory(raw = "") {
+    const value = normalize(raw);
+
+    if (["men", "women", "jewelry", "jewellery", "shoes", "watches"].includes(value)) return "fashion";
+    if (["baby", "kids", "pets", "toys"].includes(value)) return "family";
+    if (["electronics", "gadgets", "gaming", "computer", "computers", "audio", "phone", "phones"].includes(value)) return "tech";
+    if (["furniture", "decor", "storage", "household", "office"].includes(value)) return "home";
+    if (["cooking", "cookware", "appliances"].includes(value)) return "kitchen";
+    if (["skincare", "makeup", "cosmetics"].includes(value)) return "beauty";
+    if (["fitness", "wellness", "supplements"].includes(value)) return "health";
+    if (["outdoor", "exercise", "training"].includes(value)) return "sports";
+    if (["luggage", "bags", "travel-accessories"].includes(value)) return "travel";
+
+    return value || "general";
+  }
+
+  function sanitizeProduct(row = {}) {
+    const price = safeNumber(row.price, 0);
+    const originalPrice =
+      safeNumber(row.original_price, 0) > 0
+        ? safeNumber(row.original_price, 0)
+        : price > 0
+          ? price * 1.5
+          : 0;
+
+    return {
+      ...row,
+      id: row.id || null,
+      asin: String(row.asin || "").trim(),
+      slug: String(row.slug || "").trim() || String(row.asin || "").trim(),
+      name: String(row.name || "").trim() || "Amazon Product",
+      brand: row.brand || "",
+      description: row.description || "",
+      short_description: row.short_description || "",
+      category: normalizeCategory(row.category),
+      source_kind: row.source_kind || row.type || "catalog",
+      image_url: proxyImage(row.image_url),
+      price,
+      original_price: originalPrice,
+      discount_percentage: safeNumber(
+        row.discount_percentage ?? row.discount_percent,
+        0
+      ),
+      amazon_rating: safeNumber(row.amazon_rating, 0),
+      amazon_review_count: safeNumber(row.amazon_review_count, 0),
+      priority: safeNumber(row.priority, 0),
+      score: safeNumber(row.score, 0),
+      likes: safeNumber(row.likes, 0),
+      views: safeNumber(row.views, 0),
+      clicks: safeNumber(row.clicks, 0),
+      is_active: typeof row.is_active === "boolean" ? row.is_active : true
+    };
+  }
+
   function productPath(product) {
     const slug = String(product?.slug || "").trim();
     const asin = String(product?.asin || "").trim();
@@ -42,35 +96,18 @@
   }
 
   function amazonLink(product) {
-    return (
-      product?.affiliate_link ||
-      product?.amazon_url ||
-      product?.raw_amazon_url ||
-      "#"
-    );
-  }
-
-  function normalizeCategory(raw = "") {
-    const value = normalize(raw);
-
-    if (["men", "women", "jewelry"].includes(value)) return "fashion";
-    if (["baby", "pets"].includes(value)) return "family";
-    return value || "general";
+    return product?.affiliate_link || product?.amazon_url || "#";
   }
 
   function computeScore(product) {
     const reviews = safeNumber(product.amazon_review_count, 0);
     const rating = safeNumber(product.amazon_rating, 0);
-    const discount = safeNumber(
-      product.discount_percentage ?? product.discount_percent,
-      20
-    );
+    const discount = safeNumber(product.discount_percentage, 20);
     const priority = safeNumber(product.priority, 0);
     const likes = safeNumber(product.likes, 0);
+    const clicks = safeNumber(product.clicks, 0);
     const sourceBonus =
-      String(product.source_kind || product.type || "").toLowerCase() === "deal"
-        ? 120
-        : 0;
+      String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
 
     return (
       reviews * 0.4 +
@@ -78,8 +115,9 @@
       discount * 10 * 0.2 +
       priority * 4 +
       likes * 2 +
+      clicks * 1.5 +
       sourceBonus +
-      Math.random() * 25
+      Math.random() * 20
     );
   }
 
@@ -95,45 +133,9 @@
 
       if (!key) return false;
       if (seen.has(key)) return false;
-
       seen.add(key);
       return true;
     });
-  }
-
-  function sanitizeProduct(row) {
-    const price = safeNumber(row?.price, 0);
-    const originalPrice =
-      safeNumber(row?.original_price, 0) > 0
-        ? safeNumber(row.original_price, 0)
-        : price > 0
-          ? price * 1.5
-          : 0;
-
-    return {
-      ...row,
-      slug: String(row?.slug || "").trim() || String(row?.asin || "").trim(),
-      asin: String(row?.asin || "").trim(),
-      name: String(row?.name || "").trim() || "Amazon Product",
-      description: row?.description || "",
-      short_description: row?.short_description || "",
-      brand: row?.brand || "",
-      category: normalizeCategory(row?.category),
-      image_url: proxyImage(row?.image_url),
-      price,
-      original_price: originalPrice,
-      discount_percentage: safeNumber(
-        row?.discount_percentage ?? row?.discount_percent,
-        0
-      ),
-      amazon_rating: safeNumber(row?.amazon_rating, 0),
-      amazon_review_count: safeNumber(row?.amazon_review_count, 0),
-      priority: safeNumber(row?.priority, 0),
-      score: safeNumber(row?.score, 0),
-      is_active:
-        typeof row?.is_active === "boolean" ? row.is_active : true,
-      source_kind: row?.source_kind || row?.type || "catalog"
-    };
   }
 
   function getDiscount(product) {
@@ -146,12 +148,7 @@
 
     return Math.max(
       10,
-      Math.min(
-        65,
-        Math.round(
-          safeNumber(product.discount_percentage ?? product.discount_percent, 18)
-        )
-      )
+      Math.min(65, Math.round(safeNumber(product.discount_percentage, 18)))
     );
   }
 
@@ -168,18 +165,10 @@
           : 0;
 
     const discount = getDiscount(product);
-    const hook = window.ProductHooks
-      ? window.ProductHooks.getHook(product)
-      : "Popular right now";
-    const urgency = window.ProductHooks
-      ? window.ProductHooks.getUrgency(product)
-      : "Selling fast";
-    const proof = window.ProductHooks
-      ? window.ProductHooks.getSocialProof(product)
-      : "Frequently bought";
-    const priceStory = window.ProductHooks
-      ? window.ProductHooks.getPriceStory(product)
-      : "High-demand product";
+    const hook = window.ProductHooks ? window.ProductHooks.getHook(product) : "Popular right now";
+    const urgency = window.ProductHooks ? window.ProductHooks.getUrgency(product) : "Selling fast";
+    const proof = window.ProductHooks ? window.ProductHooks.getSocialProof(product) : "Frequently bought";
+    const priceStory = window.ProductHooks ? window.ProductHooks.getPriceStory(product) : "High-demand product";
 
     return `
       <article class="block rounded-2xl border border-zinc-800 bg-zinc-900 p-4 transition hover:scale-[1.02] hover:border-zinc-600">
@@ -244,54 +233,40 @@
     `;
   }
 
-  async function fetchPrimaryProducts() {
-    if (!window.supabaseClient) return [];
+  async function fetchFromView(limit = 400) {
+    const { data, error } = await window.supabaseClient
+      .from("catalog_category_feed")
+      .select("*")
+      .limit(limit);
 
-    try {
-      const { data, error } = await window.supabaseClient
-        .from("catalog_category_feed")
-        .select("*")
-        .limit(400);
-
-      if (error) {
-        console.error("catalog_category_feed error:", error);
-        return [];
-      }
-
-      return dedupeProducts(
-        (data || [])
-          .map(sanitizeProduct)
-          .filter((row) => row.name && row.is_active !== false)
-      );
-    } catch (error) {
-      console.error("Primary product fetch failed:", error);
+    if (error) {
+      console.error("catalog_category_feed error:", error);
       return [];
     }
+
+    return dedupeProducts(
+      (data || [])
+        .map(sanitizeProduct)
+        .filter((row) => row.name && row.is_active !== false)
+    );
   }
 
-  async function fetchFallbackProducts() {
-    if (!window.supabaseClient) return [];
+  async function fetchFromProducts(limit = 400) {
+    const { data, error } = await window.supabaseClient
+      .from("products")
+      .select("*")
+      .limit(limit);
 
-    try {
-      const { data, error } = await window.supabaseClient
-        .from("products")
-        .select("*")
-        .limit(400);
-
-      if (error) {
-        console.error("products fallback error:", error);
-        return [];
-      }
-
-      return dedupeProducts(
-        (data || [])
-          .map(sanitizeProduct)
-          .filter((row) => row.name && row.is_active !== false)
-      );
-    } catch (error) {
-      console.error("Fallback product fetch failed:", error);
+    if (error) {
+      console.error("products fallback error:", error);
       return [];
     }
+
+    return dedupeProducts(
+      (data || [])
+        .map(sanitizeProduct)
+        .filter((row) => row.name && row.is_active !== false)
+    );
   }
 
   async function fetchProducts() {
@@ -299,10 +274,10 @@
     if (productsPromise) return productsPromise;
 
     productsPromise = (async () => {
-      let items = await fetchPrimaryProducts();
+      let items = await fetchFromView(400);
 
       if (!items.length) {
-        items = await fetchFallbackProducts();
+        items = await fetchFromProducts(400);
       }
 
       items = dedupeProducts(items)
@@ -317,6 +292,24 @@
     })();
 
     return productsPromise;
+  }
+
+  function sortProducts(items, mode) {
+    const arr = [...items];
+
+    if (mode === "reviews") {
+      arr.sort((a, b) => safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count));
+    } else if (mode === "rating") {
+      arr.sort((a, b) => safeNumber(b.amazon_rating) - safeNumber(a.amazon_rating));
+    } else if (mode === "low") {
+      arr.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
+    } else if (mode === "high") {
+      arr.sort((a, b) => safeNumber(b.price) - safeNumber(a.price));
+    } else {
+      arr.sort((a, b) => safeNumber(b.final_score) - safeNumber(a.final_score));
+    }
+
+    return arr;
   }
 
   async function renderDealsPage() {
@@ -337,24 +330,6 @@
       if (value === "under-25") return 25;
       if (value === "under-50") return 50;
       return null;
-    }
-
-    function sortProducts(items, mode) {
-      const arr = [...items];
-
-      if (mode === "reviews") {
-        arr.sort((a, b) => safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count));
-      } else if (mode === "rating") {
-        arr.sort((a, b) => safeNumber(b.amazon_rating) - safeNumber(a.amazon_rating));
-      } else if (mode === "low") {
-        arr.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
-      } else if (mode === "high") {
-        arr.sort((a, b) => safeNumber(b.price) - safeNumber(a.price));
-      } else {
-        arr.sort((a, b) => safeNumber(b.final_score) - safeNumber(a.final_score));
-      }
-
-      return arr;
     }
 
     function run() {
@@ -392,6 +367,11 @@
       }
 
       items = sortProducts(items, sortMode);
+
+      if (!items.length) {
+        items = sortProducts(products, "score").slice(0, 24);
+      }
+
       grid.innerHTML = items.map(productCard).join("");
 
       if (results) {
@@ -415,7 +395,8 @@
     productPath,
     amazonLink,
     sanitizeProduct,
-    normalizeCategory
+    normalizeCategory,
+    sortProducts
   };
 
   document.addEventListener("DOMContentLoaded", renderDealsPage);
