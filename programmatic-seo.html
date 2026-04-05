@@ -3,163 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Best Amazon Products | TrendPulse</title>
-  <meta
-    name="description"
-    content="Discover popular Amazon products on TrendPulse with curated collections, trending picks, and evergreen best sellers."
-  />
-  <meta name="robots" content="index,follow" />
-  <link rel="canonical" href="https://www.trend-pulse.shop/collections/best-tech-products" />
-
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Best Amazon Products | TrendPulse" />
-  <meta
-    property="og:description"
-    content="Discover popular Amazon products on TrendPulse with curated collections and high-demand picks."
-  />
-  <meta property="og:url" content="https://www.trend-pulse.shop/collections/best-tech-products" />
-  <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Best Amazon Products | TrendPulse" />
-  <meta
-    name="twitter:description"
-    content="Discover popular Amazon products on TrendPulse with curated collections and high-demand picks."
-  />
-  <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
-
-  <meta name="theme-color" content="#09090b" />
-
+  <title>Collection | TrendPulse</title>
+  <meta name="description" content="Browse curated Amazon product collections." />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/assets/js/supabase.js?v=20260405-2" defer></script>
-  <script src="/assets/js/product-hooks.js?v=20260405-2" defer></script>
-  <script src="/assets/js/programmatic-seo.js?v=20260405-2" defer></script>
-
-  <script type="application/ld+json" id="collection-schema">
-  {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Best Amazon Products | TrendPulse",
-    "url": "https://www.trend-pulse.shop/collections/best-tech-products",
-    "description": "Discover popular Amazon products on TrendPulse with curated collections and high-demand picks."
-  }
-  </script>
 </head>
-
-<body class="bg-zinc-950 text-zinc-100 antialiased pb-24 md:pb-0">
-
-  <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-      <a href="/" class="text-xl font-bold text-white">TrendPulse</a>
-
-      <nav class="hidden md:flex gap-5 text-sm text-zinc-300">
-        <a href="/" class="hover:text-white">Home</a>
-        <a href="/deals" class="hover:text-white">Deals</a>
-        <a href="/catalog" class="hover:text-white">Catalog</a>
+<body class="min-h-screen bg-black text-white">
+  <header class="border-b border-zinc-800 bg-zinc-950">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+      <a href="/" class="text-xl font-bold">TrendPulse</a>
+      <nav class="flex items-center gap-4 text-sm text-zinc-300">
+        <a href="/">Home</a>
+        <a href="/deals">Deals</a>
+        <a href="/catalog">Catalog</a>
       </nav>
-
-      <a
-        href="/deals"
-        class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
-      >
-        Live Deals
-      </a>
     </div>
   </header>
 
-  <main class="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+  <main class="mx-auto max-w-6xl px-4 py-8">
+    <div class="mb-8">
+      <h1 id="collection-title" class="text-3xl font-bold">Collection</h1>
+      <p id="collection-description" class="mt-2 text-zinc-400">Loading collection...</p>
+      <div id="collection-count" class="mt-3 text-sm text-zinc-500">Loading products...</div>
+    </div>
 
-    <nav class="mb-5 text-sm text-zinc-400">
-      <a href="/" class="hover:text-white">Home</a>
-      <span class="mx-2">/</span>
-      <span class="text-zinc-200">Collections</span>
-    </nav>
+    <div id="products-container" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
 
-    <section class="rounded-[2rem] border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 shadow-2xl shadow-black/20 sm:p-8">
-      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Collection</p>
-
-      <h1 id="collection-title" class="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-        Best Products
-      </h1>
-
-      <p id="collection-description" class="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
-        Browse a curated list of popular Amazon products.
-      </p>
-
-      <div class="mt-5 flex flex-wrap gap-2">
-        <span class="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-300">Trending now</span>
-        <span class="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-300">High demand</span>
-        <span class="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-300">Best ranked</span>
-      </div>
-
-      <div class="mt-6 flex flex-wrap gap-3">
-        <a
-          href="/catalog"
-          class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-        >
-          Browse Categories
-        </a>
-
-        <a
-          href="/deals"
-          class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:text-white"
-        >
-          View Live Deals
-        </a>
-      </div>
-    </section>
-
-    <section class="mt-8">
-      <div class="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <h2 class="text-2xl font-bold tracking-tight text-white">Selected products</h2>
-          <p id="collection-count" class="mt-2 text-sm text-zinc-400">0 products</p>
-        </div>
-
-        <a href="/catalog" class="text-sm text-zinc-400 hover:text-white">Browse all categories →</a>
-      </div>
-
-      <div id="collection-grid" class="grid grid-cols-2 gap-4 xl:grid-cols-4"></div>
-
-      <div id="collection-empty-state" class="hidden mt-8 rounded-[2rem] border border-zinc-800 bg-zinc-900/50 p-8 text-center">
-        <h3 class="text-lg font-semibold text-white">No products found</h3>
-        <p class="mt-2 text-sm leading-6 text-zinc-300">
-          This collection currently has no matching products.
-        </p>
-        <a
-          href="/catalog"
-          class="mt-4 inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-        >
-          Browse Catalog
-        </a>
-      </div>
-    </section>
-
-    <section class="mt-10 grid gap-4 lg:grid-cols-2">
-      <div class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6">
-        <h2 class="text-lg font-semibold text-white">Why this page exists</h2>
-        <p id="collection-seo-text" class="mt-3 text-sm leading-7 text-zinc-300">
-          This page groups popular Amazon products around a specific theme using strong-demand catalog data.
-        </p>
-      </div>
-
-      <div class="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6">
-        <h2 class="text-lg font-semibold text-white">Explore more collections</h2>
-        <div id="collection-related-links" class="mt-4 flex flex-wrap gap-2"></div>
-      </div>
-    </section>
-
+    <div class="mt-10">
+      <h2 class="text-lg font-semibold">About this collection</h2>
+      <p id="collection-seo-text" class="mt-2 text-zinc-400"></p>
+    </div>
   </main>
 
-  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-950/98 backdrop-blur md:hidden">
-    <div class="grid grid-cols-3">
-      <a href="/" class="py-3 text-center text-zinc-400">Home</a>
-      <a href="/deals" class="py-3 text-center text-zinc-400">Deals</a>
-      <a href="/catalog" class="py-3 text-center text-white">Catalog</a>
-    </div>
-  </nav>
+  <script src="/assets/js/supabase.js"></script>
+  <script src="/assets/js/trendpulse-data.js"></script>
+  <script src="/assets/js/trendpulse-ui.js"></script>
+  <script>
+    (async function () {
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      const slug = (pathParts[0] === "collections" && pathParts[1]) ? decodeURIComponent(pathParts[1]) : "";
 
+      const response = await fetch("/programmatic-pages.json");
+      const pages = await response.json();
+      const config = pages.find((page) => page.slug === slug);
+
+      if (!config) {
+        document.getElementById("collection-title").textContent = "Collection not found";
+        document.getElementById("collection-description").textContent = "This collection does not exist.";
+        return;
+      }
+
+      document.title = `${config.title} | TrendPulse`;
+      document.getElementById("collection-title").textContent = config.title;
+      document.getElementById("collection-description").textContent = config.description;
+      document.getElementById("collection-seo-text").textContent = config.seoText || config.description;
+
+      const products = await window.TrendPulseData.fetchCollectionProducts(config, 24);
+      window.TrendPulseUI.renderProducts(products, "#products-container");
+      document.getElementById("collection-count").textContent = `${products.length} ${products.length === 1 ? "product" : "products"}`;
+    })();
+  </script>
 </body>
-        </html>
+</html>
