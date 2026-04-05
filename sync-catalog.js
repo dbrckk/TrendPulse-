@@ -78,34 +78,10 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (
     hasAny(haystack, [
-      "tech",
-      "electronics",
-      "gadget",
-      "gaming",
-      "computer",
-      "laptop",
-      "keyboard",
-      "mouse",
-      "monitor",
-      "ssd",
-      "router",
-      "webcam",
-      "audio",
-      "speaker",
-      "earbud",
-      "headphone",
-      "microphone",
-      "phone",
-      "iphone",
-      "android",
-      "charger",
-      "usb",
-      "tablet",
-      "smartwatch",
-      "camera",
-      "tv",
-      "projector",
-      "magsafe"
+      "tech", "electronics", "gadget", "gaming", "computer", "laptop", "keyboard",
+      "mouse", "monitor", "ssd", "router", "webcam", "audio", "speaker", "earbud",
+      "headphone", "microphone", "phone", "iphone", "android", "charger", "usb",
+      "tablet", "smartwatch", "camera", "tv", "projector", "magsafe"
     ])
   ) {
     return "tech";
@@ -113,24 +89,9 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (
     hasAny(haystack, [
-      "home",
-      "furniture",
-      "decor",
-      "storage",
-      "household",
-      "organizer",
-      "vacuum",
-      "pillow",
-      "blanket",
-      "lamp",
-      "cleaner",
-      "bedding",
-      "sofa",
-      "shelf",
-      "office chair",
-      "desk lamp",
-      "humidifier",
-      "air purifier"
+      "home", "furniture", "decor", "storage", "household", "organizer", "vacuum",
+      "pillow", "blanket", "lamp", "cleaner", "bedding", "sofa", "shelf",
+      "office chair", "desk lamp", "humidifier", "air purifier"
     ])
   ) {
     return "home";
@@ -138,24 +99,9 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (
     hasAny(haystack, [
-      "kitchen",
-      "cooking",
-      "cookware",
-      "appliance",
-      "air fryer",
-      "blender",
-      "knife",
-      "coffee",
-      "espresso",
-      "toaster",
-      "pan",
-      "pot",
-      "mixer",
-      "fryer",
-      "rice cooker",
-      "cutting board",
-      "water bottle",
-      "meal prep"
+      "kitchen", "cooking", "cookware", "appliance", "air fryer", "blender",
+      "knife", "coffee", "espresso", "toaster", "pan", "pot", "mixer", "fryer",
+      "rice cooker", "cutting board", "water bottle", "meal prep"
     ])
   ) {
     return "kitchen";
@@ -163,22 +109,9 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (
     hasAny(haystack, [
-      "beauty",
-      "skincare",
-      "makeup",
-      "cosmetic",
-      "serum",
-      "cleanser",
-      "moisturizer",
-      "shampoo",
-      "conditioner",
-      "haircare",
-      "face wash",
-      "lip",
-      "mascara",
-      "nail",
-      "fragrance",
-      "perfume"
+      "beauty", "skincare", "makeup", "cosmetic", "serum", "cleanser",
+      "moisturizer", "shampoo", "conditioner", "haircare", "face wash", "lip",
+      "mascara", "nail", "fragrance", "perfume"
     ])
   ) {
     return "beauty";
@@ -186,20 +119,9 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (
     hasAny(haystack, [
-      "health",
-      "wellness",
-      "supplement",
-      "vitamin",
-      "recovery",
-      "massager",
-      "fitness tracker",
-      "sleep",
-      "posture",
-      "pain relief",
-      "protein",
-      "electrolyte",
-      "healthcare",
-      "medical"
+      "health", "wellness", "supplement", "vitamin", "recovery", "massager",
+      "fitness tracker", "sleep", "posture", "pain relief", "protein",
+      "electrolyte", "healthcare", "medical"
     ])
   ) {
     return "health";
@@ -207,22 +129,9 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (
     hasAny(haystack, [
-      "sport",
-      "outdoor",
-      "exercise",
-      "training",
-      "yoga",
-      "gym",
-      "running",
-      "dumbbell",
-      "resistance band",
-      "treadmill",
-      "cycling",
-      "basketball",
-      "football",
-      "camping",
-      "hiking",
-      "workout"
+      "sport", "outdoor", "exercise", "training", "yoga", "gym", "running",
+      "dumbbell", "resistance band", "treadmill", "cycling", "basketball",
+      "football", "camping", "hiking", "workout"
     ])
   ) {
     return "sports";
@@ -230,18 +139,9 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (
     hasAny(haystack, [
-      "travel",
-      "luggage",
-      "suitcase",
-      "carry-on",
-      "passport",
-      "backpack",
-      "travel accessory",
-      "packing cube",
-      "neck pillow",
-      "toiletry bag",
-      "adapter",
-      "trip"
+      "travel", "luggage", "suitcase", "carry-on", "passport", "backpack",
+      "travel accessory", "packing cube", "neck pillow", "toiletry bag",
+      "adapter", "trip"
     ])
   ) {
     return "travel";
@@ -249,26 +149,9 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (
     hasAny(haystack, [
-      "fashion",
-      "men",
-      "women",
-      "jewelry",
-      "jewellery",
-      "shoe",
-      "watch",
-      "wallet",
-      "bracelet",
-      "necklace",
-      "ring",
-      "bag",
-      "handbag",
-      "clothing",
-      "hoodie",
-      "dress",
-      "shirt",
-      "sneaker",
-      "belt",
-      "sunglasses"
+      "fashion", "men", "women", "jewelry", "jewellery", "shoe", "watch",
+      "wallet", "bracelet", "necklace", "ring", "bag", "handbag", "clothing",
+      "hoodie", "dress", "shirt", "sneaker", "belt", "sunglasses"
     ])
   ) {
     return "fashion";
@@ -276,20 +159,8 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (
     hasAny(haystack, [
-      "family",
-      "kid",
-      "baby",
-      "pet",
-      "dog",
-      "cat",
-      "toy",
-      "nursery",
-      "stroller",
-      "diaper",
-      "toddler",
-      "children",
-      "puppy",
-      "kitten"
+      "family", "kid", "baby", "pet", "dog", "cat", "toy", "nursery",
+      "stroller", "diaper", "toddler", "children", "puppy", "kitten"
     ])
   ) {
     return "family";
@@ -336,37 +207,16 @@ function getSupplementalCategories(row, baseCategory) {
   const haystack = getHaystack(row);
   const list = [];
 
-  if (baseCategory !== "tech" && hasAny(haystack, ["gaming", "charger", "audio", "phone", "computer"])) {
-    list.push("tech");
-  }
-  if (baseCategory !== "home" && hasAny(haystack, ["home", "storage", "decor", "organizer", "lamp"])) {
-    list.push("home");
-  }
-  if (baseCategory !== "kitchen" && hasAny(haystack, ["kitchen", "cookware", "coffee", "air fryer", "blender"])) {
-    list.push("kitchen");
-  }
-  if (baseCategory !== "beauty" && hasAny(haystack, ["beauty", "skincare", "makeup", "haircare"])) {
-    list.push("beauty");
-  }
-  if (baseCategory !== "health" && hasAny(haystack, ["health", "wellness", "massager", "vitamin", "recovery"])) {
-    list.push("health");
-  }
-  if (baseCategory !== "sports" && hasAny(haystack, ["sports", "fitness", "workout", "yoga", "outdoor"])) {
-    list.push("sports");
-  }
-  if (baseCategory !== "travel" && hasAny(haystack, ["travel", "backpack", "luggage", "adapter"])) {
-    list.push("travel");
-  }
-  if (baseCategory !== "fashion" && hasAny(haystack, ["fashion", "shoe", "watch", "wallet", "jewelry", "bag"])) {
-    list.push("fashion");
-  }
-  if (baseCategory !== "family" && hasAny(haystack, ["baby", "kid", "pet", "dog", "cat", "toy"])) {
-    list.push("family");
-  }
-
-  if (baseCategory !== "general") {
-    list.push("general");
-  }
+  if (baseCategory !== "tech" && hasAny(haystack, ["gaming", "charger", "audio", "phone", "computer"])) list.push("tech");
+  if (baseCategory !== "home" && hasAny(haystack, ["home", "storage", "decor", "organizer", "lamp"])) list.push("home");
+  if (baseCategory !== "kitchen" && hasAny(haystack, ["kitchen", "cookware", "coffee", "air fryer", "blender"])) list.push("kitchen");
+  if (baseCategory !== "beauty" && hasAny(haystack, ["beauty", "skincare", "makeup", "haircare"])) list.push("beauty");
+  if (baseCategory !== "health" && hasAny(haystack, ["health", "wellness", "massager", "vitamin", "recovery"])) list.push("health");
+  if (baseCategory !== "sports" && hasAny(haystack, ["sports", "fitness", "workout", "yoga", "outdoor"])) list.push("sports");
+  if (baseCategory !== "travel" && hasAny(haystack, ["travel", "backpack", "luggage", "adapter"])) list.push("travel");
+  if (baseCategory !== "fashion" && hasAny(haystack, ["fashion", "shoe", "watch", "wallet", "jewelry", "bag"])) list.push("fashion");
+  if (baseCategory !== "family" && hasAny(haystack, ["baby", "kid", "pet", "dog", "cat", "toy"])) list.push("family");
+  if (baseCategory !== "general") list.push("general");
 
   return unique(list.filter((cat) => TARGET_CATEGORIES.includes(cat)));
 }
@@ -395,10 +245,7 @@ function buildCatalogSourceRow(row) {
     _name: name,
     _slug: normalizeText(row.slug) || slugify(name) || asin.toLowerCase(),
     _base_category: category,
-    _all_candidate_categories: unique([
-      category,
-      ...getSupplementalCategories(row, category)
-    ])
+    _all_candidate_categories: unique([category, ...getSupplementalCategories(row, category)])
   };
 }
 
@@ -408,20 +255,12 @@ async function fetchAllProducts() {
 
   while (true) {
     const to = from + PAGE_SIZE - 1;
+    const { data, error } = await supabase.from("products").select("*").range(from, to);
 
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .range(from, to);
-
-    if (error) {
-      throw new Error(`Failed to fetch products: ${error.message}`);
-    }
-
+    if (error) throw new Error(`Failed to fetch products: ${error.message}`);
     if (!data || data.length === 0) break;
 
     all = all.concat(data);
-
     if (data.length < PAGE_SIZE) break;
     from += PAGE_SIZE;
   }
@@ -464,13 +303,8 @@ function fillCategories(primaryRows) {
   const groupedPrimary = new Map();
   const allByScore = [...primaryRows].sort((a, b) => b._priority_score - a._priority_score);
 
-  for (const category of TARGET_CATEGORIES) {
-    groupedPrimary.set(category, []);
-  }
-
-  for (const row of primaryRows) {
-    groupedPrimary.get(row._base_category).push(row);
-  }
+  for (const category of TARGET_CATEGORIES) groupedPrimary.set(category, []);
+  for (const row of primaryRows) groupedPrimary.get(row._base_category).push(row);
 
   const finalRows = [];
   const usedInCategory = new Map();
@@ -478,8 +312,7 @@ function fillCategories(primaryRows) {
   for (const category of TARGET_CATEGORIES) {
     usedInCategory.set(category, new Set());
 
-    const primaries = (groupedPrimary.get(category) || [])
-      .sort((a, b) => b._priority_score - a._priority_score);
+    const primaries = (groupedPrimary.get(category) || []).sort((a, b) => b._priority_score - a._priority_score);
 
     for (const row of primaries) {
       if (usedInCategory.get(category).has(row.asin)) continue;
@@ -487,18 +320,16 @@ function fillCategories(primaryRows) {
       usedInCategory.get(category).add(row.asin);
     }
 
-    if (primaries.length >= MIN_PRODUCTS_PER_CATEGORY) {
-      continue;
-    }
+    if (usedInCategory.get(category).size < MIN_PRODUCTS_PER_CATEGORY) {
+      for (const row of allByScore) {
+        if (usedInCategory.get(category).has(row.asin)) continue;
+        if (!row._all_candidate_categories.includes(category)) continue;
 
-    for (const row of allByScore) {
-      if (usedInCategory.get(category).has(row.asin)) continue;
-      if (!row._all_candidate_categories.includes(category)) continue;
+        finalRows.push(cloneForCategory(row, category));
+        usedInCategory.get(category).add(row.asin);
 
-      finalRows.push(cloneForCategory(row, category));
-      usedInCategory.get(category).add(row.asin);
-
-      if (usedInCategory.get(category).size >= MIN_PRODUCTS_PER_CATEGORY) break;
+        if (usedInCategory.get(category).size >= MIN_PRODUCTS_PER_CATEGORY) break;
+      }
     }
 
     if (usedInCategory.get(category).size < MIN_PRODUCTS_PER_CATEGORY) {
@@ -518,23 +349,14 @@ function fillCategories(primaryRows) {
 
 function assignRanks(rows) {
   const grouped = new Map();
-
-  for (const category of TARGET_CATEGORIES) {
-    grouped.set(category, []);
-  }
-
-  for (const row of rows) {
-    if (!grouped.has(row.category)) grouped.set(row.category, []);
-    grouped.get(row.category).push(row);
-  }
+  for (const category of TARGET_CATEGORIES) grouped.set(category, []);
+  for (const row of rows) grouped.get(row.category).push(row);
 
   const finalRows = [];
 
   for (const [category, items] of grouped.entries()) {
     items.sort((a, b) => {
-      if (b._priority_score !== a._priority_score) {
-        return b._priority_score - a._priority_score;
-      }
+      if (b._priority_score !== a._priority_score) return b._priority_score - a._priority_score;
       return a._name.localeCompare(b._name);
     });
 
@@ -558,31 +380,18 @@ function assignRanks(rows) {
 }
 
 async function deleteExistingCatalogSources() {
-  const { error } = await supabase
-    .from("product_sources")
-    .delete()
-    .eq("source_kind", "catalog");
-
-  if (error) {
-    throw new Error(`Failed to delete old catalog sources: ${error.message}`);
-  }
+  const { error } = await supabase.from("product_sources").delete().eq("source_kind", "catalog");
+  if (error) throw new Error(`Failed to delete old catalog sources: ${error.message}`);
 }
 
 async function insertCatalogSources(rows) {
   if (!rows.length) return;
 
   const chunkSize = 500;
-
   for (let i = 0; i < rows.length; i += chunkSize) {
     const chunk = rows.slice(i, i + chunkSize);
-
-    const { error } = await supabase
-      .from("product_sources")
-      .insert(chunk);
-
-    if (error) {
-      throw new Error(`Failed to insert catalog sources: ${error.message}`);
-    }
+    const { error } = await supabase.from("product_sources").insert(chunk);
+    if (error) throw new Error(`Failed to insert catalog sources: ${error.message}`);
   }
 }
 
@@ -592,15 +401,10 @@ async function verifyCounts() {
     .select("category")
     .eq("source_kind", "catalog");
 
-  if (error) {
-    throw new Error(`Failed to verify catalog source counts: ${error.message}`);
-  }
+  if (error) throw new Error(`Failed to verify catalog source counts: ${error.message}`);
 
   const counts = {};
-  for (const row of data || []) {
-    counts[row.category] = (counts[row.category] || 0) + 1;
-  }
-
+  for (const row of data || []) counts[row.category] = (counts[row.category] || 0) + 1;
   return counts;
 }
 
@@ -610,10 +414,7 @@ async function main() {
   const products = await fetchAllProducts();
   console.log(`Fetched ${products.length} products`);
 
-  const mapped = products
-    .map(buildCatalogSourceRow)
-    .filter(Boolean);
-
+  const mapped = products.map(buildCatalogSourceRow).filter(Boolean);
   console.log(`Mapped ${mapped.length} potential catalog rows`);
 
   const deduped = dedupePrimaryCandidates(mapped);
@@ -632,9 +433,7 @@ async function main() {
   console.log("Inserted new catalog sources");
 
   const counts = await verifyCounts();
-  console.log("Catalog categories:");
-  console.log(counts);
-
+  console.log("Catalog categories:", counts);
   console.log("Catalog sync complete");
 }
 
