@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+Disallow: /*?slug=
+Disallow: /*?asin=
+Disallow: /*?category=
+
 Sitemap: https://www.trend-pulse.shop/sitemap.xml
