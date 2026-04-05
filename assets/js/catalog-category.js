@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     beauty: {
       title: "Beauty Catalog",
       description: "Popular beauty products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This beauty catalog combines high-demand skincare, self-care, and beauty products with any matching deals currently available."
+      seo: "This beauty catalog combines high-demand skincare, self-care, and beauty products with matching deals currently available."
     },
     health: {
       title: "Health Catalog",
@@ -134,6 +134,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `/product/${encodeURIComponent(product.asin || "")}`;
   }
 
+  function normalizeCategory(raw = "") {
+    const value = String(raw).trim().toLowerCase();
+    if (["men", "women", "jewelry"].includes(value)) return "fashion";
+    if (["baby", "pets"].includes(value)) return "family";
+    return value || "general";
+  }
+
+  function getDiscount(product) {
+    const price = safeNumber(product.price, 0);
+    const original = safeNumber(product.original_price, 0) || price * 1.5;
+    if (original > price && price > 0) {
+      return Math.max(1, Math.round(((original - price) / original) * 100));
+    }
+    return Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
+  }
+
   function getCategoryBadge(product) {
     const sourceKind = String(product.source_kind || "").toLowerCase();
 
@@ -145,7 +161,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `<span class="rounded-full bg-blue-500/15 px-2.5 py-1 text-[11px] font-medium text-blue-300">Best Seller</span>`;
     }
 
-    return `<span class="rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${escapeHtml(capitalize(product.category || category))}</span>`;
+    return `<span class="rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${escapeHtml(capitalize(normalizeCategory(product.category || category)))}</span>`;
+  }
+
+  function computeScore(product) {
+    const reviews = safeNumber(product.amazon_review_count, 0);
+    const rating = safeNumber(product.amazon_rating, 0);
+    const discount = safeNumber(product.discount_percentage, 20);
+    const priority = safeNumber(product.priority, 0);
+    const sourceBonus = String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
+
+    return (
+      reviews * 0.4 +
+      rating * 100 * 0.3 +
+      discount * 10 * 0.2 +
+      priority * 4 +
+      sourceBonus +
+      Math.random() * 50
+    );
   }
 
   function updateMeta() {
@@ -174,6 +207,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) ogUrl.setAttribute("content", `https://www.trend-pulse.shop/catalog/${encodeURIComponent(category)}`);
+
+    const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+    if (twitterTitle) twitterTitle.setAttribute("content", `${meta.title} | TrendPulse`);
+
+    const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+    if (twitterDescription) twitterDescription.setAttribute("content", meta.description);
   }
 
   function renderRelatedCategories() {
@@ -200,10 +239,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const reviewCount = safeNumber(product.amazon_review_count);
     const price = formatPrice(product.price);
     const image = proxyImage(product.image_url);
-    const isDeal = String(product.source_kind || "").toLowerCase() === "deal";
+    const discount = getDiscount(product);
+    const original = safeNumber(product.original_price, 0) || safeNumber(product.price, 0) * 1.5;
+    const hook = window.ProductHooks ? window.ProductHooks.getHook(product) : "Popular right now";
+    const urgency = window.ProductHooks ? window.ProductHooks.getUrgency(product) : "Selling fast";
+    const proof = window.ProductHooks ? window.ProductHooks.getSocialProof(product) : "Frequently bought";
+    const priceStory = window.ProductHooks ? window.ProductHooks.getPriceStory(product) : "High-demand product";
 
     return `
-      <article class="group h-full overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/70 transition hover:border-zinc-500 hover:shadow-xl hover:shadow-black/30">
+      <article class="group h-full overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 transition hover:scale-[1.02] hover:border-zinc-600">
         <a href="${productUrl(product)}" class="flex h-full flex-col">
           <div class="relative aspect-square overflow-hidden bg-white">
             <img
@@ -214,13 +258,21 @@ document.addEventListener("DOMContentLoaded", async () => {
               onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
             />
 
+            <div class="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-[11px] font-bold text-white">
+              -${discount}%
+            </div>
+
+            <div class="absolute bottom-3 right-3 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white">
+              🔥 ${escapeHtml(proof)}
+            </div>
+
             ${
               product.source_rank
                 ? `
-                <div class="absolute right-3 top-3 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
-                  #${safeNumber(product.source_rank, 0)}
-                </div>
-              `
+                  <div class="absolute right-3 top-3 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white">
+                    #${safeNumber(product.source_rank, 0)}
+                  </div>
+                `
                 : ""
             }
           </div>
@@ -228,14 +280,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="flex flex-1 flex-col p-4">
             <div class="mb-2 flex flex-wrap gap-2">
               ${getCategoryBadge(product)}
-              ${
-                isDeal
-                  ? `<span class="rounded-full border border-green-500/30 px-2.5 py-1 text-[11px] font-medium text-green-300">Live Now</span>`
-                  : ""
-              }
             </div>
 
-            <h3 class="min-h-[3rem] text-sm font-semibold leading-6 text-white">
+            <div class="text-xs font-semibold text-green-400">
+              ${escapeHtml(hook)}
+            </div>
+
+            <h3 class="mt-2 min-h-[3rem] text-sm font-semibold leading-6 text-white">
               ${escapeHtml(product.name || "Product")}
             </h3>
 
@@ -243,16 +294,24 @@ document.addEventListener("DOMContentLoaded", async () => {
               ⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviewCount.toLocaleString()})
             </div>
 
+            <div class="mt-1 text-xs font-semibold text-red-400">
+              ⚡ ${escapeHtml(urgency)}
+            </div>
+
+            <div class="mt-1 text-xs text-zinc-500">
+              ${escapeHtml(priceStory)}
+            </div>
+
             <div class="mt-auto flex items-end justify-between gap-3 pt-4">
               <div class="flex flex-col">
                 <span class="text-lg font-bold text-green-400">${price}</span>
-                <span class="text-[10px] text-zinc-500">
-                  ${isDeal ? "Catalog + deal" : "Frequently bought"}
+                <span class="text-[10px] text-zinc-500 line-through">
+                  ${original > 0 ? formatPrice(original) : ""}
                 </span>
               </div>
 
-              <div class="rounded-lg bg-green-500 px-3 py-2 text-xs font-bold text-black">
-                View →
+              <div class="rounded-xl bg-green-500 px-3 py-2 text-xs font-bold text-black">
+                View Deal →
               </div>
             </div>
           </div>
@@ -275,13 +334,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const seen = new Set();
 
-    return (data || []).filter((p) => {
-      const key = p.asin || p.slug || p.name;
-      if (!key) return false;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    return (data || [])
+      .filter((p) => {
+        const key = p.asin || p.slug || p.name;
+        if (!key) return false;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .map((p) => ({
+        ...p,
+        category: normalizeCategory(p.category),
+        final_score: computeScore(p)
+      }));
   }
 
   function sortProducts(items, sort) {
@@ -296,25 +361,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else if (sort === "price-high") {
       arr.sort((a, b) => safeNumber(b.price) - safeNumber(a.price));
     } else {
-      arr.sort((a, b) => {
-        if (safeNumber(a.source_priority, 999999) !== safeNumber(b.source_priority, 999999)) {
-          return safeNumber(a.source_priority, 999999) - safeNumber(b.source_priority, 999999);
-        }
-
-        if (safeNumber(a.source_rank, 999999) !== safeNumber(b.source_rank, 999999)) {
-          return safeNumber(a.source_rank, 999999) - safeNumber(b.source_rank, 999999);
-        }
-
-        if (safeNumber(b.priority) !== safeNumber(a.priority)) {
-          return safeNumber(b.priority) - safeNumber(a.priority);
-        }
-
-        if (safeNumber(b.score) !== safeNumber(a.score)) {
-          return safeNumber(b.score) - safeNumber(a.score);
-        }
-
-        return safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count);
-      });
+      arr.sort((a, b) => safeNumber(b.final_score) - safeNumber(a.final_score));
     }
 
     return arr;
