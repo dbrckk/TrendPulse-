@@ -36,10 +36,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="/assets/js/supabase.js?v=20260404-5" defer></script>
-  <script src="/assets/js/catalog-category.js?v=20260404-5" defer></script>
+  <script src="/assets/js/supabase.js?v=20260405-2" defer></script>
+  <script src="/assets/js/product-hooks.js?v=20260405-2" defer></script>
+  <script src="/assets/js/catalog-category.js?v=20260405-2" defer></script>
 
-  <script type="application/ld+json">
+  <script type="application/ld+json" id="category-schema">
   {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -91,6 +92,12 @@
       <p id="catalog-category-description" class="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
         Browse frequently bought Amazon products and relevant active deals in this category.
       </p>
+
+      <div class="mt-5 flex flex-wrap gap-2">
+        <span class="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-300">High demand</span>
+        <span class="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-300">Live deals</span>
+        <span class="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-300">Best sellers</span>
+      </div>
 
       <div class="mt-6 flex flex-wrap gap-3">
         <a
@@ -222,4 +229,4 @@
   </nav>
 
 </body>
-    </html>
+                                                                                                                                                                           </html>
