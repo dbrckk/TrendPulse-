@@ -185,11 +185,16 @@ function buildProgrammaticUrls(programmaticPages) {
 }
 
 function buildProductUrls(products, catalogSources) {
-  const catalogAsinSet = new Set((catalogSources || []).map((row) => String(row.asin || "").trim()).filter(Boolean));
+  const catalogAsinSet = new Set(
+    (catalogSources || [])
+      .map((row) => String(row.asin || "").trim().toUpperCase())
+      .filter(Boolean)
+  );
+
   const byAsinCategory = new Map();
 
   for (const row of catalogSources || []) {
-    const asin = String(row.asin || "").trim();
+    const asin = String(row.asin || "").trim().toUpperCase();
     if (!asin) continue;
     byAsinCategory.set(asin, normalizeCategory(row.category));
   }
