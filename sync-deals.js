@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { createClient } from "@supabase/supabase-js";
+import Parser from "rss-parser";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -12,6 +13,13 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false }
+});
+
+const parser = new Parser({
+  timeout: 15000,
+  headers: {
+    "User-Agent": "TrendPulse/1.0"
+  }
 });
 
 const TARGET_CATEGORIES = [
@@ -67,241 +75,25 @@ function normalizeCategory(rawCategory, row = {}) {
 
   if (!haystack) return "general";
 
-  if (
-    hasAny(haystack, [
-      "tech",
-      "electronics",
-      "gadget",
-      "gaming",
-      "computer",
-      "laptop",
-      "keyboard",
-      "mouse",
-      "monitor",
-      "ssd",
-      "router",
-      "webcam",
-      "audio",
-      "speaker",
-      "earbud",
-      "headphone",
-      "microphone",
-      "phone",
-      "iphone",
-      "android",
-      "charger",
-      "usb",
-      "tablet",
-      "smartwatch",
-      "camera",
-      "tv",
-      "projector",
-      "magsafe"
-    ])
-  ) {
-    return "tech";
-  }
-
-  if (
-    hasAny(haystack, [
-      "home",
-      "furniture",
-      "decor",
-      "storage",
-      "household",
-      "organizer",
-      "vacuum",
-      "pillow",
-      "blanket",
-      "lamp",
-      "cleaner",
-      "bedding",
-      "sofa",
-      "shelf",
-      "office chair",
-      "desk lamp",
-      "humidifier",
-      "air purifier"
-    ])
-  ) {
-    return "home";
-  }
-
-  if (
-    hasAny(haystack, [
-      "kitchen",
-      "cooking",
-      "cookware",
-      "appliance",
-      "air fryer",
-      "blender",
-      "knife",
-      "coffee",
-      "espresso",
-      "toaster",
-      "pan",
-      "pot",
-      "mixer",
-      "fryer",
-      "rice cooker",
-      "cutting board",
-      "water bottle",
-      "meal prep"
-    ])
-  ) {
-    return "kitchen";
-  }
-
-  if (
-    hasAny(haystack, [
-      "beauty",
-      "skincare",
-      "makeup",
-      "cosmetic",
-      "serum",
-      "cleanser",
-      "moisturizer",
-      "shampoo",
-      "conditioner",
-      "haircare",
-      "face wash",
-      "lip",
-      "mascara",
-      "nail",
-      "fragrance",
-      "perfume"
-    ])
-  ) {
-    return "beauty";
-  }
-
-  if (
-    hasAny(haystack, [
-      "health",
-      "wellness",
-      "supplement",
-      "vitamin",
-      "recovery",
-      "massager",
-      "fitness tracker",
-      "sleep",
-      "posture",
-      "pain relief",
-      "protein",
-      "electrolyte",
-      "healthcare",
-      "medical"
-    ])
-  ) {
-    return "health";
-  }
-
-  if (
-    hasAny(haystack, [
-      "sport",
-      "outdoor",
-      "exercise",
-      "training",
-      "yoga",
-      "gym",
-      "running",
-      "dumbbell",
-      "resistance band",
-      "treadmill",
-      "cycling",
-      "basketball",
-      "football",
-      "camping",
-      "hiking",
-      "workout"
-    ])
-  ) {
-    return "sports";
-  }
-
-  if (
-    hasAny(haystack, [
-      "travel",
-      "luggage",
-      "suitcase",
-      "carry-on",
-      "passport",
-      "backpack",
-      "travel accessory",
-      "packing cube",
-      "neck pillow",
-      "toiletry bag",
-      "adapter",
-      "trip"
-    ])
-  ) {
-    return "travel";
-  }
-
-  if (
-    hasAny(haystack, [
-      "fashion",
-      "men",
-      "women",
-      "jewelry",
-      "jewellery",
-      "shoe",
-      "watch",
-      "wallet",
-      "bracelet",
-      "necklace",
-      "ring",
-      "bag",
-      "handbag",
-      "clothing",
-      "hoodie",
-      "dress",
-      "shirt",
-      "sneaker",
-      "belt",
-      "sunglasses"
-    ])
-  ) {
-    return "fashion";
-  }
-
-  if (
-    hasAny(haystack, [
-      "family",
-      "kid",
-      "baby",
-      "pet",
-      "dog",
-      "cat",
-      "toy",
-      "nursery",
-      "stroller",
-      "diaper",
-      "toddler",
-      "children",
-      "puppy",
-      "kitten"
-    ])
-  ) {
-    return "family";
-  }
+  if (hasAny(haystack, ["tech", "electronics", "gadget", "gaming", "computer", "laptop", "phone", "charger", "audio", "tablet", "camera"])) return "tech";
+  if (hasAny(haystack, ["home", "furniture", "decor", "storage", "household", "vacuum", "blanket", "lamp", "organizer"])) return "home";
+  if (hasAny(haystack, ["kitchen", "cookware", "cooking", "air fryer", "coffee", "blender", "knife", "toaster"])) return "kitchen";
+  if (hasAny(haystack, ["beauty", "skincare", "makeup", "cosmetic", "serum", "shampoo", "perfume"])) return "beauty";
+  if (hasAny(haystack, ["health", "wellness", "vitamin", "supplement", "massager", "recovery", "sleep"])) return "health";
+  if (hasAny(haystack, ["sport", "outdoor", "exercise", "training", "fitness", "yoga", "workout", "camping"])) return "sports";
+  if (hasAny(haystack, ["travel", "luggage", "suitcase", "backpack", "adapter", "packing cube"])) return "travel";
+  if (hasAny(haystack, ["fashion", "men", "women", "jewelry", "shoe", "watch", "wallet", "clothing", "bag"])) return "fashion";
+  if (hasAny(haystack, ["family", "kid", "baby", "pet", "dog", "cat", "toy", "stroller", "diaper"])) return "family";
 
   return "general";
 }
 
 function computeDiscountPercent(row) {
-  const explicit = safeNumber(
-    row.discount_percentage ?? row.discount_percent,
-    NaN
-  );
-
-  if (Number.isFinite(explicit) && explicit > 0) {
-    return explicit;
-  }
+  const explicit = safeNumber(row.discount_percentage ?? row.discount_percent, NaN);
+  if (Number.isFinite(explicit) && explicit > 0) return explicit;
 
   const price = safeNumber(row.price, 0);
   const original = safeNumber(row.original_price, 0);
-
   if (price > 0 && original > price) {
     return ((original - price) / original) * 100;
   }
@@ -311,16 +103,7 @@ function computeDiscountPercent(row) {
 
 function looksLikeDealFeed(row) {
   const haystack = getHaystack(row);
-  return hasAny(haystack, [
-    "deal",
-    "discount",
-    "flash sale",
-    "limited time",
-    "coupon",
-    "clearance",
-    "price drop",
-    "sale"
-  ]);
+  return hasAny(haystack, ["deal", "discount", "flash sale", "limited time", "coupon", "clearance", "price drop", "sale"]);
 }
 
 function isGoodDeal(row) {
@@ -435,20 +218,12 @@ async function fetchAllProducts() {
 
   while (true) {
     const to = from + PAGE_SIZE - 1;
+    const { data, error } = await supabase.from("products").select("*").range(from, to);
 
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .range(from, to);
-
-    if (error) {
-      throw new Error(`Failed to fetch products: ${error.message}`);
-    }
-
+    if (error) throw new Error(`Failed to fetch products: ${error.message}`);
     if (!data || data.length === 0) break;
 
     all = all.concat(data);
-
     if (data.length < PAGE_SIZE) break;
     from += PAGE_SIZE;
   }
@@ -493,23 +268,14 @@ function ensureMinimumDeals(primaryDeals, allProducts) {
 
 function assignRanks(rows) {
   const grouped = new Map();
-
-  for (const category of TARGET_CATEGORIES) {
-    grouped.set(category, []);
-  }
-
-  for (const row of rows) {
-    if (!grouped.has(row.category)) grouped.set(row.category, []);
-    grouped.get(row.category).push(row);
-  }
+  for (const category of TARGET_CATEGORIES) grouped.set(category, []);
+  for (const row of rows) grouped.get(row.category).push(row);
 
   const finalRows = [];
 
   for (const [category, items] of grouped.entries()) {
     items.sort((a, b) => {
-      if (b._priority_score !== a._priority_score) {
-        return b._priority_score - a._priority_score;
-      }
+      if (b._priority_score !== a._priority_score) return b._priority_score - a._priority_score;
       return a._name.localeCompare(b._name);
     });
 
@@ -533,31 +299,18 @@ function assignRanks(rows) {
 }
 
 async function deleteExistingDealSources() {
-  const { error } = await supabase
-    .from("product_sources")
-    .delete()
-    .eq("source_kind", "deal");
-
-  if (error) {
-    throw new Error(`Failed to delete old deal sources: ${error.message}`);
-  }
+  const { error } = await supabase.from("product_sources").delete().eq("source_kind", "deal");
+  if (error) throw new Error(`Failed to delete old deal sources: ${error.message}`);
 }
 
 async function insertDealSources(rows) {
   if (!rows.length) return;
 
   const chunkSize = 500;
-
   for (let i = 0; i < rows.length; i += chunkSize) {
     const chunk = rows.slice(i, i + chunkSize);
-
-    const { error } = await supabase
-      .from("product_sources")
-      .insert(chunk);
-
-    if (error) {
-      throw new Error(`Failed to insert deal sources: ${error.message}`);
-    }
+    const { error } = await supabase.from("product_sources").insert(chunk);
+    if (error) throw new Error(`Failed to insert deal sources: ${error.message}`);
   }
 }
 
@@ -567,16 +320,70 @@ async function verifyCounts() {
     .select("category")
     .eq("source_kind", "deal");
 
-  if (error) {
-    throw new Error(`Failed to verify deal source counts: ${error.message}`);
-  }
+  if (error) throw new Error(`Failed to verify deal source counts: ${error.message}`);
 
   const counts = {};
-  for (const row of data || []) {
-    counts[row.category] = (counts[row.category] || 0) + 1;
+  for (const row of data || []) counts[row.category] = (counts[row.category] || 0) + 1;
+  return counts;
+}
+
+async function fetchDealsFromRssFeeds() {
+  const feeds = [
+    "https://www.dealnews.com/c142/Electronics/?rss=1",
+    "https://www.dealnews.com/c39/Home-Garden/?rss=1",
+    "https://www.dealnews.com/c238/Health-Beauty/?rss=1"
+  ];
+
+  const allEntries = [];
+
+  for (const url of feeds) {
+    try {
+      const feed = await parser.parseURL(url);
+      for (const item of feed.items || []) {
+        allEntries.push({
+          title: item.title || "",
+          link: item.link || "",
+          pubDate: item.pubDate || "",
+          source_name: feed.title || "rss-feed"
+        });
+      }
+    } catch (error) {
+      console.error(`RSS fetch failed for ${url}:`, error.message);
+    }
   }
 
-  return counts;
+  return allEntries;
+}
+
+async function boostProductsFromRss(allProducts) {
+  const rssEntries = await fetchDealsFromRssFeeds();
+  if (!rssEntries.length) return [];
+
+  const boosted = [];
+  const entriesText = rssEntries.map((entry) => `${normalizeLower(entry.title)} ${normalizeLower(entry.link)}`);
+
+  for (const product of allProducts) {
+    const haystack = getHaystack(product);
+    if (!haystack) continue;
+
+    const match = entriesText.find((text) => {
+      const words = haystack.split(" ").filter((w) => w.length > 3).slice(0, 8);
+      return words.some((word) => text.includes(word));
+    });
+
+    if (!match) continue;
+
+    boosted.push(
+      buildDealSourceRow({
+        ...product,
+        type: "deal",
+        source_name: "rss-match",
+        score: safeNumber(product.score, 0) + 20
+      })
+    );
+  }
+
+  return boosted.filter(Boolean);
 }
 
 async function main() {
@@ -585,13 +392,13 @@ async function main() {
   const products = await fetchAllProducts();
   console.log(`Fetched ${products.length} products`);
 
-  const mapped = products
-    .map(buildDealSourceRow)
-    .filter(Boolean);
+  const directDeals = products.map(buildDealSourceRow).filter(Boolean);
+  console.log(`Mapped ${directDeals.length} direct deal rows`);
 
-  console.log(`Mapped ${mapped.length} potential deal rows`);
+  const rssBoostedDeals = await boostProductsFromRss(products);
+  console.log(`Mapped ${rssBoostedDeals.length} RSS-boosted deal rows`);
 
-  const deduped = dedupeByAsin(mapped);
+  const deduped = dedupeByAsin([...directDeals, ...rssBoostedDeals]);
   console.log(`Deduped to ${deduped.length} unique deal products`);
 
   const withFallback = ensureMinimumDeals(deduped, products);
@@ -607,9 +414,7 @@ async function main() {
   console.log("Inserted new deal sources");
 
   const counts = await verifyCounts();
-  console.log("Deal categories:");
-  console.log(counts);
-
+  console.log("Deal categories:", counts);
   console.log("Deals sync complete");
 }
 
