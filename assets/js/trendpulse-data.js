@@ -68,10 +68,7 @@
       source_rank: safeNumber(row.source_rank, 0),
       price,
       original_price: originalPrice,
-      discount_percentage: safeNumber(
-        row.discount_percentage ?? row.discount_percent,
-        0
-      ),
+      discount_percentage: safeNumber(row.discount_percentage ?? row.discount_percent, 0),
       amazon_rating: safeNumber(row.amazon_rating, 0),
       amazon_review_count: safeNumber(row.amazon_review_count, 0),
       score: safeNumber(row.score, 0),
@@ -131,11 +128,7 @@
 
   async function fetchDeals(limit = PAGE_SIZE) {
     const client = ensureClient();
-
-    const { data, error } = await client
-      .from("deal_products")
-      .select("*")
-      .limit(limit);
+    const { data, error } = await client.from("deal_products").select("*").limit(limit);
 
     if (error) {
       console.error("[trendpulse-data] fetchDeals error:", error);
@@ -177,11 +170,7 @@
 
   async function fetchCatalog(limit = PAGE_SIZE) {
     const client = ensureClient();
-
-    const { data, error } = await client
-      .from("catalog_category_feed")
-      .select("*")
-      .limit(limit);
+    const { data, error } = await client.from("catalog_category_feed").select("*").limit(limit);
 
     if (error) {
       console.error("[trendpulse-data] fetchCatalog error:", error);
@@ -199,11 +188,7 @@
 
   async function fetchTopProducts(limit = PAGE_SIZE) {
     const client = ensureClient();
-
-    const { data, error } = await client
-      .from("products")
-      .select("*")
-      .limit(limit);
+    const { data, error } = await client.from("products").select("*").limit(limit);
 
     if (error) {
       console.error("[trendpulse-data] fetchTopProducts error:", error);
