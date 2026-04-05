@@ -16,51 +16,20 @@ const CATEGORIES = [
 ];
 
 const CATEGORY_META = {
-  tech: {
-    label: "Tech",
-    desc: "electronics, gadgets, accessories, desk setup upgrades, and high-demand devices"
-  },
-  home: {
-    label: "Home",
-    desc: "storage, decor, comfort items, and practical daily-use home products"
-  },
-  kitchen: {
-    label: "Kitchen",
-    desc: "cookware, tools, appliances, and frequently bought kitchen essentials"
-  },
-  beauty: {
-    label: "Beauty",
-    desc: "skincare, self-care, cosmetics, and high-demand beauty products"
-  },
-  health: {
-    label: "Health",
-    desc: "wellness products, daily-use health items, and practical support products"
-  },
-  sports: {
-    label: "Sports",
-    desc: "fitness gear, active products, and strong-demand sports essentials"
-  },
-  travel: {
-    label: "Travel",
-    desc: "travel gear, luggage, organizers, and practical accessories"
-  },
-  fashion: {
-    label: "Fashion",
-    desc: "men, women, jewelry, accessories, and practical style upgrades"
-  },
-  family: {
-    label: "Family",
-    desc: "baby, pet, and practical family-related everyday products"
-  },
-  general: {
-    label: "General",
-    desc: "mixed high-demand Amazon products across multiple evergreen categories"
-  }
+  tech: { label: "Tech" },
+  home: { label: "Home" },
+  kitchen: { label: "Kitchen" },
+  beauty: { label: "Beauty" },
+  health: { label: "Health" },
+  sports: { label: "Sports" },
+  travel: { label: "Travel" },
+  fashion: { label: "Fashion" },
+  family: { label: "Family" },
+  general: { label: "General" }
 };
 
 function buildCategoryPages(category) {
-  const meta = CATEGORY_META[category];
-  const label = meta.label;
+  const label = CATEGORY_META[category].label;
 
   return [
     {
@@ -71,7 +40,7 @@ function buildCategoryPages(category) {
       mode: "category",
       sort: "score",
       filter: null,
-      seoText: `This page highlights the best ${category} products with strong ongoing demand on Amazon, combining evergreen winners and high-interest products in one category-focused collection.`
+      seoText: `This page highlights the best ${category} products with strong ongoing demand on Amazon.`
     },
     {
       slug: `top-${category}-products`,
@@ -81,7 +50,7 @@ function buildCategoryPages(category) {
       mode: "category",
       sort: "reviews",
       filter: null,
-      seoText: `This page focuses on top ${category} products that consistently attract buyers on Amazon, with emphasis on review volume and proven buying interest.`
+      seoText: `This page focuses on top ${category} products that consistently attract buyers on Amazon.`
     },
     {
       slug: `popular-${category}-products`,
@@ -91,7 +60,7 @@ function buildCategoryPages(category) {
       mode: "category",
       sort: "rating",
       filter: null,
-      seoText: `This page collects popular ${category} products with strong buyer signals, useful for discovering items people repeatedly purchase in this category.`
+      seoText: `This page collects popular ${category} products with strong buyer signals.`
     },
     {
       slug: `cheap-${category}-products`,
@@ -101,7 +70,7 @@ function buildCategoryPages(category) {
       mode: "category",
       sort: "price-low",
       filter: { maxPrice: 25 },
-      seoText: `This page highlights affordable ${category} products with strong value, focusing on low-price products that still show real demand on Amazon.`
+      seoText: `This page highlights affordable ${category} products with strong value.`
     },
     {
       slug: `best-${category}-products-under-25`,
@@ -111,7 +80,7 @@ function buildCategoryPages(category) {
       mode: "category",
       sort: "score",
       filter: { maxPrice: 25 },
-      seoText: `This page highlights the best ${category} products under $25, combining affordability with strong demand signals and buying frequency.`
+      seoText: `This page highlights the best ${category} products under $25.`
     },
     {
       slug: `best-${category}-products-under-50`,
@@ -121,7 +90,7 @@ function buildCategoryPages(category) {
       mode: "category",
       sort: "score",
       filter: { maxPrice: 50 },
-      seoText: `This page focuses on the best ${category} products under $50, helping users find stronger-value products without leaving the category.`
+      seoText: `This page focuses on the best ${category} products under $50.`
     },
     {
       slug: `${category}-essentials`,
@@ -131,7 +100,7 @@ function buildCategoryPages(category) {
       mode: "category",
       sort: "score",
       filter: null,
-      seoText: `This page focuses on essential ${category} products that people buy regularly on Amazon, making it a strong evergreen collection for this category.`
+      seoText: `This page focuses on essential ${category} products that people buy regularly on Amazon.`
     }
   ];
 }
@@ -146,7 +115,7 @@ function buildAudiencePages() {
       mode: "keyword",
       sort: "score",
       filter: { query: "men" },
-      seoText: "This page highlights gift ideas for men using popular Amazon products with strong buying frequency and gift potential."
+      seoText: "This page highlights gift ideas for men using popular Amazon products."
     },
     {
       slug: "best-gifts-for-women",
@@ -156,7 +125,7 @@ function buildAudiencePages() {
       mode: "keyword",
       sort: "score",
       filter: { query: "women" },
-      seoText: "This page highlights gift ideas for women using popular Amazon products with strong buying frequency and broad gift appeal."
+      seoText: "This page highlights gift ideas for women using popular Amazon products."
     },
     {
       slug: "best-gifts-for-gamers",
@@ -166,7 +135,7 @@ function buildAudiencePages() {
       mode: "keyword",
       sort: "score",
       filter: { query: "gaming" },
-      seoText: "This page highlights gift ideas for gamers using popular Amazon tech products with strong demand and clear category relevance."
+      seoText: "This page highlights gift ideas for gamers using popular Amazon tech products."
     },
     {
       slug: "best-gifts-for-travelers",
@@ -176,7 +145,7 @@ function buildAudiencePages() {
       mode: "keyword",
       sort: "score",
       filter: { query: "travel" },
-      seoText: "This page highlights gift ideas for travelers using useful Amazon travel products with strong long-term relevance."
+      seoText: "This page highlights gift ideas for travelers using useful Amazon travel products."
     },
     {
       slug: "best-gifts-for-home-lovers",
@@ -186,27 +155,7 @@ function buildAudiencePages() {
       mode: "keyword",
       sort: "score",
       filter: { query: "home" },
-      seoText: "This page highlights gift ideas for home lovers using useful home products that show steady Amazon demand."
-    },
-    {
-      slug: "popular-products-for-men",
-      title: "Popular Products for Men",
-      description: "Discover popular Amazon products for men.",
-      category: "fashion",
-      mode: "keyword",
-      sort: "reviews",
-      filter: { query: "men" },
-      seoText: "This page collects frequently bought Amazon products relevant to men across fashion and practical daily-use categories."
-    },
-    {
-      slug: "popular-products-for-women",
-      title: "Popular Products for Women",
-      description: "Discover popular Amazon products for women.",
-      category: "fashion",
-      mode: "keyword",
-      sort: "reviews",
-      filter: { query: "women" },
-      seoText: "This page collects frequently bought Amazon products relevant to women across fashion and practical daily-use categories."
+      seoText: "This page highlights gift ideas for home lovers using useful home products."
     }
   ];
 }
@@ -227,15 +176,8 @@ async function main() {
     ...buildAudiencePages()
   ]);
 
-  await fs.writeFile(
-    "programmatic-pages.json",
-    JSON.stringify(pages, null, 2),
-    "utf-8"
-  );
-
-  console.log(
-    `[generate-programmatic-pages] wrote ${pages.length} pages to programmatic-pages.json`
-  );
+  await fs.writeFile("programmatic-pages.json", JSON.stringify(pages, null, 2), "utf-8");
+  console.log(`[generate-programmatic-pages] wrote ${pages.length} pages to programmatic-pages.json`);
 }
 
 main().catch((error) => {
