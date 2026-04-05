@@ -18,11 +18,7 @@
   }
 
   function getDiscount(product) {
-    const explicit = safeNumber(
-      product.discount_percentage ?? product.discount_percent,
-      0
-    );
-
+    const explicit = safeNumber(product.discount_percentage ?? product.discount_percent, 0);
     if (explicit > 0) return Math.round(explicit);
 
     const price = safeNumber(product.price, 0);
