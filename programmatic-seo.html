@@ -7,7 +7,7 @@
   <title>Best Amazon Products | TrendPulse</title>
   <meta
     name="description"
-    content="Discover popular Amazon products on TrendPulse with curated category collections and evergreen product pages."
+    content="Discover popular Amazon products on TrendPulse with curated collections, trending picks, and evergreen best sellers."
   />
   <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://www.trend-pulse.shop/collections/best-tech-products" />
@@ -16,7 +16,7 @@
   <meta property="og:title" content="Best Amazon Products | TrendPulse" />
   <meta
     property="og:description"
-    content="Discover popular Amazon products on TrendPulse with curated category collections."
+    content="Discover popular Amazon products on TrendPulse with curated collections and high-demand picks."
   />
   <meta property="og:url" content="https://www.trend-pulse.shop/collections/best-tech-products" />
   <meta property="og:image" content="https://www.trend-pulse.shop/og-image.jpg" />
@@ -25,7 +25,7 @@
   <meta name="twitter:title" content="Best Amazon Products | TrendPulse" />
   <meta
     name="twitter:description"
-    content="Discover popular Amazon products on TrendPulse with curated category collections."
+    content="Discover popular Amazon products on TrendPulse with curated collections and high-demand picks."
   />
   <meta name="twitter:image" content="https://www.trend-pulse.shop/og-image.jpg" />
 
@@ -33,16 +33,16 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/assets/js/supabase.js?v=20260404-5" defer></script>
-  <script src="/assets/js/programmatic-seo.js?v=20260404-5" defer></script>
+  <script src="/assets/js/supabase.js?v=20260405-2" defer></script>
+  <script src="/assets/js/programmatic-seo.js?v=20260405-2" defer></script>
 
-  <script type="application/ld+json">
+  <script type="application/ld+json" id="collection-schema">
   {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "name": "Best Amazon Products | TrendPulse",
     "url": "https://www.trend-pulse.shop/collections/best-tech-products",
-    "description": "Discover popular Amazon products on TrendPulse with curated category collections."
+    "description": "Discover popular Amazon products on TrendPulse with curated collections and high-demand picks."
   }
   </script>
 </head>
@@ -60,10 +60,10 @@
       </nav>
 
       <a
-        href="/catalog"
+        href="/deals"
         class="inline-flex items-center justify-center rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:text-white"
       >
-        Browse Catalog
+        Live Deals
       </a>
     </div>
   </header>
@@ -86,6 +86,12 @@
       <p id="collection-description" class="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
         Browse a curated list of popular Amazon products.
       </p>
+
+      <div class="mt-5 flex flex-wrap gap-2">
+        <span class="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-300">Trending now</span>
+        <span class="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-300">High demand</span>
+        <span class="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-300">Best ranked</span>
+      </div>
 
       <div class="mt-6 flex flex-wrap gap-3">
         <a
@@ -110,9 +116,24 @@
           <h2 class="text-2xl font-bold tracking-tight text-white">Selected products</h2>
           <p id="collection-count" class="mt-2 text-sm text-zinc-400">0 products</p>
         </div>
+
+        <a href="/catalog" class="text-sm text-zinc-400 hover:text-white">Browse all categories →</a>
       </div>
 
       <div id="collection-grid" class="grid grid-cols-2 gap-4 xl:grid-cols-4"></div>
+
+      <div id="collection-empty-state" class="hidden mt-8 rounded-[2rem] border border-zinc-800 bg-zinc-900/50 p-8 text-center">
+        <h3 class="text-lg font-semibold text-white">No products found</h3>
+        <p class="mt-2 text-sm leading-6 text-zinc-300">
+          This collection currently has no matching products.
+        </p>
+        <a
+          href="/catalog"
+          class="mt-4 inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+        >
+          Browse Catalog
+        </a>
+      </div>
     </section>
 
     <section class="mt-10 grid gap-4 lg:grid-cols-2">
@@ -140,4 +161,4 @@
   </nav>
 
 </body>
-</html>
+  </html>
