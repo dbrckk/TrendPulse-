@@ -1,13 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-
   "buildCommand": "",
   "outputDirectory": ".",
   "framework": null,
-
   "cleanUrls": false,
   "trailingSlash": false,
-
   "rewrites": [
     {
       "source": "/deals",
@@ -30,7 +27,6 @@
       "destination": "/programmatic-seo.html"
     }
   ],
-
   "redirects": [
     {
       "source": "/index.html",
@@ -58,7 +54,6 @@
       "permanent": false
     }
   ],
-
   "headers": [
     {
       "source": "/assets/(.*)",
