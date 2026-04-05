@@ -12,6 +12,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   const relatedLinksEl = document.getElementById("collection-related-links");
   const emptyStateEl = document.getElementById("collection-empty-state");
 
+  const HOOKS = [
+    "This is selling out fast",
+    "Everyone is buying this right now",
+    "This feels illegal for this price",
+    "You don’t need it… until you see it",
+    "This is blowing up right now",
+    "People are obsessed with this"
+  ];
+
+  const URGENCY = [
+    "Limited stock",
+    "Deal ending soon",
+    "Only today",
+    "Selling fast"
+  ];
+
   function getCollectionSlug() {
     const pathParts = window.location.pathname.split("/").filter(Boolean);
     if (pathParts[0] === "collections" && pathParts[1]) {
@@ -60,6 +76,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
   }
 
+  function randomPick(array, seed = "") {
+    if (!array.length) return "";
+    let hash = 0;
+    const text = String(seed || "x");
+    for (let i = 0; i < text.length; i += 1) {
+      hash = (hash << 5) - hash + text.charCodeAt(i);
+      hash |= 0;
+    }
+    const index = Math.abs(hash) % array.length;
+    return array[index];
+  }
+
+  function getHook(product) {
+    return randomPick(HOOKS, product.asin || product.slug || product.name);
+  }
+
+  function getUrgency(product) {
+    return randomPick(URGENCY, `${product.asin || product.slug || product.name}-u`);
+  }
+
+  function getDiscount(product) {
+    const price = safeNumber(product.price, 0);
+    const original = safeNumber(product.original_price, 0) || price * 1.5;
+    if (original > price && price > 0) {
+      return Math.max(1, Math.round(((original - price) / original) * 100));
+    }
+    return Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
+  }
+
   function getBadge(product) {
     const sourceKind = String(product.source_kind || "").toLowerCase();
 
@@ -74,13 +119,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `<span class="rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${escapeHtml(capitalize(product.category || "general"))}</span>`;
   }
 
+  function computeScore(product) {
+    const reviews = safeNumber(product.amazon_review_count, 0);
+    const rating = safeNumber(product.amazon_rating, 0);
+    const discount = safeNumber(product.discount_percentage, 20);
+    const priority = safeNumber(product.priority, 0);
+    const sourceBonus = String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
+
+    return (
+      reviews * 0.4 +
+      rating * 100 * 0.3 +
+      discount * 10 * 0.2 +
+      priority * 4 +
+      sourceBonus +
+      Math.random() * 50
+    );
+  }
+
   function card(product) {
     const rating = safeNumber(product.amazon_rating);
     const reviews = safeNumber(product.amazon_review_count);
     const image = proxyImage(product.image_url);
+    const price = safeNumber(product.price, 0);
+    const original = safeNumber(product.original_price, 0) || price * 1.5;
+    const discount = getDiscount(product);
+    const hook = getHook(product);
+    const urgency = getUrgency(product);
 
     return `
-      <a href="${productUrl(product)}" class="block rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4 transition hover:border-zinc-600">
+      <a href="${productUrl(product)}" class="block rounded-2xl border border-zinc-800 bg-zinc-900 p-4 transition hover:scale-[1.02] hover:border-zinc-600">
         <div class="relative">
           <img
             src="${image}"
@@ -89,18 +156,25 @@ document.addEventListener("DOMContentLoaded", async () => {
             loading="lazy"
             onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
           />
-          ${
-            product.source_rank
-              ? `<div class="absolute right-3 top-3 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white">#${safeNumber(product.source_rank)}</div>`
-              : ""
-          }
+
+          <div class="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">
+            -${discount}%
+          </div>
+
+          <div class="absolute bottom-2 right-2 rounded-full bg-black/80 px-2 py-1 text-xs text-white">
+            🔥 Trending
+          </div>
         </div>
 
         <div class="mt-3 flex flex-wrap gap-2">
           ${getBadge(product)}
         </div>
 
-        <h3 class="mt-3 text-sm font-semibold text-white">
+        <div class="mt-3 text-xs font-semibold text-green-400">
+          ${escapeHtml(hook)}
+        </div>
+
+        <h3 class="mt-2 text-sm font-semibold text-white">
           ${escapeHtml(product.name || "Product")}
         </h3>
 
@@ -108,7 +182,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           ⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})
         </div>
 
-        <div class="mt-2 font-bold text-green-400">${formatPrice(product.price)}</div>
+        <div class="mt-1 text-xs font-semibold text-red-400">
+          ⚡ ${escapeHtml(urgency)}
+        </div>
+
+        <div class="mt-2 flex items-center gap-2">
+          <div class="text-lg font-bold text-green-400">${formatPrice(price)}</div>
+          <div class="text-xs text-zinc-500 line-through">${formatPrice(original)}</div>
+        </div>
+
+        <div class="mt-3 rounded-xl bg-green-500 py-2 text-center text-sm font-bold text-black">
+          View Deal →
+        </div>
       </a>
     `;
   }
@@ -164,25 +249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else if (sortMode === "price-low") {
       arr.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
     } else {
-      arr.sort((a, b) => {
-        if (safeNumber(a.source_priority, 999999) !== safeNumber(b.source_priority, 999999)) {
-          return safeNumber(a.source_priority, 999999) - safeNumber(b.source_priority, 999999);
-        }
-
-        if (safeNumber(a.source_rank, 999999) !== safeNumber(b.source_rank, 999999)) {
-          return safeNumber(a.source_rank, 999999) - safeNumber(b.source_rank, 999999);
-        }
-
-        if (safeNumber(b.priority) !== safeNumber(a.priority)) {
-          return safeNumber(b.priority) - safeNumber(a.priority);
-        }
-
-        if (safeNumber(b.score) !== safeNumber(a.score)) {
-          return safeNumber(b.score) - safeNumber(a.score);
-        }
-
-        return safeNumber(b.amazon_review_count) - safeNumber(a.amazon_review_count);
-      });
+      arr.sort((a, b) => safeNumber(b.final_score) - safeNumber(a.final_score));
     }
 
     return arr;
@@ -277,7 +344,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  let products = dedupeProducts(data || []);
+  let products = dedupeProducts(data || []).map((item) => ({
+    ...item,
+    final_score: computeScore(item)
+  }));
+
   products = applyKeywordFilter(products, config.filter?.query || null);
   products = applyPriceFilter(products, config.filter?.maxPrice ?? null);
   products = sortProducts(products, config.sort || "score");
