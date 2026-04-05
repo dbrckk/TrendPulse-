@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "description": "TrendPulse - mobile-first Amazon affiliate catalog, deals, and programmatic SEO site",
   "scripts": {
-    "build": "echo \"No build step needed\"",
-    "sync:deals": "node sync-deals.js",
     "sync:catalog": "node sync-catalog.js",
+    "sync:deals": "node sync-deals.js",
+    "generate:programmatic": "node generate-programmatic-pages.js",
     "generate:sitemap": "node generate-sitemap.js",
-    "generate:programmatic": "node generate-programmatic-pages.js"
+    "pipeline": "npm run sync:catalog && npm run sync:deals && npm run generate:programmatic && npm run generate:sitemap"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
