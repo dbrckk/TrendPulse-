@@ -2,22 +2,6 @@
   let productsCache = null;
   let productsPromise = null;
 
-  const HOOKS = [
-    "This is selling out fast",
-    "Everyone is buying this right now",
-    "This feels illegal for this price",
-    "You don’t need it… until you see it",
-    "This is blowing up right now",
-    "People are obsessed with this"
-  ];
-
-  const URGENCY = [
-    "Limited stock",
-    "Deal ending soon",
-    "Only today",
-    "Selling fast"
-  ];
-
   function safeNumber(value, fallback = 0) {
     const n = Number(value);
     return Number.isFinite(n) ? n : fallback;
@@ -51,26 +35,6 @@
   function productUrl(product) {
     if (product.slug) return `/product/${encodeURIComponent(product.slug)}`;
     return `/product/${encodeURIComponent(product.asin || "")}`;
-  }
-
-  function randomPick(array, seed = "") {
-    if (!array.length) return "";
-    let hash = 0;
-    const text = String(seed || "x");
-    for (let i = 0; i < text.length; i += 1) {
-      hash = (hash << 5) - hash + text.charCodeAt(i);
-      hash |= 0;
-    }
-    const index = Math.abs(hash) % array.length;
-    return array[index];
-  }
-
-  function getHook(product) {
-    return randomPick(HOOKS, product.asin || product.slug || product.name);
-  }
-
-  function getUrgency(product) {
-    return randomPick(URGENCY, `${product.asin || product.slug || product.name}-u`);
   }
 
   function computeScore(product) {
@@ -110,6 +74,15 @@
     return value || "general";
   }
 
+  function getDiscount(product) {
+    const price = safeNumber(product.price, 0);
+    const original = safeNumber(product.original_price, 0) || price * 1.5;
+    if (original > price && price > 0) {
+      return Math.max(1, Math.round(((original - price) / original) * 100));
+    }
+    return Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
+  }
+
   function productCard(product) {
     const image = proxyImage(product.image_url);
     const rating = safeNumber(product.amazon_rating, 0);
@@ -122,13 +95,11 @@
           ? price * 1.5
           : 0;
 
-    const discount =
-      originalPrice > price && price > 0
-        ? Math.max(1, Math.round(((originalPrice - price) / originalPrice) * 100))
-        : Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
-
-    const hook = getHook(product);
-    const urgency = getUrgency(product);
+    const discount = getDiscount(product);
+    const hook = window.ProductHooks ? window.ProductHooks.getHook(product) : "Popular right now";
+    const urgency = window.ProductHooks ? window.ProductHooks.getUrgency(product) : "Selling fast";
+    const proof = window.ProductHooks ? window.ProductHooks.getSocialProof(product) : "Frequently bought";
+    const priceStory = window.ProductHooks ? window.ProductHooks.getPriceStory(product) : "High-demand product";
 
     return `
       <a href="${productUrl(product)}"
@@ -147,7 +118,7 @@
           </div>
 
           <div class="absolute bottom-2 right-2 rounded-full bg-black/80 px-2 py-1 text-xs text-white">
-            🔥 Trending
+            🔥 ${escapeHtml(proof)}
           </div>
         </div>
 
@@ -165,6 +136,10 @@
 
         <div class="mt-1 text-xs font-semibold text-red-400">
           ⚡ ${escapeHtml(urgency)}
+        </div>
+
+        <div class="mt-1 text-xs text-zinc-500">
+          ${escapeHtml(priceStory)}
         </div>
 
         <div class="mt-2 flex items-center gap-2">
@@ -355,8 +330,7 @@
     fetchProducts,
     productCard,
     computeScore,
-    getHook,
-    getUrgency
+    getDiscount
   };
 
   document.addEventListener("DOMContentLoaded", renderDealsPage);
