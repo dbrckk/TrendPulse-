@@ -12,22 +12,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const relatedLinksEl = document.getElementById("collection-related-links");
   const emptyStateEl = document.getElementById("collection-empty-state");
 
-  const HOOKS = [
-    "This is selling out fast",
-    "Everyone is buying this right now",
-    "This feels illegal for this price",
-    "You don’t need it… until you see it",
-    "This is blowing up right now",
-    "People are obsessed with this"
-  ];
-
-  const URGENCY = [
-    "Limited stock",
-    "Deal ending soon",
-    "Only today",
-    "Selling fast"
-  ];
-
   function getCollectionSlug() {
     const pathParts = window.location.pathname.split("/").filter(Boolean);
     if (pathParts[0] === "collections" && pathParts[1]) {
@@ -58,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function proxyImage(url = "") {
-    const raw = String(url).trim();
+    const raw = String(url || "").trim();
     if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
       return "https://via.placeholder.com/600x600?text=No+Image";
     }
@@ -66,57 +50,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function productUrl(product) {
-    if (product.slug) {
-      return `/product/${encodeURIComponent(product.slug)}`;
-    }
-    return `/product/${encodeURIComponent(product.asin || "")}`;
+    const slugValue = String(product?.slug || "").trim();
+    const asin = String(product?.asin || "").trim();
+
+    if (slugValue) return `/product/${encodeURIComponent(slugValue)}`;
+    if (asin) return `/product/${encodeURIComponent(asin)}`;
+    return "/catalog";
   }
 
-  function capitalize(value = "") {
-    return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
-  }
+  function sanitizeProduct(row) {
+    const price = safeNumber(row?.price, 0);
+    const originalPrice =
+      safeNumber(row?.original_price, 0) > 0
+        ? safeNumber(row.original_price, 0)
+        : price > 0
+          ? price * 1.5
+          : 0;
 
-  function randomPick(array, seed = "") {
-    if (!array.length) return "";
-    let hash = 0;
-    const text = String(seed || "x");
-    for (let i = 0; i < text.length; i += 1) {
-      hash = (hash << 5) - hash + text.charCodeAt(i);
-      hash |= 0;
-    }
-    const index = Math.abs(hash) % array.length;
-    return array[index];
-  }
-
-  function getHook(product) {
-    return randomPick(HOOKS, product.asin || product.slug || product.name);
-  }
-
-  function getUrgency(product) {
-    return randomPick(URGENCY, `${product.asin || product.slug || product.name}-u`);
+    return {
+      ...row,
+      slug: String(row?.slug || "").trim() || String(row?.asin || "").trim(),
+      asin: String(row?.asin || "").trim(),
+      name: String(row?.name || "").trim() || "Amazon Product",
+      image_url: proxyImage(row?.image_url),
+      price,
+      original_price: originalPrice,
+      discount_percentage: safeNumber(
+        row?.discount_percentage ?? row?.discount_percent,
+        0
+      ),
+      amazon_rating: safeNumber(row?.amazon_rating, 0),
+      amazon_review_count: safeNumber(row?.amazon_review_count, 0),
+      priority: safeNumber(row?.priority, 0),
+      source_kind: row?.source_kind || row?.type || "catalog",
+      is_active: typeof row?.is_active === "boolean" ? row.is_active : true
+    };
   }
 
   function getDiscount(product) {
-    const price = safeNumber(product.price, 0);
-    const original = safeNumber(product.original_price, 0) || price * 1.5;
-    if (original > price && price > 0) {
-      return Math.max(1, Math.round(((original - price) / original) * 100));
-    }
-    return Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
-  }
-
-  function getBadge(product) {
-    const sourceKind = String(product.source_kind || "").toLowerCase();
-
-    if (sourceKind === "deal") {
-      return `<span class="rounded-full bg-green-500/15 px-2.5 py-1 text-[11px] font-medium text-green-300">Deal</span>`;
-    }
-
-    if (product.is_best_seller) {
-      return `<span class="rounded-full bg-blue-500/15 px-2.5 py-1 text-[11px] font-medium text-blue-300">Best Seller</span>`;
-    }
-
-    return `<span class="rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${escapeHtml(capitalize(product.category || "general"))}</span>`;
+    return window.TrendPulseUI?.getDiscount
+      ? window.TrendPulseUI.getDiscount(product)
+      : Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
   }
 
   function computeScore(product) {
@@ -124,7 +98,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const rating = safeNumber(product.amazon_rating, 0);
     const discount = safeNumber(product.discount_percentage, 20);
     const priority = safeNumber(product.priority, 0);
-    const sourceBonus = String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
+    const sourceBonus =
+      String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
 
     return (
       reviews * 0.4 +
@@ -132,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       discount * 10 * 0.2 +
       priority * 4 +
       sourceBonus +
-      Math.random() * 50
+      Math.random() * 25
     );
   }
 
@@ -143,8 +118,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const price = safeNumber(product.price, 0);
     const original = safeNumber(product.original_price, 0) || price * 1.5;
     const discount = getDiscount(product);
-    const hook = getHook(product);
-    const urgency = getUrgency(product);
+    const hook = window.ProductHooks ? window.ProductHooks.getHook(product) : "Popular right now";
+    const urgency = window.ProductHooks ? window.ProductHooks.getUrgency(product) : "Selling fast";
+    const proof = window.ProductHooks ? window.ProductHooks.getSocialProof(product) : "Frequently bought";
+    const priceStory = window.ProductHooks ? window.ProductHooks.getPriceStory(product) : "High-demand product";
 
     return `
       <a href="${productUrl(product)}" class="block rounded-2xl border border-zinc-800 bg-zinc-900 p-4 transition hover:scale-[1.02] hover:border-zinc-600">
@@ -162,12 +139,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
 
           <div class="absolute bottom-2 right-2 rounded-full bg-black/80 px-2 py-1 text-xs text-white">
-            🔥 Trending
+            🔥 ${escapeHtml(proof)}
           </div>
-        </div>
-
-        <div class="mt-3 flex flex-wrap gap-2">
-          ${getBadge(product)}
         </div>
 
         <div class="mt-3 text-xs font-semibold text-green-400">
@@ -186,6 +159,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           ⚡ ${escapeHtml(urgency)}
         </div>
 
+        <div class="mt-1 text-xs text-zinc-500">
+          ${escapeHtml(priceStory)}
+        </div>
+
         <div class="mt-2 flex items-center gap-2">
           <div class="text-lg font-bold text-green-400">${formatPrice(price)}</div>
           <div class="text-xs text-zinc-500 line-through">${formatPrice(original)}</div>
@@ -202,7 +179,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const seen = new Set();
 
     return products.filter((product) => {
-      const key = product.asin || product.slug || product.name;
+      const key =
+        String(product?.asin || "").trim() ||
+        String(product?.slug || "").trim() ||
+        String(product?.id || "").trim() ||
+        String(product?.name || "").trim();
+
       if (!key) return false;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -221,7 +203,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         product.brand,
         product.description,
         product.short_description,
-        product.category
+        product.category,
+        product.subcategory
       ]
         .filter(Boolean)
         .join(" ")
@@ -260,63 +243,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     emptyStateEl.classList.toggle("hidden", !isEmpty);
   }
 
-  function updateMeta(config, canonicalUrl) {
-    document.title = `${config.title} | TrendPulse`;
-
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) metaDescription.setAttribute("content", config.description);
-
-    const canonical = document.querySelector('link[rel="canonical"]');
-    if (canonical) canonical.setAttribute("href", canonicalUrl);
-
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute("content", `${config.title} | TrendPulse`);
-
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (ogDescription) ogDescription.setAttribute("content", config.description);
-
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) ogUrl.setAttribute("content", canonicalUrl);
-
-    const twitterTitle = document.querySelector('meta[name="twitter:title"]');
-    if (twitterTitle) twitterTitle.setAttribute("content", `${config.title} | TrendPulse`);
-
-    const twitterDescription = document.querySelector('meta[name="twitter:description"]');
-    if (twitterDescription) twitterDescription.setAttribute("content", config.description);
-
-    const schemaEl = document.getElementById("collection-schema");
-    if (schemaEl) {
-      schemaEl.textContent = JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        name: `${config.title} | TrendPulse`,
-        url: canonicalUrl,
-        description: config.description
-      });
-    }
-  }
-
-  function renderRelatedPages(pages, currentConfig) {
-    if (!relatedLinksEl) return;
-
-    const sameCategory = pages
-      .filter((page) => page.slug !== currentConfig.slug && page.category === currentConfig.category)
-      .slice(0, 6);
-
-    relatedLinksEl.innerHTML = sameCategory
-      .map(
-        (page) => `
-          <a
-            href="/collections/${encodeURIComponent(page.slug)}"
-            class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
-          >
-            ${escapeHtml(page.title)}
-          </a>
-        `
-      )
-      .join("");
-  }
-
   function findCollectionConfig(pages, currentSlug) {
     return pages.find((page) => page.slug === currentSlug);
   }
@@ -344,10 +270,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  let products = dedupeProducts(data || []).map((item) => ({
-    ...item,
-    final_score: computeScore(item)
-  }));
+  let products = dedupeProducts((data || []).map(sanitizeProduct))
+    .filter((p) => p.name && p.is_active !== false)
+    .map((item) => ({
+      ...item,
+      final_score: computeScore(item)
+    }));
 
   products = applyKeywordFilter(products, config.filter?.query || null);
   products = applyPriceFilter(products, config.filter?.maxPrice ?? null);
@@ -364,7 +292,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setEmptyState(products.length === 0);
 
-  const canonicalUrl = `https://www.trend-pulse.shop/collections/${encodeURIComponent(slug)}`;
-  updateMeta(config, canonicalUrl);
-  renderRelatedPages(pages, config);
+  if (relatedLinksEl) {
+    const sameCategory = pages
+      .filter((page) => page.slug !== config.slug && page.category === config.category)
+      .slice(0, 6);
+
+    relatedLinksEl.innerHTML = sameCategory
+      .map(
+        (page) => `
+          <a
+            href="/collections/${encodeURIComponent(page.slug)}"
+            class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+          >
+            ${escapeHtml(page.title)}
+          </a>
+        `
+      )
+      .join("");
+  }
 });
