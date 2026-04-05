@@ -25,29 +25,26 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Sync deals
+      - name: Sync catalog sources
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          RSS_FEEDS: ${{ secrets.RSS_FEEDS }}
-          AMAZON_AFFILIATE_TAG: ${{ secrets.AMAZON_AFFILIATE_TAG }}
-        run: npm run sync:deals
+        run: node sync-catalog.js
 
-      - name: Sync catalog
+      - name: Sync deal sources
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          AMAZON_AFFILIATE_TAG: ${{ secrets.AMAZON_AFFILIATE_TAG }}
-        run: npm run sync:catalog
+        run: node sync-deals.js
 
-      - name: Generate programmatic pages config
-        run: npm run generate:programmatic
+      - name: Generate programmatic pages
+        run: node generate-programmatic-pages.js
 
       - name: Generate sitemap
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: npm run generate:sitemap
+        run: node generate-sitemap.js
 
       - name: Commit generated files if changed
         run: |
