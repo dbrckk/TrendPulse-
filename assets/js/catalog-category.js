@@ -35,66 +35,53 @@ document.addEventListener("DOMContentLoaded", async () => {
     tech: {
       title: "Tech Catalog",
       description: "Popular tech products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This tech catalog combines evergreen best-selling Amazon products with active deals in the same category, helping users discover high-demand electronics, gadgets, and accessories."
+      seo: "This tech catalog combines evergreen best-selling Amazon products with active deals in the same category."
     },
     home: {
       title: "Home Catalog",
       description: "Popular home products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This home catalog combines evergreen best sellers and active deals for storage, comfort, daily living, and practical home essentials."
+      seo: "This home catalog combines evergreen best sellers and active deals for storage, comfort, and daily living."
     },
     kitchen: {
       title: "Kitchen Catalog",
       description: "Popular kitchen products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This kitchen catalog highlights frequently bought cookware, tools, appliances, and useful kitchen products, alongside category-relevant deals."
+      seo: "This kitchen catalog highlights frequently bought cookware, tools, appliances, and useful kitchen products."
     },
     beauty: {
       title: "Beauty Catalog",
       description: "Popular beauty products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This beauty catalog combines high-demand skincare, self-care, and beauty products with matching deals currently available."
+      seo: "This beauty catalog combines high-demand skincare, self-care, and beauty products with matching deals."
     },
     health: {
       title: "Health Catalog",
       description: "Popular health products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This health catalog focuses on wellness and daily-use products with stable demand, while also surfacing relevant category deals."
+      seo: "This health catalog focuses on wellness and daily-use products with stable demand."
     },
     sports: {
       title: "Sports Catalog",
       description: "Popular sports products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This sports catalog brings together frequently bought fitness and activity products, along with active deals when available."
+      seo: "This sports catalog brings together frequently bought fitness and activity products."
     },
     travel: {
       title: "Travel Catalog",
       description: "Popular travel products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This travel catalog surfaces proven travel essentials, luggage, and accessories, together with matching category deals."
+      seo: "This travel catalog surfaces proven travel essentials, luggage, and accessories."
     },
     fashion: {
       title: "Fashion Catalog",
       description: "Popular fashion products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This fashion catalog merges strong-demand products across men, women, and jewelry, creating a denser category with both evergreen products and live deals."
+      seo: "This fashion catalog merges strong-demand products across men, women, and jewelry."
     },
     family: {
       title: "Family Catalog",
       description: "Popular family products with strong buying frequency on Amazon, plus relevant active deals.",
-      seo: "This family catalog groups baby and pet related products into a stronger evergreen category, enriched with matching live deals."
+      seo: "This family catalog groups baby and pet related products into a stronger evergreen category."
     },
     general: {
       title: "General Catalog",
       description: "Popular Amazon products with strong buying frequency, plus relevant active deals.",
-      seo: "This general catalog mixes frequently bought Amazon products across categories and supplements them with active deals when relevant."
+      seo: "This general catalog mixes frequently bought Amazon products across categories."
     }
-  };
-
-  const relatedCategoryMap = {
-    tech: ["home", "travel", "general", "fashion"],
-    home: ["kitchen", "beauty", "general", "family"],
-    kitchen: ["home", "health", "general", "beauty"],
-    beauty: ["health", "fashion", "general", "home"],
-    health: ["sports", "beauty", "general", "kitchen"],
-    sports: ["health", "fashion", "general", "travel"],
-    travel: ["tech", "fashion", "general", "home"],
-    fashion: ["beauty", "tech", "general", "travel"],
-    family: ["home", "health", "general", "fashion"],
-    general: ["tech", "home", "beauty", "kitchen"]
   };
 
   function safeNumber(value, fallback = 0) {
@@ -115,12 +102,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `$${safeNumber(value).toFixed(2)}`;
   }
 
-  function capitalize(value = "") {
-    return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
-  }
-
   function proxyImage(url = "") {
-    const raw = String(url).trim();
+    const raw = String(url || "").trim();
     if (!raw || raw.includes("your-image-url.com") || raw.includes("placeholder")) {
       return "https://via.placeholder.com/600x600?text=No+Image";
     }
@@ -128,10 +111,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function productUrl(product) {
-    if (product.slug) {
-      return `/product/${encodeURIComponent(product.slug)}`;
-    }
-    return `/product/${encodeURIComponent(product.asin || "")}`;
+    const slug = String(product?.slug || "").trim();
+    const asin = String(product?.asin || "").trim();
+
+    if (slug) return `/product/${encodeURIComponent(slug)}`;
+    if (asin) return `/product/${encodeURIComponent(asin)}`;
+    return "/catalog";
   }
 
   function normalizeCategory(raw = "") {
@@ -141,27 +126,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     return value || "general";
   }
 
-  function getDiscount(product) {
-    const price = safeNumber(product.price, 0);
-    const original = safeNumber(product.original_price, 0) || price * 1.5;
-    if (original > price && price > 0) {
-      return Math.max(1, Math.round(((original - price) / original) * 100));
-    }
-    return Math.max(10, Math.min(65, Math.round(safeNumber(product.discount_percentage, 18))));
+  function capitalize(value = "") {
+    return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
   }
 
-  function getCategoryBadge(product) {
-    const sourceKind = String(product.source_kind || "").toLowerCase();
+  function sanitizeProduct(row) {
+    const price = safeNumber(row?.price, 0);
+    const originalPrice =
+      safeNumber(row?.original_price, 0) > 0
+        ? safeNumber(row.original_price, 0)
+        : price > 0
+          ? price * 1.5
+          : 0;
 
-    if (sourceKind === "deal") {
-      return `<span class="rounded-full bg-green-500/15 px-2.5 py-1 text-[11px] font-medium text-green-300">Deal</span>`;
-    }
+    return {
+      ...row,
+      slug: String(row?.slug || "").trim() || String(row?.asin || "").trim(),
+      asin: String(row?.asin || "").trim(),
+      name: String(row?.name || "").trim() || "Amazon Product",
+      category: normalizeCategory(row?.category || category),
+      image_url: proxyImage(row?.image_url),
+      price,
+      original_price: originalPrice,
+      discount_percentage: safeNumber(
+        row?.discount_percentage ?? row?.discount_percent,
+        0
+      ),
+      amazon_rating: safeNumber(row?.amazon_rating, 0),
+      amazon_review_count: safeNumber(row?.amazon_review_count, 0),
+      priority: safeNumber(row?.priority, 0),
+      source_kind: row?.source_kind || row?.type || "catalog",
+      is_active: typeof row?.is_active === "boolean" ? row.is_active : true
+    };
+  }
 
-    if (product.is_best_seller) {
-      return `<span class="rounded-full bg-blue-500/15 px-2.5 py-1 text-[11px] font-medium text-blue-300">Best Seller</span>`;
-    }
-
-    return `<span class="rounded-full border border-zinc-700 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${escapeHtml(capitalize(normalizeCategory(product.category || category)))}</span>`;
+  function getDiscount(product) {
+    return window.TrendPulseUI?.getDiscount
+      ? window.TrendPulseUI.getDiscount(product)
+      : 20;
   }
 
   function computeScore(product) {
@@ -169,7 +171,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const rating = safeNumber(product.amazon_rating, 0);
     const discount = safeNumber(product.discount_percentage, 20);
     const priority = safeNumber(product.priority, 0);
-    const sourceBonus = String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
+    const sourceBonus =
+      String(product.source_kind || "").toLowerCase() === "deal" ? 120 : 0;
 
     return (
       reviews * 0.4 +
@@ -177,7 +180,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       discount * 10 * 0.2 +
       priority * 4 +
       sourceBonus +
-      Math.random() * 50
+      Math.random() * 25
     );
   }
 
@@ -190,48 +193,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (seoTextEl) seoTextEl.textContent = meta.seo;
 
     document.title = `${meta.title} | TrendPulse`;
-
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute("content", meta.description);
-
-    const canonical = document.querySelector('link[rel="canonical"]');
-    if (canonical) {
-      canonical.setAttribute("href", `https://www.trend-pulse.shop/catalog/${encodeURIComponent(category)}`);
-    }
-
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute("content", `${meta.title} | TrendPulse`);
-
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (ogDescription) ogDescription.setAttribute("content", meta.description);
-
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) ogUrl.setAttribute("content", `https://www.trend-pulse.shop/catalog/${encodeURIComponent(category)}`);
-
-    const twitterTitle = document.querySelector('meta[name="twitter:title"]');
-    if (twitterTitle) twitterTitle.setAttribute("content", `${meta.title} | TrendPulse`);
-
-    const twitterDescription = document.querySelector('meta[name="twitter:description"]');
-    if (twitterDescription) twitterDescription.setAttribute("content", meta.description);
-  }
-
-  function renderRelatedCategories() {
-    if (!relatedCategoriesEl) return;
-
-    const related = relatedCategoryMap[category] || ["general"];
-
-    relatedCategoriesEl.innerHTML = related
-      .map(
-        (cat) => `
-          <a
-            href="/catalog/${encodeURIComponent(cat)}"
-            class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
-          >
-            ${escapeHtml(capitalize(cat))}
-          </a>
-        `
-      )
-      .join("");
   }
 
   function productCard(product) {
@@ -265,23 +226,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div class="absolute bottom-3 right-3 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white">
               🔥 ${escapeHtml(proof)}
             </div>
-
-            ${
-              product.source_rank
-                ? `
-                  <div class="absolute right-3 top-3 rounded-full bg-black/80 px-2.5 py-1 text-[11px] font-semibold text-white">
-                    #${safeNumber(product.source_rank, 0)}
-                  </div>
-                `
-                : ""
-            }
           </div>
 
           <div class="flex flex-1 flex-col p-4">
-            <div class="mb-2 flex flex-wrap gap-2">
-              ${getCategoryBadge(product)}
-            </div>
-
             <div class="text-xs font-semibold text-green-400">
               ${escapeHtml(hook)}
             </div>
@@ -335,6 +282,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const seen = new Set();
 
     return (data || [])
+      .map(sanitizeProduct)
+      .filter((p) => p.name && p.is_active !== false)
       .filter((p) => {
         const key = p.asin || p.slug || p.name;
         if (!key) return false;
@@ -344,7 +293,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       })
       .map((p) => ({
         ...p,
-        category: normalizeCategory(p.category),
         final_score: computeScore(p)
       }));
   }
@@ -404,7 +352,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   updateMeta();
-  renderRelatedCategories();
 
   const products = await fetchProducts();
   applyFilters(products);
