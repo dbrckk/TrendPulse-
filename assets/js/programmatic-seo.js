@@ -161,7 +161,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function sortProducts(products, sortMode) {
-    return window.TrendPulseUI.sortProducts(products, sortMode === "price-low" ? "low" : sortMode);
+    if (sortMode === "price-low") return window.TrendPulseUI.sortProducts(products, "low");
+    if (sortMode === "price-high") return window.TrendPulseUI.sortProducts(products, "high");
+    return window.TrendPulseUI.sortProducts(products, sortMode);
   }
 
   function setEmptyState(isEmpty) {
