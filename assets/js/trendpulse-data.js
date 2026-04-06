@@ -1,13 +1,4 @@
 (function () {
-  const PAGE_SIZE = 100;
-
-  function ensureClient() {
-    if (!window.supabaseClient) {
-      throw new Error("Supabase client not initialized");
-    }
-    return window.supabaseClient;
-  }
-
   function safeNumber(value, fallback = 0) {
     const n = Number(value);
     return Number.isFinite(n) ? n : fallback;
@@ -33,225 +24,105 @@
     return v || "general";
   }
 
-  function proxyImage(url) {
-    const raw = normalizeText(url);
-    if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
-      return "https://via.placeholder.com/600x600?text=No+Image";
-    }
-    return raw;
-  }
-
   function normalizeProduct(row) {
     const price = safeNumber(row?.price, 0);
     const original = safeNumber(row?.original_price, 0);
-    const discount = safeNumber(row?.discount_percentage ?? row?.discount_percent, 0);
 
     return {
       id: row?.id || null,
       asin: normalizeText(row?.asin),
       slug: normalizeText(row?.slug) || normalizeText(row?.asin),
-
       name: normalizeText(row?.name) || normalizeText(row?.title) || "Amazon Product",
       title: normalizeText(row?.name) || normalizeText(row?.title) || "Amazon Product",
       brand: normalizeText(row?.brand),
-
       description: normalizeText(row?.description),
       short_description: normalizeText(row?.short_description),
-      tagline: normalizeText(row?.tagline),
-      subcategory: normalizeText(row?.subcategory),
 
-      image: proxyImage(row?.image_url || row?.image),
-      image_url: proxyImage(row?.image_url || row?.image),
+      image: normalizeText(row?.image || row?.image_url),
+      image_url: normalizeText(row?.image || row?.image_url),
 
       price,
       oldPrice: original > price ? original : null,
       original_price: original > price ? original : null,
 
-      discount,
-      discount_percentage: discount,
+      discount: safeNumber(row?.discount ?? row?.discount_percentage, 0),
+      discount_percentage: safeNumber(row?.discount ?? row?.discount_percentage, 0),
 
-      rating: safeNumber(row?.amazon_rating, 0),
-      reviews: safeNumber(row?.amazon_review_count, 0),
-      amazon_rating: safeNumber(row?.amazon_rating, 0),
-      amazon_review_count: safeNumber(row?.amazon_review_count, 0),
+      rating: safeNumber(row?.rating ?? row?.amazon_rating, 0),
+      reviews: safeNumber(row?.reviews ?? row?.amazon_review_count, 0),
+      amazon_rating: safeNumber(row?.rating ?? row?.amazon_rating, 0),
+      amazon_review_count: safeNumber(row?.reviews ?? row?.amazon_review_count, 0),
 
       category: normalizeCategory(row?.category),
-      affiliate: normalizeText(row?.affiliate_link || row?.amazon_url || row?.link || "#"),
-      affiliate_link: normalizeText(row?.affiliate_link || row?.amazon_url || row?.link || "#"),
-      amazon_url: normalizeText(row?.amazon_url || row?.affiliate_link || row?.link || "#"),
+      subcategory: normalizeText(row?.subcategory),
 
-      source_kind: normalizeText(row?.source_kind || row?.type || "catalog").toLowerCase(),
-      source_name: normalizeText(row?.source_name),
+      affiliate: normalizeText(row?.affiliate || row?.affiliate_link || row?.amazon_url || row?.link || "#"),
+      affiliate_link: normalizeText(row?.affiliate || row?.affiliate_link || row?.amazon_url || row?.link || "#"),
+      amazon_url: normalizeText(row?.amazon_url || row?.affiliate || row?.affiliate_link || row?.link || "#"),
 
       priority: safeNumber(row?.priority, 0),
       clicks: safeNumber(row?.clicks, 0),
       views: safeNumber(row?.views, 0),
-      likes: safeNumber(row?.likes, 0),
-
-      created_at: row?.created_at || null,
-      updated_at: row?.updated_at || null,
-      published_at: row?.published_at || null,
-
-      score: 0
+      likes: safeNumber(row?.likes, 0)
     };
   }
 
-  function dedupe(items) {
-    const seen = new Set();
-
-    return (items || []).filter((item) => {
-      const key = item.asin || item.slug || item.name || item.id;
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }
-
-  function computeScore(product) {
-    return (
-      safeNumber(product.reviews) * 0.4 +
-      safeNumber(product.rating) * 100 * 0.3 +
-      safeNumber(product.discount) * 10 * 0.2 +
-      safeNumber(product.priority) * 4 +
-      safeNumber(product.likes) * 2 +
-      safeNumber(product.clicks) * 1.5 +
-      safeNumber(product.views) * 0.15
-    );
-  }
-
-  function prepareRows(rows) {
-    return dedupe((rows || []).map(normalizeProduct))
-      .map((p) => ({ ...p, score: computeScore(p) }))
-      .sort((a, b) => b.score - a.score);
-  }
-
-  async function fetchDeals(limit = 60) {
-    const client = ensureClient();
-    const { data, error } = await client
-      .from("deal_products")
-      .select("*")
-      .limit(limit);
-
-    if (error) {
-      console.error("Error fetching deals:", error);
-      return [];
-    }
-
-    return prepareRows(data);
-  }
-
   async function fetchCatalogByCategory(category, limit = 60) {
-    const client = ensureClient();
-    const normalizedCategory = normalizeCategory(category);
+    if (!window.supabaseClient) return [];
 
-    const { data, error } = await client
+    const { data, error } = await window.supabaseClient
       .from("catalog_category_feed")
       .select("*")
-      .eq("category", normalizedCategory)
+      .eq("category", normalizeCategory(category))
       .limit(limit);
 
     if (error) {
-      console.error("Error fetching category catalog:", error);
+      console.error("fetchCatalogByCategory error", error);
       return [];
     }
 
-    return prepareRows(data);
+    return (data || []).map(normalizeProduct);
   }
 
-  async function fetchCatalog(limit = PAGE_SIZE) {
-    const client = ensureClient();
-    const { data, error } = await client
-      .from("catalog_category_feed")
-      .select("*")
-      .limit(limit);
+  async function fetchTopProducts(limit = 24) {
+    if (!window.supabaseClient) return [];
 
-    if (error) {
-      console.error("Error fetching catalog:", error);
-      return [];
-    }
-
-    return prepareRows(data);
-  }
-
-  async function fetchTopProducts(limit = 60) {
-    const client = ensureClient();
-    const { data, error } = await client
+    const { data, error } = await window.supabaseClient
       .from("products")
       .select("*")
       .limit(limit);
 
     if (error) {
-      console.error("Error fetching top products:", error);
+      console.error("fetchTopProducts error", error);
       return [];
     }
 
-    return prepareRows(data);
-  }
-
-  async function fetchHomeFeed() {
-    let items = await fetchDeals(30);
-
-    if (!items.length) {
-      console.warn("No live deals found, using product fallback.");
-      items = await fetchTopProducts(30);
-    }
-
-    return items;
+    return (data || []).map(normalizeProduct);
   }
 
   async function fetchCollectionProducts(config, limit = 24) {
-    const safeConfig = config || {};
-    let items = await fetchCatalogByCategory(safeConfig.category || "general", 120);
+    let products = await fetchCatalogByCategory(config.category, 120);
 
-    if (safeConfig.filter?.query) {
-      const needle = normalizeText(safeConfig.filter.query).toLowerCase();
-      items = items.filter((item) => {
-        const haystack = [
-          item.name,
-          item.brand,
-          item.description,
-          item.short_description,
-          item.category,
-          item.subcategory
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return haystack.includes(needle);
-      });
+    if (config?.filter?.query) {
+      const q = config.filter.query.toLowerCase();
+      products = products.filter((p) =>
+        `${p.name} ${p.description} ${p.category}`.toLowerCase().includes(q)
+      );
     }
 
-    if (safeConfig.filter?.maxPrice != null) {
-      const maxPrice = safeNumber(safeConfig.filter.maxPrice, 0);
-      items = items.filter((item) => safeNumber(item.price, 999999) <= maxPrice);
+    if (config?.filter?.maxPrice) {
+      products = products.filter(
+        (p) => safeNumber(p.price, 999999) <= config.filter.maxPrice
+      );
     }
 
-    if (safeConfig.sort === "reviews") {
-      items.sort((a, b) => safeNumber(b.reviews) - safeNumber(a.reviews));
-    } else if (safeConfig.sort === "rating") {
-      items.sort((a, b) => safeNumber(b.rating) - safeNumber(a.rating));
-    } else if (safeConfig.sort === "price-low") {
-      items.sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
-    } else {
-      items.sort((a, b) => safeNumber(b.score) - safeNumber(a.score));
-    }
-
-    if (!items.length) {
-      items = await fetchTopProducts(limit);
-    }
-
-    return items.slice(0, limit);
+    return products.slice(0, limit);
   }
 
   window.TrendPulseData = {
-    fetchDeals,
-    fetchCatalogByCategory,
-    fetchCatalog,
-    fetchTopProducts,
-    fetchHomeFeed,
-    fetchCollectionProducts,
     normalizeCategory,
-    normalizeProduct
+    fetchCatalogByCategory,
+    fetchTopProducts,
+    fetchCollectionProducts
   };
 })();
