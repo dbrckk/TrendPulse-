@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TrendPulse</title>
-  <meta name="description" content="Discover Amazon deals and high-demand products on TrendPulse." />
+  <meta
+    name="description"
+    content="Discover Amazon deals and high-demand products on TrendPulse."
+  />
+  <link rel="canonical" href="https://www.trend-pulse.shop/" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -14,14 +18,14 @@
       <a href="/" class="text-3xl font-bold">TrendPulse</a>
       <nav class="flex items-center gap-6 text-sm text-zinc-300">
         <a href="/" class="text-white">Home</a>
-        <a href="/deals">Deals</a>
-        <a href="/catalog">Catalog</a>
+        <a href="/deals" class="hover:text-white">Deals</a>
+        <a href="/catalog" class="hover:text-white">Catalog</a>
       </nav>
     </div>
   </header>
 
   <main class="mx-auto max-w-6xl px-4 py-8">
-    <section class="mb-8">
+    <section class="mb-10">
       <h1 class="text-4xl font-bold">Trending Amazon Products</h1>
       <p class="mt-3 max-w-3xl text-lg text-zinc-400">
         Discover strong Amazon deals and best-selling products. If there are no live deals,
@@ -33,17 +37,29 @@
     <section>
       <div id="deals" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
     </section>
+
+    <section class="mt-12 rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
+      <h2 class="text-xl font-semibold">Explore TrendPulse</h2>
+      <div class="mt-4 flex flex-wrap gap-3 text-sm">
+        <a href="/deals" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Latest Deals</a>
+        <a href="/catalog/tech" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Tech</a>
+        <a href="/catalog/home" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Home</a>
+        <a href="/catalog/kitchen" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Kitchen</a>
+        <a href="/collections/best-tech-products" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Best Tech Products</a>
+        <a href="/collections/best-gifts-for-men" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Best Gifts for Men</a>
+      </div>
+    </section>
   </main>
 
   <script src="/assets/js/supabase.js"></script>
   <script src="/assets/js/trendpulse-data.js"></script>
   <script src="/assets/js/product-hooks.js"></script>
+  <script src="/assets/js/trendpulse-analytics.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       if (typeof window.loadDeals === "function") {
         window.loadDeals();
       } else {
-        console.error("loadDeals is not defined");
         const status = document.getElementById("home-status");
         if (status) status.textContent = "Error loading products";
       }
