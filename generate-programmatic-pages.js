@@ -28,7 +28,17 @@ const CATEGORY_META = {
       "computer accessories",
       "portable tech",
       "tech gifts",
-      "budget tech"
+      "budget tech",
+      "usb c accessories",
+      "laptop accessories",
+      "wireless accessories",
+      "office tech",
+      "creator gear",
+      "travel tech",
+      "iphone accessories",
+      "android accessories",
+      "monitor accessories",
+      "audio gear"
     ]
   },
   home: {
@@ -43,7 +53,17 @@ const CATEGORY_META = {
       "smart home",
       "bedroom essentials",
       "living room items",
-      "small space products"
+      "small space products",
+      "bathroom essentials",
+      "entryway organization",
+      "laundry room items",
+      "desk organization",
+      "minimalist home",
+      "cozy home items",
+      "daily home products",
+      "amazon home finds",
+      "room refresh items",
+      "practical home products"
     ]
   },
   kitchen: {
@@ -58,7 +78,17 @@ const CATEGORY_META = {
       "kitchen organization",
       "baking tools",
       "water bottles",
-      "cheap kitchen gadgets"
+      "cheap kitchen gadgets",
+      "blender accessories",
+      "knife sets",
+      "food storage",
+      "espresso accessories",
+      "kitchen essentials",
+      "healthy cooking gear",
+      "kitchen amazon finds",
+      "kitchen gifts",
+      "countertop tools",
+      "kitchen under 50"
     ]
   },
   beauty: {
@@ -73,7 +103,17 @@ const CATEGORY_META = {
       "face care",
       "body care",
       "beauty under 25",
-      "trending beauty"
+      "trending beauty",
+      "hair styling tools",
+      "facial tools",
+      "travel beauty",
+      "beauty organizer",
+      "beauty essentials",
+      "beauty amazon finds",
+      "skin care gifts",
+      "budget skincare",
+      "premium beauty",
+      "daily beauty products"
     ]
   },
   health: {
@@ -88,7 +128,17 @@ const CATEGORY_META = {
       "massagers",
       "posture support",
       "health under 50",
-      "walking essentials"
+      "walking essentials",
+      "hydration accessories",
+      "stress relief tools",
+      "home wellness",
+      "mobility aids",
+      "ergonomic accessories",
+      "healthy living products",
+      "health amazon finds",
+      "recovery gifts",
+      "wellness under 25",
+      "everyday health items"
     ]
   },
   sports: {
@@ -103,7 +153,17 @@ const CATEGORY_META = {
       "sports gifts",
       "camping gear",
       "hiking gear",
-      "budget fitness"
+      "budget fitness",
+      "gym bag essentials",
+      "resistance training",
+      "cardio accessories",
+      "sports recovery",
+      "garage gym",
+      "exercise mats",
+      "workout amazon finds",
+      "fitness under 50",
+      "travel workout gear",
+      "daily training gear"
     ]
   },
   travel: {
@@ -118,7 +178,17 @@ const CATEGORY_META = {
       "luggage accessories",
       "cheap travel gear",
       "flight essentials",
-      "travel gifts"
+      "travel gifts",
+      "travel comfort items",
+      "passport accessories",
+      "backpack organization",
+      "hotel essentials",
+      "travel under 25",
+      "travel amazon finds",
+      "digital nomad gear",
+      "weekend trip gear",
+      "vacation essentials",
+      "international travel gear"
     ]
   },
   fashion: {
@@ -133,7 +203,17 @@ const CATEGORY_META = {
       "jewelry",
       "cheap fashion",
       "minimalist fashion",
-      "travel fashion"
+      "travel fashion",
+      "daily accessories",
+      "fashion under 50",
+      "fashion amazon finds",
+      "work accessories",
+      "caps and hats",
+      "sunglasses",
+      "giftable accessories",
+      "statement jewelry",
+      "small bags",
+      "budget style"
     ]
   },
   family: {
@@ -148,7 +228,17 @@ const CATEGORY_META = {
       "daily family items",
       "home pet gear",
       "family under 25",
-      "useful family products"
+      "useful family products",
+      "dog accessories",
+      "cat accessories",
+      "toddler essentials",
+      "nursery items",
+      "pet amazon finds",
+      "family organization",
+      "school essentials",
+      "road trip with kids",
+      "parent life products",
+      "family gifts"
     ]
   },
   general: {
@@ -163,7 +253,17 @@ const CATEGORY_META = {
       "everyday essentials",
       "trending amazon finds",
       "useful products",
-      "budget products"
+      "budget products",
+      "must have products",
+      "cool finds",
+      "practical gifts",
+      "amazon under 25",
+      "amazon under 50",
+      "home office finds",
+      "daily use items",
+      "top rated finds",
+      "hidden gems",
+      "most useful products"
     ]
   }
 };
@@ -172,14 +272,38 @@ const SORT_VARIANTS = [
   { key: "score", label: "Best", intro: "best" },
   { key: "reviews", label: "Top", intro: "top" },
   { key: "rating", label: "Popular", intro: "popular" },
-  { key: "price-low", label: "Cheap", intro: "cheap" }
+  { key: "price-low", label: "Cheap", intro: "cheap" },
+  { key: "price-high", label: "Premium", intro: "premium" }
 ];
 
 const PRICE_VARIANTS = [
+  { maxPrice: 10, slug: "under-10", text: "Under $10" },
   { maxPrice: 15, slug: "under-15", text: "Under $15" },
   { maxPrice: 25, slug: "under-25", text: "Under $25" },
+  { maxPrice: 35, slug: "under-35", text: "Under $35" },
   { maxPrice: 50, slug: "under-50", text: "Under $50" },
   { maxPrice: 100, slug: "under-100", text: "Under $100" }
+];
+
+const MODIFIERS = [
+  "for beginners",
+  "for everyday use",
+  "for small spaces",
+  "for gift ideas",
+  "for daily use",
+  "for travel",
+  "for home office",
+  "for students",
+  "for minimalists",
+  "for smart shopping"
+];
+
+const INTENTS = [
+  { slug: "best", label: "Best", sort: "score" },
+  { slug: "top-rated", label: "Top Rated", sort: "rating" },
+  { slug: "most-reviewed", label: "Most Reviewed", sort: "reviews" },
+  { slug: "budget", label: "Budget", sort: "price-low" },
+  { slug: "premium", label: "Premium", sort: "price-high" }
 ];
 
 function slugify(value) {
@@ -279,6 +403,51 @@ function buildKeywordPages(category) {
         pageType: "keyword_price"
       });
     }
+
+    for (const modifier of MODIFIERS) {
+      const modifierSlug = slugify(modifier);
+
+      pages.push({
+        slug: `best-${category}-${keywordSlug}-${modifierSlug}`,
+        title: `Best ${label} ${keywordTitle} ${titleCase(modifier)}`,
+        description: `Discover ${category} ${keyword} ${modifier} on Amazon.`,
+        category,
+        sort: "score",
+        filter: { query: `${keyword} ${modifier}` },
+        seoText: `This page highlights ${category} ${keyword} ${modifier} using strong Amazon demand signals.`,
+        pageType: "keyword_modifier"
+      });
+    }
+  }
+
+  return pages;
+}
+
+function buildIntentPages(category) {
+  const meta = CATEGORY_META[category];
+  const label = meta.label;
+  const pages = [];
+
+  for (const keyword of meta.keywordSeeds) {
+    const keywordSlug = slugify(keyword);
+    const keywordTitle = titleCase(keyword);
+
+    for (const intent of INTENTS) {
+      for (const modifier of MODIFIERS) {
+        const modifierSlug = slugify(modifier);
+
+        pages.push({
+          slug: `${intent.slug}-${category}-${keywordSlug}-${modifierSlug}`,
+          title: `${intent.label} ${label} ${keywordTitle} ${titleCase(modifier)}`,
+          description: `Explore ${intent.slug} ${category} ${keyword} ${modifier} on Amazon.`,
+          category,
+          sort: intent.sort,
+          filter: { query: `${keyword} ${modifier}` },
+          seoText: `This page focuses on ${intent.slug} ${category} ${keyword} ${modifier}, filtered through TrendPulse demand signals.`,
+          pageType: "intent_modifier"
+        });
+      }
+    }
   }
 
   return pages;
@@ -356,6 +525,7 @@ function buildAllPages() {
   for (const category of CATEGORIES) {
     pages.push(...buildCorePages(category));
     pages.push(...buildKeywordPages(category));
+    pages.push(...buildIntentPages(category));
   }
 
   pages.push(...buildAudiencePages());
@@ -366,8 +536,8 @@ function buildAllPages() {
 async function main() {
   const pages = buildAllPages();
 
-  if (pages.length < 1000) {
-    throw new Error(`Expected at least 1000 pages, got ${pages.length}`);
+  if (pages.length < 10000) {
+    throw new Error(`Expected at least 10000 pages, got ${pages.length}`);
   }
 
   await fs.writeFile(
