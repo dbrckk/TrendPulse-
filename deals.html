@@ -4,34 +4,53 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Amazon Deals | TrendPulse</title>
-  <meta name="description" content="Browse strong Amazon deals curated from the latest feed and high-demand products." />
+  <meta
+    name="description"
+    content="Browse strong Amazon deals curated from the latest feed and high-demand products."
+  />
+  <link rel="canonical" href="https://www.trend-pulse.shop/deals" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="min-h-screen bg-black text-white">
   <header class="border-b border-zinc-800 bg-zinc-950">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-      <a href="/" class="text-xl font-bold">TrendPulse</a>
-      <nav class="flex items-center gap-4 text-sm text-zinc-300">
-        <a href="/">Home</a>
+      <a href="/" class="text-3xl font-bold">TrendPulse</a>
+      <nav class="flex items-center gap-6 text-sm text-zinc-300">
+        <a href="/" class="hover:text-white">Home</a>
         <a href="/deals" class="text-white">Deals</a>
-        <a href="/catalog">Catalog</a>
+        <a href="/catalog" class="hover:text-white">Catalog</a>
       </nav>
     </div>
   </header>
 
   <main class="mx-auto max-w-6xl px-4 py-8">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold">Latest Amazon Deals</h1>
-      <p class="mt-2 text-zinc-400">Good deals first. If there are no live deals, the page automatically falls back to strong Amazon products.</p>
-      <div id="resultCount" class="mt-3 text-sm text-zinc-500">Loading deals...</div>
-    </div>
+    <section class="mb-10">
+      <h1 class="text-4xl font-bold">Latest Amazon Deals</h1>
+      <p class="mt-3 max-w-3xl text-lg text-zinc-400">
+        Good deals first. If there are no live deals, this page falls back to strong Amazon products.
+      </p>
+      <div id="resultCount" class="mt-4 text-sm text-zinc-500">Loading deals...</div>
+    </section>
 
-    <div id="products-container" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
+    <section>
+      <div id="products-container" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
+    </section>
+
+    <section class="mt-12 rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
+      <h2 class="text-xl font-semibold">Browse more</h2>
+      <div class="mt-4 flex flex-wrap gap-3 text-sm">
+        <a href="/catalog/tech" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Tech</a>
+        <a href="/catalog/home" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Home</a>
+        <a href="/catalog/kitchen" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Kitchen</a>
+        <a href="/collections/best-tech-products" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Best Tech Products</a>
+      </div>
+    </section>
   </main>
 
   <script src="/assets/js/supabase.js"></script>
   <script src="/assets/js/trendpulse-data.js"></script>
   <script src="/assets/js/trendpulse-ui.js"></script>
+  <script src="/assets/js/trendpulse-analytics.js"></script>
 </body>
 </html>
