@@ -1,6 +1,6 @@
 (function () {
-  function escapeHtml(value = "") {
-    return String(value)
+  function escapeHtml(value) {
+    return String(value || "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
@@ -18,11 +18,18 @@
   }
 
   function getDiscount(product) {
-    const explicit = safeNumber(product.discount, 0);
+    const explicit = safeNumber(
+      product.discount ?? product.discount_percentage,
+      0
+    );
+
     if (explicit > 0) return Math.round(explicit);
 
     const price = safeNumber(product.price, 0);
-    const oldPrice = safeNumber(product.oldPrice, 0);
+    const oldPrice = safeNumber(
+      product.oldPrice ?? product.original_price,
+      0
+    );
 
     if (oldPrice > price && price > 0) {
       return Math.max(1, Math.round(((oldPrice - price) / oldPrice) * 100));
@@ -46,10 +53,17 @@
 
     container.innerHTML = deals
       .map((d) => {
-        const title = escapeHtml(d.name || "Amazon Product");
-        const image = escapeHtml(d.image || "https://via.placeholder.com/600x600?text=No+Image");
-        const affiliate = escapeHtml(d.affiliate || "#");
+        const title = escapeHtml(d.name || d.title || "Amazon Product");
+        const image = escapeHtml(
+          d.image || d.image_url || "https://via.placeholder.com/600x600?text=No+Image"
+        );
+        const affiliate = escapeHtml(
+          d.affiliate || d.affiliate_link || d.amazon_url || "#"
+        );
         const discount = getDiscount(d);
+        const rating = safeNumber(d.rating ?? d.amazon_rating, 0);
+        const reviews = safeNumber(d.reviews ?? d.amazon_review_count, 0);
+        const oldPrice = d.oldPrice ?? d.original_price;
 
         return `
           <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 shadow-sm transition hover:scale-[1.01] hover:border-zinc-700">
@@ -61,19 +75,30 @@
                 loading="lazy"
                 onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
               />
-              ${discount > 0 ? `<div class="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">-${discount}%</div>` : ""}
+              ${
+                discount > 0
+                  ? `<div class="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">-${discount}%</div>`
+                  : ""
+              }
             </div>
 
-            <h3 class="mt-3 line-clamp-2 text-sm font-semibold text-white">${title}</h3>
+            <h3 class="mt-3 line-clamp-2 text-sm font-semibold text-white">
+              ${title}
+            </h3>
 
             <div class="mt-2 text-xs text-zinc-400">
-              ⭐ ${safeNumber(d.rating, 0) > 0 ? safeNumber(d.rating, 0).toFixed(1) : "—"}
-              (${safeNumber(d.reviews, 0).toLocaleString()})
+              ⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})
             </div>
 
             <div class="mt-3 flex items-center gap-2">
-              <span class="text-lg font-bold text-green-400">${formatPrice(d.price)}</span>
-              ${d.oldPrice ? `<span class="text-xs text-zinc-500 line-through">${formatPrice(d.oldPrice)}</span>` : ""}
+              <span class="text-lg font-bold text-green-400">
+                ${formatPrice(d.price)}
+              </span>
+              ${
+                oldPrice
+                  ? `<span class="text-xs text-zinc-500 line-through">${formatPrice(oldPrice)}</span>`
+                  : ""
+              }
             </div>
 
             <a
@@ -97,11 +122,12 @@
       if (status) status.textContent = "Loading products...";
 
       const deals = await window.TrendPulseData.fetchHomeFeed();
-
       renderDeals(deals);
 
       if (status) {
-        status.textContent = `${deals.length} ${deals.length === 1 ? "product" : "products"} loaded`;
+        status.textContent = `${deals.length} ${
+          deals.length === 1 ? "product" : "products"
+        } loaded`;
       }
     } catch (e) {
       console.error("HOME FEED ERROR:", e);
