@@ -529,18 +529,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.trend-pulse.shop/collections/popular-products-for-men</loc>
-    
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.trend-pulse.shop/collections/popular-products-for-women</loc>
-    
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://www.trend-pulse.shop/product/portable-blender-usb-rechargeable</loc>
     <lastmod>2026-04-02T16:06:58.167Z</lastmod>
     <changefreq>weekly</changefreq>
