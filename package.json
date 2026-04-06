@@ -9,10 +9,13 @@
     "sync:deals": "node sync-deals.js",
     "generate:programmatic": "node generate-programmatic-pages.js",
     "generate:sitemap": "node generate-sitemap.js",
-    "pipeline": "npm run sync:catalog && npm run sync:deals && npm run generate:programmatic && npm run generate:sitemap"
+    "submit:sitemap": "node scripts/submit-sitemap-gsc.js",
+    "pipeline": "npm run sync:catalog && npm run sync:deals && npm run generate:programmatic && npm run generate:sitemap",
+    "seo:full": "npm run pipeline && npm run submit:sitemap"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
+    "googleapis": "^144.0.0",
     "node-fetch": "^3.3.2",
     "rss-parser": "^3.13.0"
   }
