@@ -1,8 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "",
-  "outputDirectory": ".",
-  "framework": null,
   "cleanUrls": false,
   "trailingSlash": false,
   "rewrites": [
@@ -42,16 +39,6 @@
       "source": "/catalog.html",
       "destination": "/catalog",
       "permanent": true
-    },
-    {
-      "source": "/catalog-category.html",
-      "destination": "/catalog",
-      "permanent": true
-    },
-    {
-      "source": "/product.html",
-      "destination": "/",
-      "permanent": false
     }
   ],
   "headers": [
@@ -70,6 +57,33 @@
         {
           "key": "Cache-Control",
           "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/programmatic-pages.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
         }
       ]
     },
