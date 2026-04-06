@@ -1,194 +1,68 @@
 (function () {
-  function escapeHtml(value) {
-    return String(value || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function safeNumber(value, fallback = 0) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : fallback;
-  }
-
-  function formatPrice(value) {
-    return `$${safeNumber(value).toFixed(2)}`;
-  }
-
-  function getDiscount(product) {
-    const explicit = safeNumber(
-      product.discount ?? product.discount_percentage,
-      0
-    );
-
-    if (explicit > 0) return Math.round(explicit);
-
-    const price = safeNumber(product.price, 0);
-    const oldPrice = safeNumber(
-      product.oldPrice ?? product.original_price,
-      0
-    );
-
-    if (oldPrice > price && price > 0) {
-      return Math.max(1, Math.round(((oldPrice - price) / oldPrice) * 100));
+  function getCategoryFromURL() {
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    if (parts[0] === "catalog" && parts[1]) {
+      return decodeURIComponent(parts[1]);
     }
-
-    return 0;
+    return null;
   }
 
   function capitalize(value) {
-    return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
+    return value
+      ? value.charAt(0).toUpperCase() + value.slice(1)
+      : "";
   }
 
-  function getCategoryFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const byQuery = params.get("category");
-
-    if (byQuery) {
-      return window.TrendPulseData.normalizeCategory(byQuery);
-    }
-
-    const pathParts = window.location.pathname.split("/").filter(Boolean);
-
-    if (pathParts[0] === "catalog" && pathParts[1]) {
-      return window.TrendPulseData.normalizeCategory(
-        decodeURIComponent(pathParts[1])
-      );
-    }
-
-    return "general";
+  function computeScore(product) {
+    return (
+      (product.reviews || 0) * 0.4 +
+      (product.rating || 0) * 100 * 0.3 +
+      (product.discount || 0) * 10 * 0.2 +
+      (product.priority || 0) * 4
+    );
   }
 
-  function renderProducts(products) {
-    const container = document.getElementById("products");
-    if (!container) return;
-
-    if (!products || !products.length) {
-      container.innerHTML = `
-        <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-center text-zinc-400">
-          No products found
-        </div>
-      `;
-      return;
-    }
-
-    container.innerHTML = products
-      .map((p) => {
-        const title = escapeHtml(p.name || p.title || "Amazon Product");
-        const image = escapeHtml(
-          p.image || p.image_url || "https://via.placeholder.com/600x600?text=No+Image"
-        );
-        const affiliate = escapeHtml(
-          p.affiliate || p.affiliate_link || p.amazon_url || "#"
-        );
-        const slug = encodeURIComponent(p.slug || p.asin || "");
-        const discount = getDiscount(p);
-        const oldPrice = p.oldPrice ?? p.original_price;
-        const rating = safeNumber(p.rating ?? p.amazon_rating, 0);
-        const reviews = safeNumber(p.reviews ?? p.amazon_review_count, 0);
-
-        return `
-          <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 shadow-sm transition hover:scale-[1.01] hover:border-zinc-700">
-            <a href="/product/${slug}" class="block">
-              <div class="relative overflow-hidden rounded-xl bg-white">
-                <img
-                  src="${image}"
-                  alt="${title}"
-                  class="h-44 w-full object-contain"
-                  loading="lazy"
-                  onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
-                />
-                ${
-                  discount > 0
-                    ? `<div class="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">-${discount}%</div>`
-                    : ""
-                }
-              </div>
-
-              <h3 class="mt-3 line-clamp-2 text-sm font-semibold text-white">
-                ${title}
-              </h3>
-
-              <div class="mt-2 text-xs text-zinc-400">
-                ⭐ ${rating > 0 ? rating.toFixed(1) : "—"} (${reviews.toLocaleString()})
-              </div>
-
-              <div class="mt-3 flex items-center gap-2">
-                <span class="text-lg font-bold text-green-400">
-                  ${formatPrice(p.price)}
-                </span>
-                ${
-                  oldPrice
-                    ? `<span class="text-xs text-zinc-500 line-through">${formatPrice(oldPrice)}</span>`
-                    : ""
-                }
-              </div>
-            </a>
-
-            <a
-              href="${affiliate}"
-              target="_blank"
-              rel="nofollow sponsored noopener"
-              class="mt-4 block rounded-xl bg-green-500 px-4 py-2 text-center text-sm font-bold text-black"
-            >
-              View Deal
-            </a>
-          </article>
-        `;
-      })
-      .join("");
-  }
-
-  async function loadCategory() {
-    const category = getCategoryFromUrl();
+  document.addEventListener("DOMContentLoaded", async () => {
+    const category = getCategoryFromURL();
+    if (!category) return;
 
     const titleEl = document.getElementById("category-title");
     const descEl = document.getElementById("category-description");
     const countEl = document.getElementById("category-count");
+    const container = document.getElementById("products");
+
+    if (titleEl) titleEl.textContent = capitalize(category);
+    if (descEl)
+      descEl.textContent = `Top ${category} products based on demand and popularity`;
+
+    if (!window.TrendPulseData || !window.TrendPulseUI) {
+      console.error("Missing data or UI layer");
+      return;
+    }
 
     try {
-      if (titleEl) titleEl.textContent = `${capitalize(category)} Catalog`;
-      if (descEl) descEl.textContent = `Loading ${category} products...`;
-      if (countEl) countEl.textContent = "Loading products...";
+      const products =
+        await window.TrendPulseData.fetchCatalogByCategory(category, 100);
 
-      let products = await window.TrendPulseData.fetchCatalogByCategory(
-        category,
-        60
-      );
+      const sorted = products
+        .map((p) => ({
+          ...p,
+          score: computeScore(p)
+        }))
+        .sort((a, b) => b.score - a.score);
 
-      if (!products.length) {
-        products = await window.TrendPulseData.fetchTopProducts(24);
-      }
-
-      renderProducts(products);
-
-      if (descEl) {
-        descEl.textContent = `Browse top Amazon products in ${category}.`;
+      if (window.TrendPulseUI) {
+        window.TrendPulseUI.renderProducts(sorted, container);
       }
 
       if (countEl) {
-        countEl.textContent = `${products.length} ${
-          products.length === 1 ? "product" : "products"
-        }`;
-      }
-    } catch (e) {
-      console.error("CATEGORY ERROR:", e);
-
-      const container = document.getElementById("products");
-      if (container) {
-        container.innerHTML = `
-          <div class="rounded-2xl border border-red-900 bg-red-950/30 p-6 text-center text-red-300">
-            Error loading products
-          </div>
-        `;
+        countEl.textContent = `${sorted.length} products`;
       }
 
-      if (descEl) descEl.textContent = "Error loading category";
-      if (countEl) countEl.textContent = "Error loading products";
+      document.title = `${capitalize(category)} Products | TrendPulse`;
+    } catch (err) {
+      console.error("Category load error:", err);
+      if (countEl) countEl.textContent = "Failed to load";
     }
-  }
-
-  document.addEventListener("DOMContentLoaded", loadCategory);
+  });
 })();
