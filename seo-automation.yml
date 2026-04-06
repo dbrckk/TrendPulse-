@@ -1,0 +1,43 @@
+name: SEO Automation
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  seo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm install
+
+      - name: Generate 10k pages
+        run: node generate-programmatic-pages.js
+
+      - name: Generate sitemap
+        run: node generate-sitemap.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Check site
+        run: node scripts/check-site.js
+
+      - name: Commit changes
+        run: |
+          git config user.name "seo-bot"
+          git config user.email "seo@trendpulse.com"
+          git add .
+          git commit -m "auto seo update" || echo "no changes"
+          git push
