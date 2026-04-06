@@ -3,43 +3,13 @@
   const SUPABASE_ANON_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
 
-  function canInitSupabase() {
-    return (
-      typeof window !== "undefined" &&
-      typeof window.supabase !== "undefined" &&
-      typeof window.supabase.createClient === "function"
-    );
-  }
-
-  function createFallbackClient() {
-    return {
-      from() {
-        return {
-          select() {
-            return Promise.resolve({
-              data: [],
-              error: new Error("Supabase client not initialized")
-            });
-          }
-        };
-      }
-    };
-  }
-
-  if (!canInitSupabase()) {
-    console.error("[supabase] CDN client not loaded");
-    window.supabaseClient = createFallbackClient();
-    return;
-  }
-
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.error("[supabase] Missing SUPABASE_URL or SUPABASE_ANON_KEY");
-    window.supabaseClient = createFallbackClient();
+  if (!window.supabase || typeof window.supabase.createClient !== "function") {
+    console.error("Supabase library not loaded");
     return;
   }
 
   try {
-    window.supabaseClient = window.supabase.createClient(
+    const client = window.supabase.createClient(
       SUPABASE_URL,
       SUPABASE_ANON_KEY,
       {
@@ -56,14 +26,9 @@
       }
     );
 
-    window.TRENDPULSE_CONFIG = {
-      siteUrl: "https://www.trend-pulse.shop",
-      affiliateTag: "Drackk-20"
-    };
-
-    console.log("[supabase] client initialized");
-  } catch (error) {
-    console.error("[supabase] init failed:", error);
-    window.supabaseClient = createFallbackClient();
+    window.supabaseClient = client;
+    console.log("Supabase initialized");
+  } catch (err) {
+    console.error("Supabase init error:", err);
   }
 })();
