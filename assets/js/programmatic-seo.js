@@ -13,54 +13,15 @@
       .replace(/'/g, "&#039;");
   }
 
-  function formatPrice(value) {
-    return `$${safeNumber(value).toFixed(2)}`;
-  }
-
-  function proxyImage(url) {
-    const raw = String(url || "").trim();
-    if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
-      return "https://via.placeholder.com/600x600?text=No+Image";
-    }
-    return raw;
-  }
-
-  function getDiscount(product) {
-    const explicit = safeNumber(
-      product.discount ?? product.discount_percentage ?? product.discount_percent,
-      0
-    );
-
-    if (explicit > 0) return Math.round(explicit);
-
-    const price = safeNumber(product.price, 0);
-    const oldPrice = safeNumber(
-      product.oldPrice ?? product.original_price,
-      0
-    );
-
-    if (oldPrice > price && price > 0) {
-      return Math.max(1, Math.round(((oldPrice - price) / oldPrice) * 100));
-    }
-
-    return 0;
-  }
-
-  function productPath(product) {
-    const slug = String(product?.slug || "").trim();
-    const asin = String(product?.asin || "").trim();
-
-    if (slug) return `/product/${encodeURIComponent(slug)}`;
-    if (asin) return `/product/${encodeURIComponent(asin)}`;
-    return "/catalog";
-  }
-
   function normalizeText(value) {
     return String(value || "").trim();
   }
 
   function normalizeCategory(value) {
-    if (window.TrendPulseData && typeof window.TrendPulseData.normalizeCategory === "function") {
+    if (
+      window.TrendPulseData &&
+      typeof window.TrendPulseData.normalizeCategory === "function"
+    ) {
       return window.TrendPulseData.normalizeCategory(value);
     }
 
@@ -79,9 +40,21 @@
     return v || "general";
   }
 
+  function proxyImage(url) {
+    const raw = normalizeText(url);
+    if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
+      return "https://via.placeholder.com/600x600?text=No+Image";
+    }
+    return raw;
+  }
+
   function normalizeProduct(row) {
     const price = safeNumber(row?.price, 0);
     const original = safeNumber(row?.original_price, 0);
+    const discount = safeNumber(
+      row?.discount ?? row?.discount_percentage ?? row?.discount_percent,
+      0
+    );
 
     return {
       id: row?.id || null,
@@ -93,25 +66,42 @@
       description: normalizeText(row?.description),
       short_description: normalizeText(row?.short_description),
       subcategory: normalizeText(row?.subcategory),
+
       image: proxyImage(row?.image || row?.image_url),
       image_url: proxyImage(row?.image || row?.image_url),
-      price: price,
+
+      price,
       oldPrice: original > price ? original : null,
       original_price: original > price ? original : null,
-      discount: safeNumber(row?.discount ?? row?.discount_percentage ?? row?.discount_percent, 0),
-      discount_percentage: safeNumber(row?.discount ?? row?.discount_percentage ?? row?.discount_percent, 0),
+
+      discount,
+      discount_percentage: discount,
+
       rating: safeNumber(row?.rating ?? row?.amazon_rating, 0),
       reviews: safeNumber(row?.reviews ?? row?.amazon_review_count, 0),
       amazon_rating: safeNumber(row?.rating ?? row?.amazon_rating, 0),
       amazon_review_count: safeNumber(row?.reviews ?? row?.amazon_review_count, 0),
+
       category: normalizeCategory(row?.category),
-      affiliate: normalizeText(row?.affiliate || row?.affiliate_link || row?.amazon_url || row?.link || "#"),
-      affiliate_link: normalizeText(row?.affiliate || row?.affiliate_link || row?.amazon_url || row?.link || "#"),
-      amazon_url: normalizeText(row?.amazon_url || row?.affiliate || row?.affiliate_link || row?.link || "#"),
+      affiliate: normalizeText(
+        row?.affiliate || row?.affiliate_link || row?.amazon_url || row?.link || "#"
+      ),
+      affiliate_link: normalizeText(
+        row?.affiliate || row?.affiliate_link || row?.amazon_url || row?.link || "#"
+      ),
+      amazon_url: normalizeText(
+        row?.amazon_url || row?.affiliate || row?.affiliate_link || row?.link || "#"
+      ),
+
       priority: safeNumber(row?.priority, 0),
       clicks: safeNumber(row?.clicks, 0),
       views: safeNumber(row?.views, 0),
-      likes: safeNumber(row?.likes, 0)
+      likes: safeNumber(row?.likes, 0),
+
+      created_at: row?.created_at || null,
+      updated_at: row?.updated_at || null,
+      published_at: row?.published_at || null,
+      score: 0
     };
   }
 
@@ -120,10 +110,10 @@
 
     return (products || []).filter((product) => {
       const key =
-        String(product?.asin || "").trim() ||
-        String(product?.slug || "").trim() ||
-        String(product?.id || "").trim() ||
-        String(product?.name || "").trim();
+        normalizeText(product?.asin) ||
+        normalizeText(product?.slug) ||
+        normalizeText(product?.id) ||
+        normalizeText(product?.name);
 
       if (!key || seen.has(key)) return false;
       seen.add(key);
@@ -164,7 +154,7 @@
   function applyKeywordFilter(products, queryText) {
     if (!queryText) return products;
 
-    const needle = String(queryText).toLowerCase();
+    const needle = normalizeText(queryText).toLowerCase();
 
     return products.filter((product) => {
       const haystack = [
@@ -191,20 +181,23 @@
     );
   }
 
-  function card(product) {
+  function fallbackCard(product) {
     const title = escapeHtml(product.name || product.title || "Amazon Product");
-    const image = escapeHtml(product.image || product.image_url || "https://via.placeholder.com/600x600?text=No+Image");
+    const image = escapeHtml(
+      product.image || product.image_url || "https://via.placeholder.com/600x600?text=No+Image"
+    );
     const price = safeNumber(product.price, 0);
     const oldPrice = product.oldPrice ?? product.original_price;
     const rating = safeNumber(product.rating ?? product.amazon_rating, 0);
     const reviews = safeNumber(product.reviews ?? product.amazon_review_count, 0);
-    const discount = getDiscount(product);
-    const url = escapeHtml(product.affiliate || product.affiliate_link || product.amazon_url || "#");
-    const path = productPath(product);
+    const url = escapeHtml(
+      product.affiliate || product.affiliate_link || product.amazon_url || "#"
+    );
+    const slug = encodeURIComponent(product.slug || product.asin || "");
 
     return `
       <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 shadow-sm transition hover:scale-[1.01] hover:border-zinc-700">
-        <a href="${path}" class="block">
+        <a href="/product/${slug}" class="block">
           <div class="relative overflow-hidden rounded-xl bg-white">
             <img
               src="${image}"
@@ -213,11 +206,6 @@
               loading="lazy"
               onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'"
             />
-            ${
-              discount > 0
-                ? `<div class="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">-${discount}%</div>`
-                : ""
-            }
           </div>
 
           <h3 class="mt-3 line-clamp-2 text-sm font-semibold text-white">${title}</h3>
@@ -227,10 +215,10 @@
           </div>
 
           <div class="mt-3 flex items-center gap-2">
-            <span class="text-lg font-bold text-green-400">${formatPrice(price)}</span>
+            <span class="text-lg font-bold text-green-400">$${price.toFixed(2)}</span>
             ${
               oldPrice
-                ? `<span class="text-xs text-zinc-500 line-through">${formatPrice(oldPrice)}</span>`
+                ? `<span class="text-xs text-zinc-500 line-through">$${safeNumber(oldPrice).toFixed(2)}</span>`
                 : ""
             }
           </div>
@@ -248,15 +236,21 @@
     `;
   }
 
-  function renderProducts(products, selectorCandidates) {
-    let container = null;
-
-    for (const selector of selectorCandidates) {
-      container = document.querySelector(selector);
-      if (container) break;
-    }
+  function renderProducts(products) {
+    const container =
+      document.querySelector("#collection-grid") ||
+      document.querySelector("#products") ||
+      document.querySelector("#products-container");
 
     if (!container) return;
+
+    if (
+      window.TrendPulseUI &&
+      typeof window.TrendPulseUI.renderProducts === "function"
+    ) {
+      window.TrendPulseUI.renderProducts(products, container);
+      return;
+    }
 
     if (!products || !products.length) {
       container.innerHTML = `
@@ -267,7 +261,7 @@
       return;
     }
 
-    container.innerHTML = products.map(card).join("");
+    container.innerHTML = products.map(fallbackCard).join("");
   }
 
   function setEmptyState(isEmpty) {
@@ -279,8 +273,22 @@
     emptyStateEl.classList.toggle("hidden", !isEmpty);
   }
 
-  async function fetchBaseProductsForCollection(config) {
-    if (window.TrendPulseData && typeof window.TrendPulseData.fetchCatalogByCategory === "function") {
+  async function fetchBaseProducts(config) {
+    if (
+      window.TrendPulseData &&
+      typeof window.TrendPulseData.fetchCollectionProducts === "function"
+    ) {
+      const products = await window.TrendPulseData.fetchCollectionProducts(config, 24);
+      return dedupeProducts((products || []).map(normalizeProduct)).map((p) => ({
+        ...p,
+        score: computeScore(p)
+      }));
+    }
+
+    if (
+      window.TrendPulseData &&
+      typeof window.TrendPulseData.fetchCatalogByCategory === "function"
+    ) {
       const rows = await window.TrendPulseData.fetchCatalogByCategory(config.category, 120);
       return dedupeProducts((rows || []).map(normalizeProduct)).map((p) => ({
         ...p,
@@ -296,7 +304,7 @@
       .from("catalog_category_feed")
       .select("*")
       .eq("category", normalizeCategory(config.category))
-      .limit(400);
+      .limit(120);
 
     if (error) {
       throw error;
@@ -308,8 +316,11 @@
     }));
   }
 
-  async function fetchFallbackProducts(config) {
-    if (window.TrendPulseData && typeof window.TrendPulseData.fetchTopProducts === "function") {
+  async function fetchFallbackProducts() {
+    if (
+      window.TrendPulseData &&
+      typeof window.TrendPulseData.fetchTopProducts === "function"
+    ) {
       const rows = await window.TrendPulseData.fetchTopProducts(60);
       return dedupeProducts((rows || []).map(normalizeProduct)).map((p) => ({
         ...p,
@@ -354,7 +365,7 @@
         throw new Error("Missing collection slug");
       }
 
-      const response = await fetch("/programmatic-pages.json");
+      const response = await fetch("/programmatic-pages.json", { cache: "no-store" });
       const pages = await response.json();
       const config = (pages || []).find((page) => page.slug === slug);
 
@@ -369,28 +380,22 @@
 
       document.title = `${config.title} | TrendPulse`;
 
-      let products = await fetchBaseProductsForCollection(config);
+      let products = await fetchBaseProducts(config);
       products = applyKeywordFilter(products, config.filter?.query || null);
       products = applyPriceFilter(products, config.filter?.maxPrice ?? null);
       products = sortProducts(products, config.sort || "score");
 
       if (!products.length) {
-        let fallback = await fetchFallbackProducts(config);
+        let fallback = await fetchFallbackProducts();
         fallback = applyKeywordFilter(fallback, config.filter?.query || null);
         fallback = applyPriceFilter(fallback, config.filter?.maxPrice ?? null);
         fallback = sortProducts(fallback, config.sort || "score");
-
         products = fallback;
       }
 
       products = products.slice(0, 24);
 
-      renderProducts(products, [
-        "#collection-grid",
-        "#products",
-        "#products-container"
-      ]);
-
+      renderProducts(products);
       setEmptyState(products.length === 0);
 
       if (countEl) {
@@ -420,15 +425,11 @@
     } catch (error) {
       console.error("COLLECTION ERROR:", error);
 
-      renderProducts([], [
-        "#collection-grid",
-        "#products",
-        "#products-container"
-      ]);
+      renderProducts([]);
+      setEmptyState(true);
 
       if (descEl) descEl.textContent = "Error loading collection";
       if (countEl) countEl.textContent = "Error loading products";
-      setEmptyState(true);
     }
   }
 
