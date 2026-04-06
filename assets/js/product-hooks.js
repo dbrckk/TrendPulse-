@@ -9,68 +9,73 @@
       safeNumber(product.reviews, 0) * 0.4 +
       safeNumber(product.rating, 0) * 100 * 0.3 +
       safeNumber(product.discount, 0) * 10 * 0.2 +
-      safeNumber(product.priority, 0) * 4
+      safeNumber(product.priority, 0) * 4 +
+      safeNumber(product.likes, 0) * 2 +
+      safeNumber(product.clicks, 0) * 1.5 +
+      safeNumber(product.views, 0) * 0.15
     );
   }
 
-  function getHook(product) {
-    const reviews = safeNumber(product.reviews, 0);
-    const rating = safeNumber(product.rating, 0);
-    const discount = safeNumber(product.discount, 0);
-
-    if (discount >= 30) return "🔥 Big discount right now";
-    if (reviews >= 5000) return "📈 Massively bought product";
-    if (rating >= 4.6) return "⭐ Highly rated by buyers";
-    return "🔥 Popular right now";
+  function setStatus(text) {
+    const status = document.getElementById("home-status");
+    if (status) status.textContent = text;
   }
 
   async function loadDeals() {
-    if (!window.supabaseClient) {
-      console.error("Supabase not ready");
+    if (!window.TrendPulseData) {
+      console.error("TrendPulseData not ready");
+      setStatus("Failed to load products");
       return;
     }
 
     const container = document.getElementById("deals");
-    const status = document.getElementById("home-status");
+    if (!container) {
+      console.error("Missing #deals container");
+      return;
+    }
 
     try {
-      let { data: deals, error } = await window.supabaseClient
-        .from("deals")
-        .select("*")
-        .limit(24);
+      setStatus("Loading products...");
 
       let products = [];
 
-      if (!error && deals && deals.length > 0) {
-        products = deals.map(window.TrendPulseData.normalizeProduct);
-      } else {
-        const fallback = await window.supabaseClient
-          .from("products")
-          .select("*")
-          .limit(24);
+      if (typeof window.TrendPulseData.fetchHomeFeed === "function") {
+        products = await window.TrendPulseData.fetchHomeFeed();
+      } else if (typeof window.TrendPulseData.fetchDeals === "function") {
+        products = await window.TrendPulseData.fetchDeals(24);
 
-        products = (fallback.data || []).map(
-          window.TrendPulseData.normalizeProduct
-        );
+        if (!products.length && typeof window.TrendPulseData.fetchTopProducts === "function") {
+          products = await window.TrendPulseData.fetchTopProducts(24);
+        }
+      } else if (typeof window.TrendPulseData.fetchTopProducts === "function") {
+        products = await window.TrendPulseData.fetchTopProducts(24);
       }
 
-      products = products
+      products = (products || [])
         .map((p) => ({
           ...p,
           score: computeScore(p)
         }))
-        .sort((a, b) => b.score - a.score);
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 24);
 
-      if (window.TrendPulseUI) {
+      if (window.TrendPulseUI && typeof window.TrendPulseUI.renderProducts === "function") {
         window.TrendPulseUI.renderProducts(products, container);
+      } else {
+        console.error("TrendPulseUI not ready");
+        setStatus("Failed to render products");
+        return;
       }
 
-      if (status) {
-        status.textContent = `${products.length} products loaded`;
-      }
+      setStatus(`${products.length} ${products.length === 1 ? "product" : "products"} loaded`);
     } catch (err) {
       console.error("loadDeals error:", err);
-      if (status) status.textContent = "Failed to load products";
+
+      if (window.TrendPulseUI && typeof window.TrendPulseUI.renderProducts === "function") {
+        window.TrendPulseUI.renderProducts([], container);
+      }
+
+      setStatus("Failed to load products");
     }
   }
 
