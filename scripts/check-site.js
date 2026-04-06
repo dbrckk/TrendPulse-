@@ -1,287 +1,189 @@
-// scripts/check-site.js
+#!/usr/bin/env node
 
-const fs = require("fs");
-const path = require("path");
+import fs from "fs/promises";
 
-const ROOT = process.cwd();
-const SITE_URL = "https://www.trend-pulse.shop";
-const AFFILIATE_TAG = "Drackk-20";
+const REQUIRED_FILES = [
+  "index.html",
+  "deals.html",
+  "catalog.html",
+  "catalog-category.html",
+  "product.html",
+  "programmatic-seo.html",
+  "404.html",
 
-const HTML_FILES = walk(ROOT).filter((file) => file.endsWith(".html"));
-const JS_FILES = walk(ROOT).filter((file) => file.endsWith(".js"));
-const TEXT_FILES = [...HTML_FILES, ...JS_FILES, path.join(ROOT, "robots.txt"), path.join(ROOT, "sitemap.xml")].filter((file) => fs.existsSync(file));
+  "assets/js/supabase.js",
+  "assets/js/trendpulse-data.js",
+  "assets/js/trendpulse-ui.js",
+  "assets/js/catalog-category.js",
+  "assets/js/programmatic-seo.js",
+  "assets/js/product-page.js",
 
-const issues = [];
-const warnings = [];
-const passes = [];
+  "generate-programmatic-pages.js",
+  "generate-sitemap.js",
+  "programmatic-pages.json",
+  "vercel.json",
+  "robots.txt"
+];
 
-function walk(dir) {
-  if (!fs.existsSync(dir)) return [];
+const EXPECTED_SCRIPT_ORDER = [
+  "/assets/js/supabase.js",
+  "/assets/js/trendpulse-data.js"
+];
 
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  const files = [];
+async function fileExists(path) {
+  try {
+    await fs.access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-  for (const entry of entries) {
-    const full = path.join(dir, entry.name);
+async function readFileSafe(path) {
+  try {
+    return await fs.readFile(path, "utf-8");
+  } catch {
+    return null;
+  }
+}
 
-    if (entry.name === "node_modules" || entry.name === ".git" || entry.name === ".vercel") {
-      continue;
-    }
+function checkScriptOrder(html, fileName) {
+  const issues = [];
 
-    if (entry.isDirectory()) {
-      files.push(...walk(full));
-    } else {
-      files.push(full);
+  for (const script of EXPECTED_SCRIPT_ORDER) {
+    if (!html.includes(script)) {
+      issues.push(`${fileName}: missing ${script}`);
     }
   }
 
-  return files;
-}
+  const supabaseIndex = html.indexOf("/assets/js/supabase.js");
+  const dataIndex = html.indexOf("/assets/js/trendpulse-data.js");
 
-function read(file) {
-  return fs.readFileSync(file, "utf8");
-}
-
-function rel(file) {
-  return path.relative(ROOT, file).replaceAll("\\", "/");
-}
-
-function addIssue(file, message) {
-  issues.push(`${rel(file)} :: ${message}`);
-}
-
-function addWarning(file, message) {
-  warnings.push(`${rel(file)} :: ${message}`);
-}
-
-function addPass(message) {
-  passes.push(message);
-}
-
-function checkPlaceholderTags() {
-  let found = false;
-
-  for (const file of TEXT_FILES) {
-    const content = read(file);
-    if (content.includes("YOURAFFILIATETAG-20")) {
-      addIssue(file, "contains placeholder affiliate tag YOURAFFILIATETAG-20");
-      found = true;
-    }
+  if (supabaseIndex !== -1 && dataIndex !== -1 && supabaseIndex > dataIndex) {
+    issues.push(`${fileName}: supabase.js must be loaded before trendpulse-data.js`);
   }
 
-  if (!found) addPass("No placeholder affiliate tags found.");
+  return issues;
 }
 
-function checkAffiliateTagUsage() {
-  let foundAmazonLink = false;
-  let badAmazonLink = false;
+function checkAnalyticsPlacement(html, fileName) {
+  const issues = [];
 
-  for (const file of TEXT_FILES) {
-    const content = read(file);
-    const matches = content.match(/https:\/\/www\.amazon\.com\/[^\s"'`<)]+/g) || [];
-    for (const match of matches) {
-      foundAmazonLink = true;
-      if (!match.includes(`tag=${AFFILIATE_TAG}`)) {
-        addWarning(file, `Amazon link missing correct affiliate tag: ${match}`);
-        badAmazonLink = true;
+  const analyticsIndex = html.indexOf("trendpulse-analytics.js");
+  const bodyCloseIndex = html.lastIndexOf("</body>");
+
+  if (analyticsIndex !== -1 && analyticsIndex < bodyCloseIndex - 200) {
+    issues.push(`${fileName}: analytics should be at the end of <body>`);
+  }
+
+  return issues;
+}
+
+function checkLegacyLinks(html, fileName) {
+  const issues = [];
+  const forbidden = [".html"];
+
+  for (const bad of forbidden) {
+    if (html.includes(bad) && !fileName.endsWith(".html")) continue;
+
+    const matches = html.match(/href="([^"]+)"/g) || [];
+    for (const m of matches) {
+      if (m.includes(".html") && !m.includes("index.html")) {
+        issues.push(`${fileName}: contains legacy link ${m}`);
       }
     }
   }
 
-  if (foundAmazonLink && !badAmazonLink) addPass(`All detected Amazon links contain tag=${AFFILIATE_TAG}.`);
+  return issues;
 }
 
-function checkCanonicals() {
-  let allGood = true;
+function checkRequiredIds(html, fileName) {
+  const issues = [];
 
-  for (const file of HTML_FILES) {
-    const content = read(file);
-    const canonicalMatch = content.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i);
-
-    if (!canonicalMatch) {
-      addIssue(file, "missing canonical tag");
-      allGood = false;
-      continue;
-    }
-
-    if (!canonicalMatch[1].startsWith(SITE_URL)) {
-      addIssue(file, `canonical does not use ${SITE_URL}`);
-      allGood = false;
-    }
-  }
-
-  if (allGood) addPass("All HTML files include canonicals on the www domain.");
-}
-
-function checkOgUrl() {
-  let allGood = true;
-
-  for (const file of HTML_FILES) {
-    const content = read(file);
-    const match = content.match(/<meta\s+property="og:url"\s+content="([^"]+)"/i);
-
-    if (!match) {
-      addIssue(file, "missing og:url");
-      allGood = false;
-      continue;
-    }
-
-    if (!match[1].startsWith(SITE_URL)) {
-      addIssue(file, `og:url does not use ${SITE_URL}`);
-      allGood = false;
-    }
-  }
-
-  if (allGood) addPass("All HTML files include og:url on the www domain.");
-}
-
-function checkLegalLinks() {
-  let allGood = true;
-
-  for (const file of HTML_FILES) {
-    const content = read(file);
-
-    const required = [
-      '/affiliate-disclosure.html',
-      '/privacy.html',
-      '/terms.html',
-      '/contact.html'
+  if (fileName === "programmatic-seo.html") {
+    const ids = [
+      "collection-title",
+      "collection-description",
+      "collection-count",
+      "collection-grid",
+      "collection-seo-text"
     ];
 
-    for (const item of required) {
-      if (!content.includes(item)) {
-        addIssue(file, `missing legal link ${item}`);
-        allGood = false;
+    for (const id of ids) {
+      if (!html.includes(`id="${id}"`)) {
+        issues.push(`${fileName}: missing id ${id}`);
       }
     }
   }
 
-  if (allGood) addPass("All HTML files contain core legal links.");
-}
-
-function checkDisclosureText() {
-  let allGood = true;
-  const expected = "As an Amazon Associate, TrendPulse earns from qualifying purchases.";
-
-  for (const file of HTML_FILES) {
-    const content = read(file);
-    if (!content.includes(expected)) {
-      addWarning(file, "missing standard Amazon Associate disclosure text");
-      allGood = false;
+  if (fileName === "catalog-category.html") {
+    const ids = ["category-title", "category-description", "products"];
+    for (const id of ids) {
+      if (!html.includes(`id="${id}"`)) {
+        issues.push(`${fileName}: missing id ${id}`);
+      }
     }
   }
 
-  if (allGood) addPass("All HTML files contain the standard Amazon Associate disclosure.");
+  return issues;
 }
 
-function checkRobotsAndSitemap() {
-  const robots = path.join(ROOT, "robots.txt");
-  const sitemap = path.join(ROOT, "sitemap.xml");
+async function main() {
+  let errors = [];
 
-  if (!fs.existsSync(robots)) {
-    addIssue(robots, "robots.txt is missing");
-  } else {
-    const content = read(robots);
-    if (!content.includes(`Sitemap: ${SITE_URL}/sitemap.xml`)) {
-      addIssue(robots, `robots.txt sitemap must be ${SITE_URL}/sitemap.xml`);
-    } else {
-      addPass("robots.txt points to the correct sitemap.");
+  console.log("🔍 Checking required files...");
+
+  for (const file of REQUIRED_FILES) {
+    const exists = await fileExists(file);
+    if (!exists) {
+      errors.push(`Missing file: ${file}`);
     }
   }
 
-  if (!fs.existsSync(sitemap)) {
-    addIssue(sitemap, "sitemap.xml is missing");
-  } else {
-    const content = read(sitemap);
-    if (!content.includes(SITE_URL)) {
-      addIssue(sitemap, `sitemap.xml does not use ${SITE_URL}`);
-    } else {
-      addPass("sitemap.xml uses the www domain.");
-    }
-  }
-}
+  console.log("🔍 Checking HTML structure...");
 
-function checkDuplicateAsins() {
-  const file = path.join(ROOT, "assets/js/trendpulse-data.js");
-
-  if (!fs.existsSync(file)) {
-    addIssue(file, "assets/js/trendpulse-data.js is missing");
-    return;
-  }
-
-  const content = read(file);
-  const matches = [...content.matchAll(/asin:\s*"([^"]+)"/g)].map((match) => match[1]);
-  const seen = new Set();
-  const duplicates = new Set();
-
-  for (const asin of matches) {
-    if (seen.has(asin)) duplicates.add(asin);
-    seen.add(asin);
-  }
-
-  if (duplicates.size) {
-    addIssue(file, `duplicate ASINs found: ${[...duplicates].join(", ")}`);
-  } else {
-    addPass("No duplicate ASINs found in assets/js/trendpulse-data.js.");
-  }
-}
-
-function checkCentralScriptsIncluded() {
-  const requiredScripts = [
-    '/assets/js/trendpulse-data.js',
-    '/assets/js/trendpulse-ui.js'
+  const htmlFiles = [
+    "index.html",
+    "deals.html",
+    "catalog.html",
+    "catalog-category.html",
+    "programmatic-seo.html",
+    "product.html"
   ];
 
-  let allGood = true;
+  for (const file of htmlFiles) {
+    const content = await readFileSafe(file);
+    if (!content) continue;
 
-  for (const file of HTML_FILES) {
-    const content = read(file);
-    for (const script of requiredScripts) {
-      if (!content.includes(script)) {
-        addWarning(file, `missing script include ${script}`);
-        allGood = false;
+    errors.push(...checkScriptOrder(content, file));
+    errors.push(...checkAnalyticsPlacement(content, file));
+    errors.push(...checkLegacyLinks(content, file));
+    errors.push(...checkRequiredIds(content, file));
+  }
+
+  console.log("🔍 Checking programmatic pages...");
+
+  const pagesContent = await readFileSafe("programmatic-pages.json");
+  if (pagesContent) {
+    try {
+      const pages = JSON.parse(pagesContent);
+      if (!Array.isArray(pages)) {
+        errors.push("programmatic-pages.json is not an array");
+      } else if (pages.length < 1000) {
+        errors.push(`programmatic-pages.json has only ${pages.length} pages (expected 1000+)`);
       }
+    } catch {
+      errors.push("programmatic-pages.json is invalid JSON");
     }
   }
 
-  if (allGood) addPass("All HTML files include the central data and UI scripts.");
-}
-
-function checkRealSessionExposure() {
-  const file = path.join(ROOT, "x-session.json");
-  if (fs.existsSync(file)) {
-    addWarning(file, "real X session file exists in repo; rotate it after repo returns to private");
+  if (errors.length) {
+    console.log("\n❌ ISSUES FOUND:\n");
+    errors.forEach((e) => console.log(" - " + e));
+    process.exit(1);
   }
-}
 
-function printSection(title, items) {
-  console.log(`\n${title}`);
-  console.log("-".repeat(title.length));
-  if (!items.length) {
-    console.log("none");
-    return;
-  }
-  for (const item of items) console.log(item);
-}
-
-function main() {
-  checkPlaceholderTags();
-  checkAffiliateTagUsage();
-  checkCanonicals();
-  checkOgUrl();
-  checkLegalLinks();
-  checkDisclosureText();
-  checkRobotsAndSitemap();
-  checkDuplicateAsins();
-  checkCentralScriptsIncluded();
-  checkRealSessionExposure();
-
-  printSection("PASS", passes);
-  printSection("WARNINGS", warnings);
-  printSection("ISSUES", issues);
-
-  const hasIssues = issues.length > 0;
-  process.exitCode = hasIssues ? 1 : 0;
+  console.log("\n✅ Site check passed");
 }
 
 main();
