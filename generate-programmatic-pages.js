@@ -198,9 +198,8 @@ function titleCase(value) {
     .join(" ");
 }
 
-function buildCategoryCorePages(category) {
-  const meta = CATEGORY_META[category];
-  const label = meta.label;
+function buildCorePages(category) {
+  const label = CATEGORY_META[category].label;
 
   return [
     {
@@ -246,7 +245,7 @@ function buildCategoryCorePages(category) {
   ];
 }
 
-function buildKeywordPagesForCategory(category) {
+function buildKeywordPages(category) {
   const meta = CATEGORY_META[category];
   const label = meta.label;
   const pages = [];
@@ -355,8 +354,8 @@ function buildAllPages() {
   const pages = [];
 
   for (const category of CATEGORIES) {
-    pages.push(...buildCategoryCorePages(category));
-    pages.push(...buildKeywordPagesForCategory(category));
+    pages.push(...buildCorePages(category));
+    pages.push(...buildKeywordPages(category));
   }
 
   pages.push(...buildAudiencePages());
