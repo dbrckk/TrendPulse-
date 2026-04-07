@@ -3,19 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Amazon Deals | TrendPulse</title>
-  <meta
-    name="description"
-    content="Browse strong Amazon deals curated from the latest feed and high-demand products."
-  />
+
+  <title>Latest Amazon Deals | TrendPulse</title>
+  <meta name="description" content="Browse the latest Amazon deals and high-discount products updated in real time." />
   <link rel="canonical" href="https://www.trend-pulse.shop/deals" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Latest Amazon Deals | TrendPulse" />
+  <meta property="og:description" content="Browse the latest Amazon deals and high-discount products updated in real time." />
+  <meta property="og:url" content="https://www.trend-pulse.shop/deals" />
+  <meta property="og:image" content="/og-image.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Latest Amazon Deals | TrendPulse" />
+  <meta name="twitter:description" content="Browse the latest Amazon deals and high-discount products updated in real time." />
+  <meta name="twitter:image" content="/og-image.jpg" />
+
+  <link rel="icon" href="/favicon.ico" />
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body class="min-h-screen bg-black text-white">
+
+  <!-- HEADER -->
   <header class="border-b border-zinc-800 bg-zinc-950">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
       <a href="/" class="text-3xl font-bold">TrendPulse</a>
+
       <nav class="flex items-center gap-6 text-sm text-zinc-300">
         <a href="/" class="hover:text-white">Home</a>
         <a href="/deals" class="text-white">Deals</a>
@@ -24,33 +40,90 @@
     </div>
   </header>
 
+  <!-- MAIN -->
   <main class="mx-auto max-w-6xl px-4 py-8">
+
+    <!-- HERO -->
     <section class="mb-10">
-      <h1 class="text-4xl font-bold">Latest Amazon Deals</h1>
+      <div class="mb-3 inline-flex rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-300">
+        Live Amazon deals
+      </div>
+
+      <h1 class="text-4xl font-bold">
+        Latest Amazon Deals
+      </h1>
+
       <p class="mt-3 max-w-3xl text-lg text-zinc-400">
-        Good deals first. If there are no live deals, this page falls back to strong Amazon products.
+        Discover high-discount Amazon deals. This page prioritizes real deals and falls back to high-demand products when no deals are available.
       </p>
-      <div id="resultCount" class="mt-4 text-sm text-zinc-500">Loading deals...</div>
-    </section>
 
-    <section>
-      <div id="products-container" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
-    </section>
-
-    <section class="mt-12 rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
-      <h2 class="text-xl font-semibold">Browse more</h2>
-      <div class="mt-4 flex flex-wrap gap-3 text-sm">
-        <a href="/catalog/tech" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Tech</a>
-        <a href="/catalog/home" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Home</a>
-        <a href="/catalog/kitchen" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Kitchen</a>
-        <a href="/collections/best-tech-products" class="rounded-full border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-zinc-500 hover:text-white">Best Tech Products</a>
+      <div id="deals-status" class="mt-4 text-sm text-zinc-500">
+        Loading deals...
       </div>
     </section>
+
+    <!-- GRID -->
+    <section>
+      <div
+        id="deals-grid"
+        class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
+      ></div>
+    </section>
+
+    <!-- INTERNAL LINKS -->
+    <section class="mt-12">
+      <div id="internal-links"></div>
+    </section>
+
   </main>
 
+  <!-- SCRIPTS -->
   <script src="/assets/js/supabase.js"></script>
   <script src="/assets/js/trendpulse-data.js"></script>
   <script src="/assets/js/trendpulse-ui.js"></script>
+
+  <script>
+    async function loadDealsPage() {
+      const status = document.getElementById("deals-status");
+      const grid = document.getElementById("deals-grid");
+
+      if (!window.TrendPulseData || !window.TrendPulseUI) {
+        status.textContent = "Error loading";
+        return;
+      }
+
+      try {
+        status.textContent = "Loading deals...";
+
+        const products = await window.TrendPulseData.fetchDeals(48);
+
+        window.TrendPulseUI.renderProducts(products, grid);
+
+        if (!products.length) {
+          status.textContent = "No deals available right now";
+        } else {
+          status.textContent = `${products.length} deals loaded`;
+        }
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Failed to load deals";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadDealsPage);
+  </script>
+
+  <!-- INTERNAL LINKS INJECTION -->
+  <script>
+    fetch("/components/internal-links.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("internal-links").innerHTML = html;
+      })
+      .catch(() => {});
+  </script>
+
   <script src="/assets/js/trendpulse-analytics.js"></script>
+
 </body>
 </html>
