@@ -1,45 +1,75 @@
 (function () {
-  // 🔥 Récupération des variables injectées depuis index.html
   const SUPABASE_URL =
-    window?.ENV?.SUPABASE_URL || "https://hyrofyfhmabhlqbucjdp.supabase.co";
+    (window.ENV && window.ENV.SUPABASE_URL) ||
+    "https://hyrofyfhmabhlqbucjdp.supabase.co";
 
   const SUPABASE_ANON_KEY =
-    window?.ENV?.SUPABASE_ANON_KEY ||
+    (window.ENV && window.ENV.SUPABASE_ANON_KEY) ||
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cm9meWZobWFiaGxxYnVjamRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU1NjcsImV4cCI6MjA5MDMwMTU2N30.3BgysZzrE0eYMiyT4TvvupSZJpXOGq40V5YzA78rvhs";
 
-  if (!window.supabase) {
-    console.error("❌ Supabase SDK not loaded");
-    return;
+  function createFallbackClient() {
+    return {
+      from() {
+        return {
+          select() {
+            return Promise.resolve({
+              data: [],
+              error: new Error("Supabase client not initialized")
+            });
+          },
+          eq() {
+            return this;
+          },
+          ilike() {
+            return this;
+          },
+          limit() {
+            return this;
+          },
+          order() {
+            return this;
+          }
+        };
+      }
+    };
   }
 
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.error("❌ Missing Supabase ENV variables");
+  if (
+    typeof window === "undefined" ||
+    typeof window.supabase === "undefined" ||
+    typeof window.supabase.createClient !== "function"
+  ) {
+    console.error("[supabase] SDK not loaded");
+    window.supabaseClient = createFallbackClient();
     return;
   }
 
   try {
-    const client = window.supabase.createClient(
+    window.supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
       SUPABASE_ANON_KEY,
       {
         auth: {
-          persistSession: false
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false
         },
         global: {
           headers: {
-            "x-application-name": "trendpulse"
+            "x-client-info": "trendpulse-web"
           }
         }
       }
     );
 
-    window.supabaseClient = client;
+    window.TRENDPULSE_CONFIG = {
+      siteUrl: "https://www.trend-pulse.shop",
+      affiliateTag: "Drackk-20"
+    };
 
-    console.log("✅ Supabase initialized", {
-      url: SUPABASE_URL
-    });
-
+    console.log("[supabase] client initialized");
   } catch (error) {
-    console.error("❌ Supabase init error:", error);
+    console.error("[supabase] init failed:", error);
+    window.supabaseClient = createFallbackClient();
   }
 })();
