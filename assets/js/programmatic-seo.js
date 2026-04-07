@@ -78,9 +78,9 @@
       }
 
       const pages = await fetchProgrammaticPages();
-      const config = pages.find(
-        (page) => String(page?.slug || "").toLowerCase() === slug
-      );
+      const config = pages.find(function (page) {
+        return String((page && page.slug) || "").toLowerCase() === slug;
+      });
 
       if (!config) {
         throw new Error("Collection config not found");
@@ -92,13 +92,13 @@
       setText("collection-breadcrumb", config.title || "Collection");
       setText("collection-count", "Loading products...");
 
-      document.title = `${config.title} | TrendPulse`;
+      document.title = (config.title || "Collection") + " | TrendPulse";
 
       const canonical = document.getElementById("canonical-url");
       if (canonical) {
         canonical.setAttribute(
           "href",
-          `https://www.trend-pulse.shop/collections/${encodeURIComponent(config.slug)}`
+          "https://www.trend-pulse.shop/collections/" + encodeURIComponent(config.slug)
         );
       }
 
@@ -112,30 +112,32 @@
       setEmptyState(!products.length);
       setText(
         "collection-count",
-        `${products.length} ${products.length === 1 ? "product" : "products"}`
+        products.length + " " + (products.length === 1 ? "product" : "products")
       );
 
       const relatedLinks = document.getElementById("collection-related-links");
       if (relatedLinks) {
         const related = pages
-          .filter(
-            (page) =>
-              String(page?.slug || "").toLowerCase() !== slug &&
-              String(page?.category || "").toLowerCase() === String(config.category || "").toLowerCase()
-          )
+          .filter(function (page) {
+            return (
+              String((page && page.slug) || "").toLowerCase() !== slug &&
+              String((page && page.category) || "").toLowerCase() ===
+                String((config && config.category) || "").toLowerCase()
+            );
+          })
           .slice(0, 6);
 
         relatedLinks.innerHTML = related
-          .map(
-            (page) => `
+          .map(function (page) {
+            return `
               <a
                 href="/collections/${encodeURIComponent(page.slug)}"
                 class="rounded-full border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
               >
                 ${escapeHtml(page.title)}
               </a>
-            `
-          )
+            `;
+          })
           .join("");
       }
     } catch (error) {
