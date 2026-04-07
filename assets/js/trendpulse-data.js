@@ -5,7 +5,7 @@
   }
 
   function normalizeText(value) {
-    return String(value || "").trim();
+    return String(value ?? "").trim();
   }
 
   function normalizeCategory(value) {
@@ -41,30 +41,70 @@
     return raw;
   }
 
+  function buildSlug(row) {
+    const rawSlug =
+      normalizeText(row?.slug) ||
+      normalizeText(row?.asin) ||
+      normalizeText(row?.id) ||
+      normalizeText(row?.name) ||
+      normalizeText(row?.title);
+
+    return rawSlug
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
   function normalizeProduct(row) {
     const price = safeNumber(row?.price, 0);
-    const original = safeNumber(row?.original_price, 0);
-    const discount = safeNumber(
-      row?.discount ??
-      row?.discount_percentage ??
-      row?.discount_percent,
+    const original = safeNumber(
+      row?.original_price ?? row?.old_price ?? row?.oldPrice,
       0
     );
+    const explicitDiscount = safeNumber(
+      row?.discount ??
+        row?.discount_percentage ??
+        row?.discount_percent,
+      0
+    );
+
+    const computedDiscount =
+      explicitDiscount > 0
+        ? explicitDiscount
+        : original > price && price > 0
+          ? Math.round(((original - price) / original) * 100)
+          : 0;
 
     const image =
       row?.image ||
       row?.image_url ||
       row?.thumbnail ||
       row?.thumbnail_url ||
+      row?.product_image ||
       "";
 
-    return {
-      id: row?.id || null,
-      asin: normalizeText(row?.asin),
-      slug: normalizeText(row?.slug) || normalizeText(row?.asin),
+    const affiliate =
+      normalizeText(
+        row?.affiliate ||
+          row?.affiliate_link ||
+          row?.amazon_url ||
+          row?.url ||
+          row?.link
+      ) || "#";
 
-      name: normalizeText(row?.name) || normalizeText(row?.title) || "Amazon Product",
-      title: normalizeText(row?.name) || normalizeText(row?.title) || "Amazon Product",
+    return {
+      id: row?.id ?? null,
+      asin: normalizeText(row?.asin),
+      slug: buildSlug(row),
+
+      name:
+        normalizeText(row?.name) ||
+        normalizeText(row?.title) ||
+        "Amazon Product",
+      title:
+        normalizeText(row?.name) ||
+        normalizeText(row?.title) ||
+        "Amazon Product",
       brand: normalizeText(row?.brand),
 
       description: normalizeText(row?.description),
@@ -78,8 +118,8 @@
       oldPrice: original > price ? original : null,
       original_price: original > price ? original : null,
 
-      discount,
-      discount_percentage: discount,
+      discount: computedDiscount,
+      discount_percentage: computedDiscount,
 
       rating: safeNumber(row?.rating ?? row?.amazon_rating, 0),
       reviews: safeNumber(row?.reviews ?? row?.amazon_review_count, 0),
@@ -87,28 +127,13 @@
       amazon_review_count: safeNumber(row?.reviews ?? row?.amazon_review_count, 0),
 
       category: normalizeCategory(row?.category),
+      raw_category: normalizeText(row?.category),
 
-      affiliate: normalizeText(
-        row?.affiliate ||
-        row?.affiliate_link ||
-        row?.amazon_url ||
-        row?.link ||
-        "#"
-      ),
-      affiliate_link: normalizeText(
-        row?.affiliate ||
-        row?.affiliate_link ||
-        row?.amazon_url ||
-        row?.link ||
-        "#"
-      ),
-      amazon_url: normalizeText(
-        row?.amazon_url ||
-        row?.affiliate ||
-        row?.affiliate_link ||
-        row?.link ||
-        "#"
-      ),
+      affiliate,
+      affiliate_link: affiliate,
+      amazon_url:
+        normalizeText(row?.amazon_url) ||
+        affiliate,
 
       priority: safeNumber(row?.priority, 0),
       clicks: safeNumber(row?.clicks, 0),
@@ -155,170 +180,236 @@
   }
 
   function prepareProducts(rows) {
-    return sortByScore(
-      dedupeProducts((rows || []).map(normalizeProduct))
-    );
+    return sortByScore(dedupeProducts((rows || []).map(normalizeProduct)));
   }
 
-  async function tryQuery(builders, limit) {
-    for (const builder of builders) {
+  async function runCandidates(candidates, limit) {
+    for (const candidate of candidates) {
       try {
-        const { data, error } = await builder();
+        const { label, run } = candidate;
+        const { data, error } = await run();
 
         if (!error && Array.isArray(data) && data.length) {
           return prepareProducts(data).slice(0, limit);
         }
 
         if (error) {
-          console.warn("TrendPulseData query fallback:", error.message || error);
+          console.warn(`[TrendPulseData] ${label} failed:`, error.message || error);
         }
       } catch (err) {
-        console.warn("TrendPulseData query failed:", err);
+        console.warn("[TrendPulseData] query crashed:", err);
       }
     }
 
     return [];
   }
 
+  function requireClient() {
+    if (!window.supabaseClient) {
+      console.error("[TrendPulseData] Supabase client missing");
+      return false;
+    }
+    return true;
+  }
+
   async function fetchDeals(limit = 24) {
-    if (!window.supabaseClient) return [];
+    if (!requireClient()) return [];
 
-    return tryQuery(
+    return runCandidates(
       [
-        () =>
-          window.supabaseClient
-            .from("deal_products")
-            .select("*")
-            .limit(limit),
-
-        () =>
-          window.supabaseClient
-            .from("product_sources")
-            .select("*")
-            .eq("source_kind", "deal")
-            .eq("is_active", true)
-            .limit(limit),
-
-        () =>
-          window.supabaseClient
-            .from("deals")
-            .select("*")
-            .limit(limit)
+        {
+          label: "deal_products",
+          run: () =>
+            window.supabaseClient
+              .from("deal_products")
+              .select("*")
+              .limit(limit)
+        },
+        {
+          label: "product_sources deal",
+          run: () =>
+            window.supabaseClient
+              .from("product_sources")
+              .select("*")
+              .eq("source_kind", "deal")
+              .eq("is_active", true)
+              .limit(limit)
+        },
+        {
+          label: "deals",
+          run: () =>
+            window.supabaseClient
+              .from("deals")
+              .select("*")
+              .limit(limit)
+        }
       ],
       limit
     );
   }
 
   async function fetchTopProducts(limit = 24) {
-    if (!window.supabaseClient) return [];
+    if (!requireClient()) return [];
 
-    const { data, error } = await window.supabaseClient
-      .from("products")
-      .select("*")
-      .limit(limit);
+    const candidates = [
+      {
+        label: "products",
+        run: () =>
+          window.supabaseClient
+            .from("products")
+            .select("*")
+            .limit(limit)
+      },
+      {
+        label: "catalog_category_feed fallback",
+        run: () =>
+          window.supabaseClient
+            .from("catalog_category_feed")
+            .select("*")
+            .limit(limit)
+      }
+    ];
 
-    if (error) {
-      console.error("fetchTopProducts error", error);
-      return [];
-    }
-
-    return prepareProducts(data).slice(0, limit);
+    return runCandidates(candidates, limit);
   }
 
   async function fetchHomeFeed(limit = 24) {
     const deals = await fetchDeals(limit);
-
-    if (deals.length) {
-      return deals;
-    }
-
+    if (deals.length) return deals;
     return fetchTopProducts(limit);
   }
 
   async function fetchCatalogByCategory(category, limit = 60) {
-    if (!window.supabaseClient) return [];
+    if (!requireClient()) return [];
 
     const normalized = normalizeCategory(category);
+    const raw = normalizeText(category);
 
-    const builders = [
-      () =>
-        window.supabaseClient
-          .from("catalog_category_feed")
-          .select("*")
-          .eq("category", normalized)
-          .limit(limit),
-
-      () =>
-        window.supabaseClient
-          .from("catalog_category_feed")
-          .select("*")
-          .ilike("category", normalized)
-          .limit(limit),
-
-      () =>
-        window.supabaseClient
-          .from("products")
-          .select("*")
-          .eq("category", normalized)
-          .limit(limit),
-
-      () =>
-        window.supabaseClient
-          .from("products")
-          .select("*")
-          .ilike("category", normalized)
-          .limit(limit)
+    const candidates = [
+      {
+        label: "catalog_category_feed eq normalized",
+        run: () =>
+          window.supabaseClient
+            .from("catalog_category_feed")
+            .select("*")
+            .eq("category", normalized)
+            .limit(limit)
+      },
+      {
+        label: "catalog_category_feed ilike normalized",
+        run: () =>
+          window.supabaseClient
+            .from("catalog_category_feed")
+            .select("*")
+            .ilike("category", normalized)
+            .limit(limit)
+      },
+      {
+        label: "catalog_category_feed ilike raw",
+        run: () =>
+          window.supabaseClient
+            .from("catalog_category_feed")
+            .select("*")
+            .ilike("category", raw)
+            .limit(limit)
+      },
+      {
+        label: "products eq normalized",
+        run: () =>
+          window.supabaseClient
+            .from("products")
+            .select("*")
+            .eq("category", normalized)
+            .limit(limit)
+      },
+      {
+        label: "products ilike normalized",
+        run: () =>
+          window.supabaseClient
+            .from("products")
+            .select("*")
+            .ilike("category", normalized)
+            .limit(limit)
+      },
+      {
+        label: "products ilike raw",
+        run: () =>
+          window.supabaseClient
+            .from("products")
+            .select("*")
+            .ilike("category", raw)
+            .limit(limit)
+      }
     ];
 
-    const products = await tryQuery(builders, limit);
-
-    console.log("CATEGORY QUERY:", normalized, products);
-
+    const products = await runCandidates(candidates, limit);
+    console.log("[TrendPulseData] CATEGORY QUERY:", normalized, products.length);
     return products.slice(0, limit);
   }
 
+  function filterByQuery(products, query) {
+    const q = normalizeText(query).toLowerCase();
+    if (!q) return products;
+
+    return products.filter((p) =>
+      [
+        p.name,
+        p.brand,
+        p.description,
+        p.short_description,
+        p.category,
+        p.subcategory,
+        p.raw_category
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(q)
+    );
+  }
+
+  function filterByMaxPrice(products, maxPrice) {
+    if (maxPrice == null) return products;
+    const max = safeNumber(maxPrice, 999999);
+    return products.filter((p) => safeNumber(p.price, 999999) <= max);
+  }
+
+  function applySort(products, sort) {
+    if (sort === "reviews") {
+      return [...products].sort((a, b) => safeNumber(b.reviews) - safeNumber(a.reviews));
+    }
+
+    if (sort === "rating") {
+      return [...products].sort((a, b) => safeNumber(b.rating) - safeNumber(a.rating));
+    }
+
+    if (sort === "price-low") {
+      return [...products].sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
+    }
+
+    if (sort === "price-high") {
+      return [...products].sort((a, b) => safeNumber(b.price) - safeNumber(a.price));
+    }
+
+    return sortByScore(products);
+  }
+
   async function fetchCollectionProducts(config, limit = 24) {
-    let products = await fetchCatalogByCategory(config.category, 200);
+    let products = await fetchCatalogByCategory(config?.category, 200);
 
-    if (config?.filter?.query) {
-      const q = normalizeText(config.filter.query).toLowerCase();
-
-      products = products.filter((p) =>
-        [
-          p.name,
-          p.brand,
-          p.description,
-          p.short_description,
-          p.category,
-          p.subcategory
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase()
-          .includes(q)
-      );
-    }
-
-    if (config?.filter?.maxPrice != null) {
-      products = products.filter(
-        (p) => safeNumber(p.price, 999999) <= safeNumber(config.filter.maxPrice, 999999)
-      );
-    }
-
-    if (config?.sort === "reviews") {
-      products = [...products].sort((a, b) => safeNumber(b.reviews) - safeNumber(a.reviews));
-    } else if (config?.sort === "rating") {
-      products = [...products].sort((a, b) => safeNumber(b.rating) - safeNumber(a.rating));
-    } else if (config?.sort === "price-low") {
-      products = [...products].sort((a, b) => safeNumber(a.price) - safeNumber(b.price));
-    } else if (config?.sort === "price-high") {
-      products = [...products].sort((a, b) => safeNumber(b.price) - safeNumber(a.price));
-    } else {
-      products = sortByScore(products);
-    }
+    products = filterByQuery(products, config?.filter?.query);
+    products = filterByMaxPrice(products, config?.filter?.maxPrice);
+    products = applySort(products, config?.sort);
 
     if (!products.length) {
-      products = await fetchTopProducts(limit);
+      const fallback = await fetchTopProducts(Math.max(limit, 24));
+      return applySort(
+        filterByMaxPrice(
+          filterByQuery(fallback, config?.filter?.query),
+          config?.filter?.maxPrice
+        ),
+        config?.sort
+      ).slice(0, limit);
     }
 
     return products.slice(0, limit);
