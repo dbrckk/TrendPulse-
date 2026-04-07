@@ -1,8 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "",
-  "outputDirectory": ".",
-  "framework": null,
   "cleanUrls": false,
   "trailingSlash": false,
   "rewrites": [
@@ -42,16 +39,6 @@
       "source": "/catalog.html",
       "destination": "/catalog",
       "permanent": true
-    },
-    {
-      "source": "/catalog-category.html",
-      "destination": "/catalog",
-      "permanent": true
-    },
-    {
-      "source": "/product.html",
-      "destination": "/",
-      "permanent": false
     }
   ],
   "headers": [
