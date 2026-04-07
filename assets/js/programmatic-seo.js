@@ -1,9 +1,4 @@
 (function () {
-  function safeNumber(value, fallback = 0) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : fallback;
-  }
-
   function escapeHtml(value) {
     return String(value || "")
       .replace(/&/g, "&amp;")
@@ -11,10 +6,6 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
-  }
-
-  function normalizeText(value) {
-    return String(value || "").trim();
   }
 
   function renderProducts(products) {
@@ -25,10 +16,7 @@
 
     if (!container) return;
 
-    if (
-      window.TrendPulseUI &&
-      typeof window.TrendPulseUI.renderProducts === "function"
-    ) {
+    if (window.TrendPulseUI && typeof window.TrendPulseUI.renderProducts === "function") {
       window.TrendPulseUI.renderProducts(products, container);
       return;
     }
@@ -42,22 +30,27 @@
     }
   }
 
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
   function setEmptyState(isEmpty) {
-    const emptyStateEl = document.getElementById("collection-empty-state");
-    if (!emptyStateEl) return;
-    emptyStateEl.classList.toggle("hidden", !isEmpty);
+    const el = document.getElementById("collection-empty-state");
+    if (!el) return;
+    el.classList.toggle("hidden", !isEmpty);
   }
 
   async function fetchProgrammaticPages() {
-    const response = await fetch("/programmatic-pages.json?v=1", {
+    const res = await fetch("/programmatic-pages.json?v=2", {
       cache: "no-store"
     });
 
-    if (!response.ok) {
+    if (!res.ok) {
       throw new Error("Failed to load programmatic-pages.json");
     }
 
-    const pages = await response.json();
+    const pages = await res.json();
 
     if (!Array.isArray(pages)) {
       throw new Error("Invalid programmatic-pages.json format");
@@ -66,45 +59,44 @@
     return pages;
   }
 
-  async function loadCollection() {
-    const titleEl = document.getElementById("collection-title");
-    const descEl = document.getElementById("collection-description");
-    const countEl = document.getElementById("collection-count");
-    const seoEl = document.getElementById("collection-seo-text");
-    const relatedLinksEl = document.getElementById("collection-related-links");
-    const breadcrumbEl = document.getElementById("collection-breadcrumb");
-    const canonicalEl = document.getElementById("canonical-url");
+  function getSlugFromURL() {
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    if (parts[0] === "collections" && parts[1]) {
+      return decodeURIComponent(parts[1]).toLowerCase();
+    }
 
+    const params = new URLSearchParams(window.location.search);
+    return String(params.get("slug") || "").toLowerCase();
+  }
+
+  async function loadCollection() {
     try {
-      const pathParts = window.location.pathname.split("/").filter(Boolean);
-      const slug =
-        pathParts[0] === "collections" && pathParts[1]
-          ? decodeURIComponent(pathParts[1]).toLowerCase()
-          : "";
+      const slug = getSlugFromURL();
 
       if (!slug) {
         throw new Error("Missing collection slug");
       }
 
       const pages = await fetchProgrammaticPages();
-      const config = (pages || []).find(
-        (page) => String(page.slug).toLowerCase() === String(slug).toLowerCase()
+      const config = pages.find(
+        (page) => String(page?.slug || "").toLowerCase() === slug
       );
 
       if (!config) {
         throw new Error("Collection config not found");
       }
 
-      if (titleEl) titleEl.textContent = config.title;
-      if (descEl) descEl.textContent = config.description;
-      if (seoEl) seoEl.textContent = config.seoText || config.description;
-      if (countEl) countEl.textContent = "Loading products...";
-      if (breadcrumbEl) breadcrumbEl.textContent = config.title;
+      setText("collection-title", config.title || "Collection");
+      setText("collection-description", config.description || "");
+      setText("collection-seo-text", config.seoText || config.description || "");
+      setText("collection-breadcrumb", config.title || "Collection");
+      setText("collection-count", "Loading products...");
 
       document.title = `${config.title} | TrendPulse`;
 
-      if (canonicalEl) {
-        canonicalEl.setAttribute(
+      const canonical = document.getElementById("canonical-url");
+      if (canonical) {
+        canonical.setAttribute(
           "href",
           `https://www.trend-pulse.shop/collections/${encodeURIComponent(config.slug)}`
         );
@@ -114,28 +106,26 @@
         throw new Error("TrendPulseData not ready");
       }
 
-      let products = await window.TrendPulseData.fetchCollectionProducts(config, 24);
-      products = Array.isArray(products) ? products : [];
+      const products = await window.TrendPulseData.fetchCollectionProducts(config, 24);
 
       renderProducts(products);
-      setEmptyState(products.length === 0);
+      setEmptyState(!products.length);
+      setText(
+        "collection-count",
+        `${products.length} ${products.length === 1 ? "product" : "products"}`
+      );
 
-      if (countEl) {
-        countEl.textContent = `${products.length} ${
-          products.length === 1 ? "product" : "products"
-        }`;
-      }
-
-      if (relatedLinksEl) {
-        const sameCategory = (pages || [])
+      const relatedLinks = document.getElementById("collection-related-links");
+      if (relatedLinks) {
+        const related = pages
           .filter(
             (page) =>
-              page.slug !== config.slug &&
-              String(page.category).toLowerCase() === String(config.category).toLowerCase()
+              String(page?.slug || "").toLowerCase() !== slug &&
+              String(page?.category || "").toLowerCase() === String(config.category || "").toLowerCase()
           )
           .slice(0, 6);
 
-        relatedLinksEl.innerHTML = sameCategory
+        relatedLinks.innerHTML = related
           .map(
             (page) => `
               <a
@@ -150,14 +140,14 @@
       }
     } catch (error) {
       console.error("COLLECTION ERROR:", error);
-
       renderProducts([]);
       setEmptyState(true);
+      setText("collection-description", "Error loading collection");
+      setText("collection-count", "Error loading products");
 
-      if (descEl) descEl.textContent = "Error loading collection";
-      if (countEl) countEl.textContent = "Error loading products";
-      if (seoEl && !seoEl.textContent.trim()) {
-        seoEl.textContent = "Collection details unavailable right now.";
+      const seo = document.getElementById("collection-seo-text");
+      if (seo && !seo.textContent.trim()) {
+        seo.textContent = "Collection details unavailable right now.";
       }
     }
   }
