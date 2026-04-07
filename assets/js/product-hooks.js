@@ -4,33 +4,32 @@
     return Number.isFinite(n) ? n : fallback;
   }
 
-  function computeScore(product) {
-    return (
-      safeNumber(product.reviews, 0) * 0.4 +
-      safeNumber(product.rating, 0) * 100 * 0.3 +
-      safeNumber(product.discount, 0) * 10 * 0.2 +
-      safeNumber(product.priority, 0) * 4 +
-      safeNumber(product.likes, 0) * 2 +
-      safeNumber(product.clicks, 0) * 1.5 +
-      safeNumber(product.views, 0) * 0.15
-    );
-  }
-
   function setStatus(text) {
     const status = document.getElementById("home-status");
     if (status) status.textContent = text;
   }
 
+  function getContainer() {
+    return document.getElementById("deals");
+  }
+
   async function loadDeals() {
+    const container = getContainer();
+
+    if (!container) {
+      console.error("Missing #deals container");
+      return;
+    }
+
     if (!window.TrendPulseData) {
       console.error("TrendPulseData not ready");
       setStatus("Failed to load products");
       return;
     }
 
-    const container = document.getElementById("deals");
-    if (!container) {
-      console.error("Missing #deals container");
+    if (!window.TrendPulseUI || typeof window.TrendPulseUI.renderProducts !== "function") {
+      console.error("TrendPulseUI not ready");
+      setStatus("Failed to render products");
       return;
     }
 
@@ -40,44 +39,57 @@
       let products = [];
 
       if (typeof window.TrendPulseData.fetchHomeFeed === "function") {
-        products = await window.TrendPulseData.fetchHomeFeed();
-      } else if (typeof window.TrendPulseData.fetchDeals === "function") {
-        products = await window.TrendPulseData.fetchDeals(24);
-
-        if (!products.length && typeof window.TrendPulseData.fetchTopProducts === "function") {
-          products = await window.TrendPulseData.fetchTopProducts(24);
-        }
+        products = await window.TrendPulseData.fetchHomeFeed(24);
       } else if (typeof window.TrendPulseData.fetchTopProducts === "function") {
         products = await window.TrendPulseData.fetchTopProducts(24);
       }
 
-      products = (products || [])
-        .map((p) => ({
-          ...p,
-          score: computeScore(p)
-        }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 24);
+      products = Array.isArray(products) ? products : [];
 
-      if (window.TrendPulseUI && typeof window.TrendPulseUI.renderProducts === "function") {
-        window.TrendPulseUI.renderProducts(products, container);
-      } else {
-        console.error("TrendPulseUI not ready");
-        setStatus("Failed to render products");
+      window.TrendPulseUI.renderProducts(products, container);
+
+      if (!products.length) {
+        setStatus("No products available right now");
         return;
       }
 
-      setStatus(`${products.length} ${products.length === 1 ? "product" : "products"} loaded`);
+      const dealsCount = products.filter((p) => String(p.source_kind || "").toLowerCase() === "deal").length;
+      const catalogCount = products.length - dealsCount;
+
+      if (dealsCount > 0 && catalogCount > 0) {
+        setStatus(`${products.length} products loaded (${dealsCount} deals + ${catalogCount} catalog)`);
+      } else if (dealsCount > 0) {
+        setStatus(`${products.length} deals loaded`);
+      } else {
+        setStatus(`${products.length} catalog products loaded`);
+      }
     } catch (err) {
       console.error("loadDeals error:", err);
-
-      if (window.TrendPulseUI && typeof window.TrendPulseUI.renderProducts === "function") {
-        window.TrendPulseUI.renderProducts([], container);
-      }
-
+      window.TrendPulseUI.renderProducts([], container);
       setStatus("Failed to load products");
     }
   }
+
+  function computeHomepageMetrics(products) {
+    const items = Array.isArray(products) ? products : [];
+
+    return {
+      total: items.length,
+      avgRating:
+        items.length > 0
+          ? items.reduce((sum, p) => sum + safeNumber(p.rating, 0), 0) / items.length
+          : 0,
+      avgDiscount:
+        items.length > 0
+          ? items.reduce((sum, p) => sum + safeNumber(p.discount, 0), 0) / items.length
+          : 0
+    };
+  }
+
+  window.TrendPulseHome = {
+    loadDeals,
+    computeHomepageMetrics
+  };
 
   window.loadDeals = loadDeals;
 })();
