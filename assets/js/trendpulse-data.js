@@ -26,9 +26,18 @@
 
   function proxyImage(url) {
     const raw = normalizeText(url);
-    if (!raw || raw.includes("placeholder") || raw.includes("your-image-url.com")) {
+
+    if (
+      !raw ||
+      raw === "null" ||
+      raw === "undefined" ||
+      raw.includes("undefined") ||
+      raw.includes("placeholder") ||
+      raw.includes("your-image-url.com")
+    ) {
       return "https://via.placeholder.com/600x600?text=No+Image";
     }
+
     return raw;
   }
 
@@ -36,9 +45,18 @@
     const price = safeNumber(row?.price, 0);
     const original = safeNumber(row?.original_price, 0);
     const discount = safeNumber(
-      row?.discount ?? row?.discount_percentage ?? row?.discount_percent,
+      row?.discount ??
+      row?.discount_percentage ??
+      row?.discount_percent,
       0
     );
+
+    const image =
+      row?.image ||
+      row?.image_url ||
+      row?.thumbnail ||
+      row?.thumbnail_url ||
+      "";
 
     return {
       id: row?.id || null,
@@ -53,8 +71,8 @@
       short_description: normalizeText(row?.short_description),
       subcategory: normalizeText(row?.subcategory),
 
-      image: proxyImage(row?.image || row?.image_url),
-      image_url: proxyImage(row?.image || row?.image_url),
+      image: proxyImage(image),
+      image_url: proxyImage(image),
 
       price,
       oldPrice: original > price ? original : null,
@@ -71,13 +89,25 @@
       category: normalizeCategory(row?.category),
 
       affiliate: normalizeText(
-        row?.affiliate || row?.affiliate_link || row?.amazon_url || row?.link || "#"
+        row?.affiliate ||
+        row?.affiliate_link ||
+        row?.amazon_url ||
+        row?.link ||
+        "#"
       ),
       affiliate_link: normalizeText(
-        row?.affiliate || row?.affiliate_link || row?.amazon_url || row?.link || "#"
+        row?.affiliate ||
+        row?.affiliate_link ||
+        row?.amazon_url ||
+        row?.link ||
+        "#"
       ),
       amazon_url: normalizeText(
-        row?.amazon_url || row?.affiliate || row?.affiliate_link || row?.link || "#"
+        row?.amazon_url ||
+        row?.affiliate ||
+        row?.affiliate_link ||
+        row?.link ||
+        "#"
       ),
 
       priority: safeNumber(row?.priority, 0),
@@ -130,67 +160,53 @@
     );
   }
 
-  async function fetchDeals(limit = 24) {
-    if (!window.supabaseClient) return [];
-
-    const candidates = [
-      {
-        table: "deal_products",
-        build: (query) => query.select("*").limit(limit)
-      },
-      {
-        table: "product_sources",
-        build: (query) =>
-          query
-            .select("*")
-            .eq("source_kind", "deal")
-            .eq("is_active", true)
-            .limit(limit)
-      },
-      {
-        table: "deals",
-        build: (query) => query.select("*").limit(limit)
-      }
-    ];
-
-    for (const candidate of candidates) {
+  async function tryQuery(builders, limit) {
+    for (const builder of builders) {
       try {
-        const { data, error } = await candidate.build(
-          window.supabaseClient.from(candidate.table)
-        );
+        const { data, error } = await builder();
 
         if (!error && Array.isArray(data) && data.length) {
           return prepareProducts(data).slice(0, limit);
         }
 
         if (error) {
-          console.warn(`fetchDeals fallback from ${candidate.table}:`, error.message || error);
+          console.warn("TrendPulseData query fallback:", error.message || error);
         }
       } catch (err) {
-        console.warn(`fetchDeals failed on ${candidate.table}:`, err);
+        console.warn("TrendPulseData query failed:", err);
       }
     }
 
     return [];
   }
 
-  async function fetchCatalogByCategory(category, limit = 60) {
+  async function fetchDeals(limit = 24) {
     if (!window.supabaseClient) return [];
 
-    const normalized = normalizeCategory(category);
+    return tryQuery(
+      [
+        () =>
+          window.supabaseClient
+            .from("deal_products")
+            .select("*")
+            .limit(limit),
 
-    const { data, error } = await window.supabaseClient
-      .from("catalog_category_feed")
-      .select("*")
-      .eq("category", normalized)
-      .limit(limit);
+        () =>
+          window.supabaseClient
+            .from("product_sources")
+            .select("*")
+            .eq("source_kind", "deal")
+            .eq("is_active", true)
+            .limit(limit),
 
-    if (error) {
-      console.error("fetchCatalogByCategory error", error);
-      return [];
-    }
-
-    return prepareProducts(data).slice(0, limit);
+        () =>
+          window.supabaseClient
+            .from("deals")
+            .select("*")
+            .limit(limit)
+      ],
+      limit
+    );
   }
 
   async function fetchTopProducts(limit = 24) {
@@ -217,6 +233,48 @@
     }
 
     return fetchTopProducts(limit);
+  }
+
+  async function fetchCatalogByCategory(category, limit = 60) {
+    if (!window.supabaseClient) return [];
+
+    const normalized = normalizeCategory(category);
+
+    const builders = [
+      () =>
+        window.supabaseClient
+          .from("catalog_category_feed")
+          .select("*")
+          .eq("category", normalized)
+          .limit(limit),
+
+      () =>
+        window.supabaseClient
+          .from("catalog_category_feed")
+          .select("*")
+          .ilike("category", normalized)
+          .limit(limit),
+
+      () =>
+        window.supabaseClient
+          .from("products")
+          .select("*")
+          .eq("category", normalized)
+          .limit(limit),
+
+      () =>
+        window.supabaseClient
+          .from("products")
+          .select("*")
+          .ilike("category", normalized)
+          .limit(limit)
+    ];
+
+    const products = await tryQuery(builders, limit);
+
+    console.log("CATEGORY QUERY:", normalized, products);
+
+    return products.slice(0, limit);
   }
 
   async function fetchCollectionProducts(config, limit = 24) {
